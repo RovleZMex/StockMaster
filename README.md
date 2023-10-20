@@ -9,14 +9,6 @@ StockMaster es un sistema de gestión de inventarios diseñado para facilitar y 
 - Alertas de nivel de stock bajo y agotado.
 - Generación de informes y análisis de datos de inventario.
 - Interfaz intuitiva y fácil de usar para los usuarios finales.
-- Capacidad para gestionar múltiples ubicaciones de inventario.
-
-## Instalación
-
-1. Clona este repositorio: `git clone https://github.com/tu_usuario/StockMaster.git`
-2. Navega al directorio del proyecto: `cd StockMaster`
-3. Instala las dependencias: `npm install`
-4. Inicia la aplicación: `npm start`
 
 ## Contribución
 
@@ -34,13 +26,10 @@ Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE)
 
 ## Equipo
 
-- [Nombre del Miembro del Equipo](enlace al perfil de GitHub)
-- [Nombre del Miembro del Equipo](enlace al perfil de GitHub)
-- [Nombre del Miembro del Equipo](enlace al perfil de GitHub)
-
-## Contacto
-
-Si tienes alguna pregunta o sugerencia con respecto a StockMaster, no dudes en ponerte en contacto con nosotros a través de [correo electrónico](correo@ejemplo.com).
+- Gabriel Santiago Robles Robles
+- Jesús Antonio Flores Briones
+- Manuel Iván Melendez Rivera
+- Mario Alejandro Castro Lerma
 
 ¡Gracias por tu interés en StockMaster!
 

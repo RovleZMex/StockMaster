@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body>
+
+
+<!-- Titulo -->
+<section class="pt-4">
+    <div class="container">
+        <h1>Dashboard</h1>
+    </div>
+</section>
+
+<!-- Cartas informativas -->
+<!-- TODO AÑADIR PROCESO DINAMICAMENTE -->
+<section class="p-5">
+    <div class="container">
+        <!-- Inicio de fila 1 -->
+        <div class="row text-center g-4">
+            <!-- Inicio de columna 1 -->
+            <div class="col-md">
+                <div class="card text-bg-primary">
+                    <div class="h1 mb-3">
+                        <i class="bi bi-box"></i>
+                    </div>
+                    <h3 class="card-title mb-3">
+                        Productos en almacén
+                    </h3>
+                    <h1 class="card-text">{{ productCount }}</h1>
+                </div>
+            </div>
+            <!-- Fin de columna 1-->
+            <!-- Inicio de columna 2 -->
+            <div class="col-md">
+                <div class="card text-bg-warning">
+                    <div class="h1 mb-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="card-title mb-3">
+                        Productos en bajo stock
+                    </h3>
+                    <h1 class="card-text">{{lowStockProducts}}</h1>
+                </div>
+            </div>
+            <!-- Fin de columna 2 -->
+            <!-- Inicio de columna 3 -->
+            <div class="col-md">
+                <div class="card text-bg-danger">
+                    <div class="h1 mb-3">
+                        <i class="bi bi-exclamation-octagon"></i>
+                    </div>
+                    <h3 class="card-title mb-3">
+                        Productos sin stock
+                    </h3>
+                    <h1 class="card-text ">{{noStockProducts}}</h1>
+                </div>
+            </div>
+            <!-- Fin de columna 3 -->
+        </div>
+        <!-- Fin de fila 1 -->
+    </div>
+</section>
+
+<!-- Graficos -->
+<section class="p-5 bg-light">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md">
+                <canvas id="piechart"></canvas>
+            </div>
+            <div class="col-md">
+                <canvas id="barchart"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Últimas compras y expediciones -->
+<section class="p-5">
+    <div class="container text-center">
+        <div class="row text-center g-4">
+            <div class="col-md">
+                <h1>Últimas Compras</h1>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Productos</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Fecha</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">A001</a></th>
+                            <td>1 x Pinol <br>1 x Papel higiénico</td>
+                            <td>$271</td>
+                            <td>27/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">A002</a></th>
+                            <td>2 x Escoba</td>
+                            <td>$324</td>
+                            <td>28/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">A003</a></th>
+                            <td>1 x Toallas humedas <br>
+                                2 x Botellas de cloro <br>
+                                5 x Paquete de servilletas <br>
+                                <a href="" class="link-info">Ver más</a></td>
+                            <td>$456</td>
+                            <td>29/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">A004</a></th>
+                            <td>3 x Focos LED</td>
+                            <td>$892</td>
+                            <td>30/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">A005</a></th>
+                            <td>8 x 1kg Bolsas negras</td>
+                            <td>$607</td>
+                            <td>31/10/2023</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h3><a href="" class="link-secondary">Todas las compras</a></h3>
+            </div>
+            <div class="col-md">
+                <h1>Últimas expediciones</h1>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Productos</th>
+                            <th scope="col"># de trabajador</th>
+                            <th scope="col">Fecha</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">E001</a></th>
+                            <td>1 x Papel higiénico</td>
+                            <td>991304</td>
+                            <td>27/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">E002</a></th>
+                            <td>1 x Escoba <br>
+                                1 x Focos LED
+                            </td>
+                            <td>456198</td>
+                            <td>28/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">E003</a></th>
+                            <td>1 x 1kg Bolsas negras</td>
+                            <td>756381</td>
+                            <td>29/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">E004</a></th>
+                            <td>2 x Toallas humedas</td>
+                            <td>401301</td>
+                            <td>30/10/2023</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><a href="" class="link-info">E005</a></th>
+                            <td>3 x Paquete de servilletas</td>
+                            <td>495018</td>
+                            <td>31/10/2023</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h3><a href="" class="link-secondary">Todas las expediciones</a></h3>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var ctx = document.getElementById('barchart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Electricos', 'Quimicos', 'Utensilios', 'Otros'],
+            datasets: [{
+                label: '# de productos',
+                data: [10, 8, 4, 16],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    })
+</script>
+<script>
+    // Coloca aquí el código JavaScript para inicializar y dibujar la gráfica
+    var ctx = document.getElementById('piechart').getContext('2d');
+    var productos = {{ productos }}
+    var myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Buen stock', 'Bajo stock', 'Sin Stock'],
+            datasets: [{
+                label: '# de productos',
+                data: [productos, 19, 3],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    })
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+</html>
+{% endblock content %}

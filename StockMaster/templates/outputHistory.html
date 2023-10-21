@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Output History</title>
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Ordenes de {{ orders.0.workerCode.name }}</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Orden #</th>
+                    <th>Nombre del Producto</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td colspan="2">Productos de la orden:</td>
+                    </tr>
+                    {% for product in order.GetItems %}
+                        <tr>
+                            <td></td>
+                            <td>{{ product.product.name }}</td>
+                            <td>{{ product.quantity }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS CDN (optional if you want to use Bootstrap JS features) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dashboard</title>
+        <title>Inventario</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
               integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
               crossorigin="anonymous">
@@ -14,6 +14,20 @@
             .no-link-decoration {
                 text-decoration: none;
             }
+
+            #inventory-table td {
+                width: 400px;
+            }
+
+            .tableRoundedm {
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .clickableRow {
+                cursor: pointer;
+            }
+
         </style>
 
     </head>
@@ -26,41 +40,65 @@
                     <div class="col-md">
                         <h1>Inventario Actual</h1>
                         <!-- Formulario de búsqueda -->
-                        <form class="mb-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Buscar productos" id="search-input">
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" id="search-button">
-                                        <i class="bi bi-search"></i>
-                                    </button>
+
+                        <div class="container mt-4">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select class="form-select" aria-label="Default select example">
+                                        <option selected>Busqueda por categoría</option>
+                                        <option value="1">Eléctrico</option>
+                                        <option value="2">Oficina</option>
+                                        <option value="3">Limpieza</option>
+                                        <option value="4">Plomería</option>
+                                        <option value="5">Buen stock</option>
+                                        <option value="4">Bajo stock</option>
+                                        <option value="4">Out of stock</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <form class="mb-3">
+                                        <div class="input-group">
+                                            <input type="text" id="search" class="form-control"
+                                                   placeholder="Busqueda por nombre">
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
-                        </form>
-                        <div class="table-responsive">
-                            <table class="table table-stripped">
+                        </div>
+
+                        <div class="container mt-4">
+
+                            <table class="table mt-3 table-hover tableRoundedm">
                                 <thead class="table-dark">
                                 <tr>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Productos</th>
-                                    <th scope="col">Cantidad</th>
-                                    <th scope="col">Imagen</th>
+                                    <th>SKU</th>
+                                    <th>Nombre</th>
+                                    <th>Cantidad</th>
+                                    <th>Imagen</th>
                                 </tr>
                                 </thead>
-                                <tbody class="table-group-divider">
-                                <tr>
-                                    <th scope="row"><a href="" class="link-info">A001</a></th>
+                                <tbody id="inventory-table">
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A200</td>
                                     <td>Papel higiénico</td>
-                                    <td>20 unidades</td>
-                                    <td>imagen.png insane</td>
+                                    <td>20</td>
+                                    <td>insane.png</td>
                                 </tr>
-                                <tr>
-                                    <th scope="row"><a href="" class="link-info">B023</a></th>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A100</td>
                                     <td>Trapeadores</td>
-                                    <td>2 unidades</td>
-                                    <td>imagen.png insane</td>
+                                    <td>5</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>Lámparas</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
                                 </tr>
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>
@@ -68,6 +106,77 @@
         </section>
     </div>
 
-    </body>
-    </html>
+    <script>
+
+        function removeAccents(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("search");
+            const tableBody = document.getElementById("inventory-table");
+            const inventoryData = [
+                {
+                    SKU: "A200",
+                    nombre: "Papel higiénico",
+                    cantidad: 20,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A100",
+                    nombre: "Trapeadores",
+                    cantidad: 5,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "Lámparas",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+            ];
+
+            searchInput.addEventListener("input", function () {
+                const searchText = removeAccents(searchInput.value.toLowerCase());
+
+                // Filtrar los elementos que coincidan con el texto de búsqueda
+                const filteredData = inventoryData.filter(item =>
+                    removeAccents(item.nombre.toLowerCase()).includes(searchText) ||
+                    item.SKU.toLowerCase().includes(searchText)
+                );
+
+
+                // Limpiar la tabla
+                tableBody.innerHTML = "";
+
+                // Agregar los elementos filtrados a la tabla
+                filteredData.forEach(item => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                    <td>${item.SKU}</td>
+                    <td>${item.nombre}</td>
+                    <td>${item.cantidad}</td>
+                    <td>${item.imagen}</td>
+                `;
+                    tableBody.appendChild(row);
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll(".table-row");
+
+            rows.forEach(function (row) {
+                row.addEventListener("click", function () {
+                    const link = row.getAttribute("data-href");
+                    if (link) {
+                        window.location.href = link;
+                    }
+                });
+            });
+        });
+    </script>
+
 {% endblock content %}

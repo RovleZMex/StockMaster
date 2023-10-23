@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "Product",
     "OutputHistory",
+    "Dashboard",
     "simple_history",
 ]
 

@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "Product",
+    "OutputHistory",
+    "Dashboard",
     "simple_history",
 ]
 
@@ -55,7 +57,7 @@ ROOT_URLCONF = "StockMaster.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

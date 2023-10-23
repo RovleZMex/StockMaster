@@ -5,15 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e7e6d4df-f749-4439-876e-86d4b717366b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/StockMaster/Workers/templates/store/store.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StockMaster/Workers/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/StockMaster/templates/store/store.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/StockMaster.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/StockMaster.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StockMaster/StockMaster/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/StockMaster/StockMaster/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StockMaster/StockMaster/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/StockMaster/StockMaster/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StockMaster/Workers/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/StockMaster/Workers/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StockMaster/templates/workers.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/StockMaster/Workers/templates/store/store.html" beforeDir="false" afterPath="$PROJECT_DIR$/StockMaster/Workers/templates/store/store.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,6 +84,7 @@
       <workItem from="1697948898609" duration="1005000" />
       <workItem from="1698006627245" duration="3353000" />
       <workItem from="1698010052995" duration="9000" />
+      <workItem from="1698038263082" duration="677000" />
     </task>
     <servers />
   </component>

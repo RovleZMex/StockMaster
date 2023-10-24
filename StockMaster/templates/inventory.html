@@ -11,10 +11,6 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
         <style>
-            .no-link-decoration {
-                text-decoration: none;
-            }
-
             #inventory-table td {
                 width: 400px;
             }
@@ -28,6 +24,14 @@
                 cursor: pointer;
             }
 
+            #custom-select {
+                background-color: green; /* Predetermined style */
+                color: white; /* text color */
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+            }
+
         </style>
 
     </head>
@@ -39,8 +43,6 @@
                 <div class="row text-center g-4">
                     <div class="col-md">
                         <h1>Inventario Actual</h1>
-                        <!-- Formulario de búsqueda -->
-
                         <div class="container mt-4">
                             <div class="row">
                                 <div class="col-md-3">
@@ -50,16 +52,21 @@
                                         <option value="2">Oficina</option>
                                         <option value="3">Limpieza</option>
                                         <option value="4">Plomería</option>
-                                        <option value="5">Buen stock</option>
-                                        <option value="4">Bajo stock</option>
-                                        <option value="4">Out of stock</option>
                                     </select>
                                 </div>
+                                <div class="col-md-2">
+                                    <select id="custom-select" class="form-select" aria-label="Default select example">
+                                        <option value="5">Buen stock</option>
+                                        <option value="4">Bajo stock</option>
+                                        <option value="3">Out of stock</option>
+                                    </select>
+                                </div>
+
                                 <div class="col">
                                     <form class="mb-3">
                                         <div class="input-group">
                                             <input type="text" id="search" class="form-control"
-                                                   placeholder="Busqueda por nombre">
+                                                   placeholder="Busqueda por nombre o SKU">
                                         </div>
                                     </form>
                                 </div>
@@ -96,6 +103,72 @@
                                     <td>10</td>
                                     <td>insane.png</td>
                                 </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>hojas</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>pantalones</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>zapatos</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>silla</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>reloj</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>cable</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>enchufe</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>bocinas</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>teclados</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>mouse</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
+                                <tr class="table-row clickableRow" data-href="">
+                                    <td>A300</td>
+                                    <td>focos</td>
+                                    <td>10</td>
+                                    <td>insane.png</td>
+                                </tr>
                                 </tbody>
                             </table>
 
@@ -104,7 +177,14 @@
                 </div>
             </div>
         </section>
+        <div class="text-center">
+            <button id="prevPage" class="btn btn-secondary" disabled>Anterior</button>
+            <span id="currentPage">Página 1</span>
+            <button id="nextPage" class="btn btn-secondary">Siguiente</button>
+        </div>
+
     </div>
+    </body>
 
     <script>
 
@@ -134,49 +214,188 @@
                     cantidad: 10,
                     imagen: "insane.png"
                 },
+                {
+                    SKU: "A300",
+                    nombre: "hojas",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "pantalones",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "zapatos",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "silla",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "reloj",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "cable",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "enchufe",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "bocinas",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "teclados",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "mouse",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
+                {
+                    SKU: "A300",
+                    nombre: "Focos",
+                    cantidad: 10,
+                    imagen: "insane.png"
+                },
             ];
+            let visibleProducts = 8; // Number of products shown per page
+            let currentPage = 1; // Current page
 
+            // Function to update the table with new data
+            function updateTable(data) {
+                tableBody.innerHTML = "";
+                data.forEach(item => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                <td>${item.SKU}</td>
+                <td>${item.nombre}</td>
+                <td>${item.cantidad}</td>
+                <td>${item.imagen}</td>
+            `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // Add an event listener to the search input for filtering data
             searchInput.addEventListener("input", function () {
+                // Get the search text and filter the data
                 const searchText = removeAccents(searchInput.value.toLowerCase());
-
-                // Filtrar los elementos que coincidan con el texto de búsqueda
                 const filteredData = inventoryData.filter(item =>
                     removeAccents(item.nombre.toLowerCase()).includes(searchText) ||
                     item.SKU.toLowerCase().includes(searchText)
                 );
 
-
-                // Limpiar la tabla
-                tableBody.innerHTML = "";
-
-                // Agregar los elementos filtrados a la tabla
-                filteredData.forEach(item => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                    <td>${item.SKU}</td>
-                    <td>${item.nombre}</td>
-                    <td>${item.cantidad}</td>
-                    <td>${item.imagen}</td>
-                `;
-                    tableBody.appendChild(row);
-                });
+                // Limit the data to the visibleProducts and update the table
+                const limitedData = filteredData.slice(0, visibleProducts);
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+                updateTable(limitedData);
             });
+
+            // Add an event listener for a custom select dropdown to change the number of visible products
+            customSelect.addEventListener("change", function () {
+                const selectedOption = customSelect.options[customSelect.selectedIndex];
+                const selectedValue = selectedOption.value;
+                visibleProducts = 8;
+                currentPage = 1; // Reset to the first page
+                updatePagination();
+                const limitedData = inventoryData.slice(0, visibleProducts);
+                updateTable(limitedData);
+            });
+
+            // Get references to previous and next page buttons and the current page display
+            const prevPageBtn = document.getElementById("prevPage");
+            const nextPageBtn = document.getElementById("nextPage");
+            const currentPageSpan = document.getElementById("currentPage");
+
+            // Add an event listener to the previous page button
+            prevPageBtn.addEventListener("click", function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updatePagination();
+                    const start = (currentPage - 1) * visibleProducts;
+                    const end = start + visibleProducts;
+                    const pageData = inventoryData.slice(start, end);
+                    updateTable(pageData);
+                }
+            });
+
+            // Add an event listener to the next page button
+            nextPageBtn.addEventListener("click", function () {
+                const totalPages = Math.ceil(inventoryData.length / visibleProducts);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updatePagination();
+                    const start = (currentPage - 1) * visibleProducts;
+                    const end = start + visibleProducts;
+                    const pageData = inventoryData.slice(start, end);
+                    updateTable(pageData);
+                }
+            });
+
+            // Function to update the pagination display
+            function updatePagination() {
+                const totalPages = Math.ceil(inventoryData.length / visibleProducts);
+                currentPageSpan.textContent = `Página ${currentPage} de ${totalPages}`;
+
+                // Enable or disable buttons based on the current page
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages;
+            }
+
+            // Initial data display
+            const initialData = inventoryData.slice(0, visibleProducts);
+            updateTable(initialData);
+            updatePagination();
         });
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const rows = document.querySelectorAll(".table-row");
+        // Dropdown menu is obtained with its id
+        const customSelect = document.getElementById("custom-select");
 
-            rows.forEach(function (row) {
-                row.addEventListener("click", function () {
-                    const link = row.getAttribute("data-href");
-                    if (link) {
-                        window.location.href = link;
-                    }
-                });
-            });
+        // An event is made to change the background color and text according to the selected option
+        customSelect.addEventListener("change", function () {
+            const selectedOption = customSelect.options[customSelect.selectedIndex];
+            const selectedValue = selectedOption.value;
+
+            // Define background colors, and text depending on the values of the options
+            const colorMap = {
+                "5": {backgroundColor: "green", textColor: "white"}, // Buen stock
+                "4": {backgroundColor: "yellow", textColor: "black"}, // Bajo stock
+                "3": {backgroundColor: "red", textColor: "white"} // Out of stock
+            };
+
+            // Obtain styles
+            const styles = colorMap[selectedValue];
+
+            // Apply styles to dropdown menu
+            customSelect.style.backgroundColor = styles.backgroundColor;
+            customSelect.style.color = styles.textColor;
         });
-    </script>
 
+    </script>
 {% endblock content %}

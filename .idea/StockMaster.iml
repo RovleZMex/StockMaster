@@ -16,6 +16,7 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="sorttable" level="application" />
     <orderEntry type="library" name="bootstrap" level="application" />
   </component>
   <component name="PyDocumentationSettings">
@@ -24,5 +25,10 @@
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
+    <option name="TEMPLATE_FOLDERS">
+      <list>
+        <option value="$MODULE_DIR$/StockMaster/templates" />
+      </list>
+    </option>
   </component>
 </module>

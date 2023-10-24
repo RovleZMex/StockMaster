@@ -1,6 +1,5 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
-from django.utils import timezone
 
 
 # Represents all different products registered in the DB

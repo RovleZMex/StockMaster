@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "Product",
+    "Inventory",
     "OutputHistory",
     "Dashboard",
     "simple_history",

@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+{% extends 'base.html'%}
+
+{%block content%}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -38,31 +40,31 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#1</td>
-                        <td>15</td>
-                        <td>Juan</td>
-                        <td>22 de Octubre 2023</td>
-                        <td><a href="{% url 'outputHistoryWorker' %}" class="btn btn-primary">Ver detalles</a></td>
-                    </tr>
+                <tr>
+                    <td>#1</td>
+                    <td>15</td>
+                    <td>Juan</td>
+                    <td>22 de Octubre 2023</td>
+                    <td><a href="{% url 'outputHistoryWorker' %}" class="btn btn-primary">Ver detalles</a></td>
+                </tr>
                 </tbody>
                 <tbody>
-                    <tr>
-                        <td>#2</td>
-                        <td>69</td>
-                        <td>Santy</td>
-                        <td>26 de Febrero 2023</td>
-                        <td><a href="{% url 'outputHistoryWorker' %}" class="btn btn-primary">Ver detalles</a></td>
-                    </tr>
+                <tr>
+                    <td>#2</td>
+                    <td>69</td>
+                    <td>Santy</td>
+                    <td>26 de Febrero 2023</td>
+                    <td><a href="{% url 'outputHistoryWorker' %}" class="btn btn-primary">Ver detalles</a></td>
+                </tr>
                 </tbody>
                 <tbody>
-                    <tr>
-                        <td>#3</td>
-                        <td>420</td>
-                        <td>Mario</td>
-                        <td>31 de Noviembre 2023</td>
-                        <td><a href="{% url 'outputHistoryWorker' %}" class="btn btn-primary">Ver detalles</a></td>
-                    </tr>
+                <tr>
+                    <td>#3</td>
+                    <td>420</td>
+                    <td>Mario</td>
+                    <td>31 de Noviembre 2023</td>
+                    <td><a href="{% url 'outputHistoryWorker' %}" class="btn btn-primary">Ver detalles</a></td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -74,44 +76,6 @@
         crossorigin="anonymous"></script>
 </body>
 </html>
-=======
-    <title>Output History</title>
-    <!-- Bootstrap CSS CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h2>Ordenes de {{ orders.0.workerCode.name }}</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Orden #</th>
-                    <th>Nombre del Producto</th>
-                    <th>Cantidad</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td colspan="2">Productos de la orden:</td>
-                    </tr>
-                    {% for product in order.GetItems %}
-                        <tr>
-                            <td></td>
-                            <td>{{ product.product.name }}</td>
-                            <td>{{ product.quantity }}</td>
-                        </tr>
-                    {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+{%endblock content%}
 
-    <a href="{% url 'logout' %}">Logout</a>
-
-    <!-- Bootstrap JS CDN (optional if you want to use Bootstrap JS features) -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
 

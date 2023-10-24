@@ -1,8 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
-from .models import Worker, OutputOrder
 
 '''
 I wanted to prove that we can link orders with multiple products to a singular worker
@@ -43,6 +40,21 @@ Then we can create OutputOrderItem and link it to the OutputOrder just created.
 '''
 
 
+# Create your views here.
+
+
+def history(request):
+    return render(request, 'outputHistoryWorker.html')
+
+
+def outputHistory(request):
+    return render(request, 'outputHistory.html')
+
+
+def inputHistory(request):
+    return render(request, 'inputHistory.html')
+
+
 def LoginPage(request):
     if request.user.is_authenticated:
         return redirect('outputHistory')  # The user is already signed in
@@ -64,14 +76,3 @@ def LoginPage(request):
 def LogoutPage(request):
     logout(request)
     return redirect('login')
-
-
-@login_required(login_url="login/")  # This decorator ensures the user is logged in to access the view.
-def outputHistory(request):
-    worker = Worker.objects.get(name="Juan")
-    orders = OutputOrder.objects.filter(worker=worker)
-    context = {
-        'orders': orders
-    }
-
-    return render(request, 'outputHistory.html', context)

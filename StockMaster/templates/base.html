@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body::before{
+        body::before {
             display: block;
             content: '';
             height: 60px;
@@ -29,7 +29,10 @@
                     <a href="{% url 'inventory' %}" class="nav-link">Inventario</a>
                 </li>
                 <li class="nav-item">
-                    <a href="" class="nav-link">Transacciones</a>
+                    <a href="{% url 'outputHistory' %}" class="nav-link">Pedidos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'inputHistory' %}" class="nav-link">Compras</a>
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">Trabajadores</a>
@@ -49,7 +52,7 @@
 <!-- Footer -->
 <div class="container">
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-        <p class="col-md-4 mb-0 text-body-secondary">&copy; 2023 Santiago Robles</p>
+        <p class="col-md-4 mb-0 text-body-secondary">&copy; 2023 </p>
     </footer>
 </div>
 

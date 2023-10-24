@@ -1,17 +1,7 @@
 from django.db import models
 
 from Product.models import Product
-
-
-# Create your models here.
-
-class Worker(models.Model):
-    name = models.CharField(max_length=255)  # Worker's name
-    workerCode = models.PositiveIntegerField()  # Worker's code
-    zone = models.CharField(max_length=255)  # Worker's working zone
-
-    def __str__(self):
-        return self.name
+from Workers.models import Worker
 
 
 class OutputOrder(models.Model):

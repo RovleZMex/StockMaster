@@ -6,9 +6,16 @@ from Workers.models import Worker
 
 class OutputOrder(models.Model):
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)  # One worker can have MULTIPLE output orders
+    date_created = models.DateTimeField(auto_now_add=True)
 
     def GetItems(self):
         return OutputOrderItem.objects.filter(outputOrder=self)
+
+    def GetTotal(self):
+        total = 0
+        for item in self.GetItems():
+            total += item.quantity * item.product.price
+        return round(total, 3)
 
     def __str__(self):
         return f"Orden de {self.worker} [{self.id}]"

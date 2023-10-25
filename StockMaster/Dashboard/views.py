@@ -2,6 +2,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+from InputHistory.models import InputOrder
+from OutputHistory.models import OutputOrder
 from Product.models import Product
 from Workers.models import Worker
 
@@ -44,6 +46,10 @@ def dashboard(request):
                     Product.objects.filter(category='PLU').count(),
                     Product.objects.filter(category='OFF').count(),
                     Product.objects.filter(category='CLE').count()]
+
+    lastInputOrders = InputOrder.objects.all()[:5]
+    lastOutputOrders = OutputOrder.objects.all()[:5]
+
     context = {'allProducts': allProducts.count(),
                'goodStockProducts': allProducts.count() - noStockProducts - lowStockProducts,
                'lowStockProducts': lowStockProducts,
@@ -51,7 +57,9 @@ def dashboard(request):
                'productData': [allProducts.count() - noStockProducts - lowStockProducts,
                                lowStockProducts,
                                noStockProducts],
-               'categoryData': categoryData}
+               'categoryData': categoryData,
+               'lastInputOrders': lastInputOrders,
+               'lastOutputOrders': lastOutputOrders}
     return render(request, 'dashboard.html', context)
 
 

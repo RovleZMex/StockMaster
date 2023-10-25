@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Worker</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
+
 <body>
 
 <div class="container mt-5">
@@ -12,7 +14,8 @@
 
     <div class="row my-3">
         <div class="col">
-            <input type="text" class="form-control" placeholder="Busca por nombre" id="searchInput" oninput="filterItems()">
+            <input type="text" class="form-control" placeholder="Busca por nombre" id="searchInput"
+                   oninput="filterItems()">
         </div>
         <div class="col">
             <select class="form-control" id="categoryFilter" onchange="filterItems()">
@@ -30,29 +33,16 @@
         <div class="col">
             <h3>Articulos disponibles:</h3>
             <ul id="items" class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center" data-category="Limpieza">
-                    Escoba <input type="number" min="0" value="0" class="form-control w-25">
-                    <button class="btn btn-primary" onclick="addItem('Escoba')">Agregar</button>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center" data-category="Limpieza">
-                    Jabon <input type="number" min="0" value="0" class="form-control w-25">
-                    <button class="btn btn-primary" onclick="addItem('Jabon')">Agregar</button>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center" data-category="Plomería">
-                    Llave <input type="number" min="0" value="0" class="form-control w-25">
-                    <button class="btn btn-primary" onclick="addItem('Llave')">Agregar</button>
-                </li>
-                 <li class="list-group-item d-flex justify-content-between align-items-center" data-category="Oficina">
-                    Papel <input type="number" min="0" value="0" class="form-control w-25">
-                    <button class="btn btn-primary" onclick="addItem('Papel')">Agregar</button>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center" data-category="Eléctrico">
-                    Foco <input type="number" min="0" value="0" class="form-control w-25">
-                    <button class="btn btn-primary" onclick="addItem('Foco')">Agregar</button>
-                </li>
+                <!-- Items will be dynamically loaded here -->
             </ul>
         </div>
     </div>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination" id="pagination">
+            <!-- Pagination buttons will be dynamically loaded here -->
+        </ul>
+    </nav>
 
     <hr>
 
@@ -70,29 +60,58 @@
 <script>
     let cartItems = [];
     let availableItems = [
-        { name: 'Escoba', category: 'CLE' },
-        { name: 'Jabon', category: 'CLE' },
-        { name: 'Llave', category: 'PLU' },
-        { name: 'Papel', category: 'OFF' },
-        { name: 'Foco', category: 'ELE' }
-
-
+        {name: 'Escoba', category: 'CLE'},
+        {name: 'Jabon', category: 'CLE'},
+        {name: 'Llave', category: 'PLU'},
+        {name: 'Papel', category: 'OFF'},
+        {name: 'Foco', category: 'ELE'},
+        // Add more items here
+        {name: 'Item 6', category: 'ELE'},
+        {name: 'Item 7', category: 'PLU'},
+        {name: 'Item 8', category: 'CLE'},
+        {name: 'Item 9', category: 'OFF'},
+        {name: 'Item 10', category: 'ELE'},
+        {name: 'Item 11', category: 'PLU'},
+        {name: 'Item 12', category: 'CLE'},
+        {name: 'Item 13', category: 'OFF'},
+        {name: 'Item 14', category: 'ELE'},
+        {name: 'Item 15', category: 'PLU'}
     ]; // Sample list of available items
 
-    function addItem(itemName) {
+    let currentPage = 1;
+    const itemsPerPage = 8;
+
+    function incrementQuantity(buttonElement) {
+        const quantityElem = buttonElement.previousElementSibling;
+        quantityElem.textContent = parseInt(quantityElem.textContent) + 1;
+    }
+
+    function decrementQuantity(buttonElement) {
+        const quantityElem = buttonElement.nextElementSibling;
+        if (parseInt(quantityElem.textContent) > 1) {
+            quantityElem.textContent = parseInt(quantityElem.textContent) - 1;
+        }
+    }
+
+    function addItem(itemName, buttonElement) {
+        const quantityElem = buttonElement.previousElementSibling.previousElementSibling;
+        const quantity = parseInt(quantityElem.textContent);
+
         const item = {
             name: itemName,
-            quantity: 1 // Default quantity is 1
+            quantity: quantity
         };
 
         const existingItem = cartItems.find(i => i.name === itemName);
         if (existingItem) {
-            existingItem.quantity += 1;
+            existingItem.quantity += quantity;
         } else {
             cartItems.push(item);
         }
-                alert(`Se agregó ${itemName} al carrito`);
+
+        showToast(`Se agregó ${itemName} (x${quantity}) al carrito`);
     }
+
 
     function showCart() {
         const cartList = document.getElementById("selectedItems");
@@ -118,14 +137,46 @@
         }
         const itemsList = document.getElementById('items');
         itemsList.innerHTML = '';
-        filteredItems.forEach(item => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = currentPage * itemsPerPage;
+        const paginatedItems = filteredItems.slice(startIndex, endIndex);
+        paginatedItems.forEach(item => {
             const listItem = document.createElement('li');
             listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
             listItem.setAttribute('data-category', item.category);
-            listItem.innerHTML = `${item.name} <input type="number" min="0" value="0" class="form-control w-25"> <button class="btn btn-primary" onclick="addItem('${item.name}')">Agregar</button>`;
+            listItem.innerHTML = `${item.name}
+            <button class="btn btn-outline-secondary" onclick="decrementQuantity(this)">-</button>
+            <span class="px-3 quantity-display">1</span>
+            <button class="btn btn-outline-secondary" onclick="incrementQuantity(this)">+</button>
+            <button class="btn btn-primary" onclick="addItem('${item.name}', this)">Agregar</button>`;
+
             itemsList.appendChild(listItem);
         });
+        renderPagination(filteredItems.length);
     }
+
+    function renderPagination(totalItems) {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const paginationElement = document.getElementById('pagination');
+        paginationElement.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.classList.add('page-item');
+            const a = document.createElement('a');
+            a.classList.add('page-link');
+            a.href = '#';
+            a.textContent = i;
+            a.addEventListener('click', function () {
+                currentPage = i;
+                filterItems();
+            });
+            li.appendChild(a);
+            paginationElement.appendChild(li);
+        }
+    }
+
+    // Initially load the items with the first page
+    filterItems();
 </script>
 
 <div class="modal" id="cartModal" tabindex="-1" role="dialog">
@@ -153,4 +204,5 @@
 </div>
 
 </body>
+
 </html>

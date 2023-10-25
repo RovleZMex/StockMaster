@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from Product.models import Product
+from Workers.models import Worker
 
 
 # Create your views here.
@@ -52,3 +53,14 @@ def dashboard(request):
                                noStockProducts],
                'categoryData': categoryData}
     return render(request, 'dashboard.html', context)
+
+
+@login_required(login_url='login')
+def workers(request):
+    workers = Worker.objects.all()
+
+    context = {
+        'workers': workers
+    }
+
+    return render(request, 'workers.html', context)

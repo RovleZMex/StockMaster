@@ -33,7 +33,7 @@
         <div class="container">
             <div class="row text-center g-4">
                 <div class="col-md">
-                    <a href="#" class="no-link-decoration"><!--TODO ADD LINK -->
+                    <a href="{% url 'inventory' %}" class="no-link-decoration">
                         <div class="card text-bg-primary">
                             <div class="h1 mb-3 pt-3">
                                 <i class="bi bi-box"></i>
@@ -114,44 +114,41 @@
                             <thead>
                             <tr>
                                 <th scope="col">ID</th>
-                                <th scope="col">Productos</th>
-                                <th scope="col">Total</th>
+                                <th scope="col"># de Productos</th>
                                 <th scope="col">Fecha</th>
+                                <th scope="col">Precio Total</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">A001</a></th>
-                                <td>1 x Pinol <br>1 x Papel higiénico</td>
-                                <td>$271</td>
+                                <td>4</td>
                                 <td>27/10/2023</td>
+                                <td>$271</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">A002</a></th>
-                                <td>2 x Escoba</td>
-                                <td>$324</td>
+                                <td>2</td>
                                 <td>28/10/2023</td>
+                                <td>$324</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">A003</a></th>
-                                <td>1 x Toallas humedas <br>
-                                    2 x Botellas de cloro <br>
-                                    5 x Paquete de servilletas <br>
-                                    <a href="" class="link-info">Ver más</a></td>
-                                <td>$456</td>
+                                <td>8</td>
                                 <td>29/10/2023</td>
+                                <td>$456</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">A004</a></th>
-                                <td>3 x Focos LED</td>
-                                <td>$892</td>
+                                <td>3</td>
                                 <td>30/10/2023</td>
+                                <td>$892</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">A005</a></th>
-                                <td>8 x 1kg Bolsas negras</td>
-                                <td>$607</td>
+                                <td>8</td>
                                 <td>31/10/2023</td>
+                                <td>$607</td>
                             </tr>
                             </tbody>
                         </table>
@@ -165,42 +162,40 @@
                             <thead>
                             <tr>
                                 <th scope="col">ID</th>
-                                <th scope="col">Productos</th>
-                                <th scope="col"># de trabajador</th>
+                                <th scope="col"># de Productos</th>
+                                <th scope="col">Nombre</th>
                                 <th scope="col">Fecha</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">E001</a></th>
-                                <td>1 x Papel higiénico</td>
-                                <td>991304</td>
+                                <td>1</td>
+                                <td>Juan Pedro</td>
                                 <td>27/10/2023</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">E002</a></th>
-                                <td>1 x Escoba <br>
-                                    1 x Focos LED
-                                </td>
-                                <td>456198</td>
+                                <td>2</td>
+                                <td>Rosa María</td>
                                 <td>28/10/2023</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">E003</a></th>
-                                <td>1 x 1kg Bolsas negras</td>
-                                <td>756381</td>
+                                <td>9</td>
+                                <td>Carlos Romero</td>
                                 <td>29/10/2023</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">E004</a></th>
-                                <td>2 x Toallas humedas</td>
-                                <td>401301</td>
+                                <td>6</td>
+                                <td>Roberto Zúñiga</td>
                                 <td>30/10/2023</td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="" class="link-info">E005</a></th>
-                                <td>3 x Paquete de servilletas</td>
-                                <td>495018</td>
+                                <td>1</td>
+                                <td>Ana Karolina</td>
                                 <td>31/10/2023</td>
                             </tr>
                             </tbody>

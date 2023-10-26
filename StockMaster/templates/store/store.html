@@ -1,34 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
+    <title>Worker</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
-<body>
-<h1>Product List</h1>
-<table border="1">
-    <tr>
-        <th>Name</th>
-        <th>SKU</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Image</th>
-        <th>Category</th>
-    </tr>
-    {% for Product in products %}
-        <tr>
-            <td>{{ Product.name }}</td>
-            <td>{{ Product.SKU }}</td>
-            <td>{{ Product.price }}</td>
-            <td>{{ Product.quantity }}</td>
-            <td>{% if Product.image %}
-                <img src="{{ Product.image.url }}" alt="{{ Product.name }}" width="100">{% endif %}</td>
-            <td>{{ Product.get_category_display }}</td>
-        </tr>
-    {% endfor %}
 
-</table>
+<body>
+
+<div class="container mt-5">
+    <h2>Productos</h2>
+
+    <div class="row my-3">
+        <div class="col">
+            <input type="text" class="form-control" placeholder="Busca por nombre" id="searchInput"
+                   oninput="filterItems()">
+        </div>
+        <div class="col">
+            <select class="form-control" id="categoryFilter" onchange="filterItems()">
+                <option value="">Todos</option>
+                <option value="ELE">Eléctrico</option>
+                <option value="PLU">Plomería</option>
+                <option value="OFF">Oficina</option>
+                <option value="CLE">Limpieza</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h3>Artículos disponibles:</h3>
+            <ul id="items" class="list-group">
+                {% for product in products %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                        data-category="{{ product.category }}">
+                        {{ product.name }}
+                        <button class="btn btn-outline-secondary" onclick="decrementQuantity(this)">-</button>
+                        <span class="px-3 quantity-display">1</span>
+                        <button class="btn btn-outline-secondary" onclick="incrementQuantity(this)">+</button>
+                        <button class="btn btn-primary" onclick="addItem('{{ product.name }}', this)">Agregar</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination" id="pagination">
+            <!-- Pagination will be handled by the filterItems function -->
+        </ul>
+    </nav>
+
+    <hr>
+
+    <div class="row my-3">
+        <div class="col">
+            <button class="btn btn-primary" onclick="showCart()">Mostrar carrito</button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
+<script>
+    let cartItems = [];
+    let currentPage = 1;
+    const itemsPerPage = 8;
+
+    function incrementQuantity(buttonElement) {
+        const quantityElem = buttonElement.previousElementSibling;
+        quantityElem.textContent = parseInt(quantityElem.textContent) + 1;
+    }
+
+    function decrementQuantity(buttonElement) {
+        const quantityElem = buttonElement.nextElementSibling;
+        if (parseInt(quantityElem.textContent) > 1) {
+            quantityElem.textContent = parseInt(quantityElem.textContent) - 1;
+        }
+    }
+
+    function addItem(itemName, buttonElement) {
+        const quantityElem = buttonElement.previousElementSibling.previousElementSibling;
+        const quantity = parseInt(quantityElem.textContent);
+
+        const item = {
+            name: itemName,
+            quantity: quantity
+        };
+
+        const existingItem = cartItems.find(i => i.name === itemName);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            cartItems.push(item);
+        }
+
+        showToast(`Se agregó ${itemName} (x${quantity}) al carrito`);
+    }
+
+
+    function showCart() {
+        const cartList = document.getElementById("selectedItems");
+        cartList.innerHTML = "";
+        cartItems.forEach(item => {
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+            listItem.textContent = `${item.name} : ${item.quantity}`;
+            cartList.appendChild(listItem);
+        });
+        $('#cartModal').modal('show');
+    }
+
+    function filterItems() {
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        const selectedCategory = document.getElementById('categoryFilter').value;
+        const itemsList = document.getElementById('items');
+        const items = Array.from(itemsList.children);
+
+        let filteredItems = items.filter(item => {
+            const itemName = item.firstChild.textContent.toLowerCase();
+            const itemCategory = item.getAttribute('data-category');
+            return (itemName.includes(searchInput) || searchInput === '') &&
+                (itemCategory === selectedCategory || selectedCategory === '');
+        });
+
+        // Hide all items
+        items.forEach(item => item.style.display = 'none');
+
+        // Show filtered items
+        filteredItems.forEach(item => item.style.display = 'block');
+
+        // Calculate pagination
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = currentPage * itemsPerPage;
+        const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+        // Show paginated items
+        paginatedItems.forEach(item => item.style.display = 'block');
+
+        renderPagination(filteredItems.length);
+    }
+
+
+    function renderPagination(totalItems) {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const paginationElement = document.getElementById('pagination');
+        paginationElement.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.classList.add('page-item');
+            const a = document.createElement('a');
+            a.classList.add('page-link');
+            a.href = '#';
+            a.textContent = i;
+            a.addEventListener('click', function () {
+                currentPage = i;
+                filterItems();
+            });
+            li.appendChild(a);
+            paginationElement.appendChild(li);
+        }
+    }
+
+    // Initially load the items with the first page
+    filterItems();
+</script>
+
+<div class="modal" id="cartModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cart</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--  cart content here -->
+                <ul id="selectedItems" class="list-group">
+                    <!-- Cart items will be displayed here -->
+                </ul>
+                <!-- Other cart information can be added here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmOrder()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 </body>
+
 </html>

@@ -72,7 +72,7 @@
 
                 </div>
                 <div class="col-md">
-                    <a href="#" class="no-link-decoration"> <!--TODO ADD LINK -->
+                    <a href="#" class="no-link-decoration">
                         <div class="card text-bg-danger">
                             <div class="h1 mb-3 pt-3">
                                 <i class="bi bi-exclamation-octagon"></i>
@@ -83,20 +83,6 @@
                             <h1 class="card-text pb-3">{{ noStockProducts }}</h1>
                         </div>
                     </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Graph canvas -->
-    <section class="p-5 bg-light">
-        <div class="container">
-            <div class="row text-center g-4">
-                <div class="col-md">
-                    <canvas id="piechart"></canvas>
-                </div>
-                <div class="col-md">
-                    <canvas id="barchart"></canvas>
                 </div>
             </div>
         </div>
@@ -163,98 +149,6 @@
     </section>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!--Bar graph script-->
-    <script>
-        var ctx = document.getElementById('barchart').getContext('2d');
-        data =
-        {{ categoryData }}
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Eléctricos', 'Plomería', 'Oficina', 'Limpieza'],
-                datasets: [{
-                    label: '# Productos p/ categoría',
-                    data: data,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        },
-                        title: {
-                            display: true,
-                            text: 'Cantidad',
-                            font: {
-                                size: 15,
-                                weight: 'bold'
-                            }
-                        }
-                    },
-                    x: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Categoria',
-                            font: {
-                                size: 15,
-                                weight: 'bold'
-                            }
-                        }
-                    }
-                }
-            }
-        })
-    </script>
-    <!-- Doughnut graph script -->
-    <script>
-        var ctx = document.getElementById('piechart').getContext('2d');
-        var data =
-        {{productData}}
-        var myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Buen stock', 'Bajo stock', 'Sin Stock'],
-                datasets: [{
-                    label: '# de productos',
-                    data: data,
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(255, 99, 132, 0.2)',
-                    ],
-                    borderColor: [
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(255, 99, 132, 1)',
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-            }
-        })
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
             crossorigin="anonymous"></script>

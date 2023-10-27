@@ -1,3 +1,5 @@
+import unicodedata
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -66,9 +68,19 @@ def dashboard(request):
 
 @login_required(login_url='login')
 def workers(request):
-    workers = Worker.objects.all()
+    searchQuery = request.GET.get('search')
+    if searchQuery:
+        search_query_normalized = remove_accents(searchQuery).lower()
+        worker_list = Worker.objects.all()
+        filtered_workers = []
+        for worker in worker_list:
+            if search_query_normalized in remove_accents(worker.name).lower():
+                filtered_workers.append(worker)
+        paginator = Paginator(filtered_workers, 5)  # Muestra 10 trabajadores por página
+    else:
+        worker_list = Worker.objects.all()
+        paginator = Paginator(worker_list, 5)  # Muestra 10 trabajadores por página
 
-    paginator = Paginator(workers, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -77,3 +89,8 @@ def workers(request):
     }
 
     return render(request, 'workers.html', context)
+
+
+def remove_accents(input_str):
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])

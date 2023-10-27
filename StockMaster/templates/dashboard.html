@@ -11,8 +11,21 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
         <style>
-            .no-link-decoration {
+            .no-link-decoration{
                 text-decoration: none;
+            }
+
+            #inventory-table td {
+                width: 400px;
+            }
+
+            .tableRoundedm {
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .clickableRow {
+                cursor: pointer;
             }
         </style>
 
@@ -95,8 +108,8 @@
                 <div class="col-md">
                     <h1>Últimas expediciones</h1>
                     <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
+                        <table class="table mt-3 table-hover tableRoundedm">
+                            <thead class="table-dark">
                             <tr>
                                 <th scope="col">ID</th>
                                 <th scope="col">Personal</th>
@@ -106,7 +119,7 @@
                             </thead>
                             <tbody>
                             {% for order in lastOutputOrders %}
-                                <tr>
+                                <tr class="clickableRow">
                                     <th scope="row"><a href="" class="link-info">{{ order.id }}</a></th>
                                     <td>{{ order.worker.name }}</td>
                                     <td>{{ order.GetItems.count }}</td>
@@ -121,8 +134,8 @@
                 <div class="col-md">
                     <h1>Últimas Compras</h1>
                     <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
+                        <table class="table mt-3 table-hover tableRoundedm">
+                            <thead class="table-dark">
                             <tr>
                                 <th scope="col">ID</th>
                                 <th scope="col"># de Productos</th>
@@ -132,7 +145,7 @@
                             </thead>
                             <tbody>
                             {% for order in lastInputOrders %}
-                                <tr>
+                                <tr class="clickableRow">
                                     <th scope="row"><a href="" class="link-info">{{ order.id }}</a></th>
                                     <td>{{ order.GetItems.count }}</td>
                                     <td>${{ order.GetTotal }} M.N.</td>

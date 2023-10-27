@@ -6,6 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Trabajador</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <style>
+        .product-image {
+            width: 100%; /* Make image fill the container */
+            height: auto; /* Maintain aspect ratio */
+            max-width: 150px; /* Maximum width */
+            max-height: 150px; /* Maximum height */
+        }
+
+        .img-placeholder {
+            width: 100%;
+            height: auto;
+            max-width: 150px;
+            max-height: 150px;
+            text-align: center;
+            line-height: 150px; /* Center text vertically */
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -81,7 +102,7 @@
                             <figure class="card card-product-grid">
                                 <div class="img-wrap">
                                     {% if product.image %}
-                                        <a href="#"><img src="{{ product.image.url}}"></a>
+                                        <a href="#"><img src="{{ product.image.url }}" class="product-image"></a>
                                     {% else %}
                                         <div class="img-placeholder">No Image</div>
                                     {% endif %}
@@ -116,6 +137,7 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 -->
 
 </body>

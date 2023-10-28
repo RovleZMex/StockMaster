@@ -1,6 +1,8 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from Product.models import Product
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 
 def store(request):
@@ -20,23 +22,61 @@ def store(request):
         "selected_category": category,
     }
 
-    # Handle adding to cart
+    return render(request, 'store/store.html', context)
+
+
+def add_to_cart(request, product_id):
+    cart = request.session.get('cart', {})
+    quantity = cart.get(str(product_id), 0)
+    cart[str(product_id)] = quantity + 1
+    request.session['cart'] = cart
+    return redirect('store')  # Redirect to your store page or wherever you prefer
+
+
+def show_cart(request):
+    cart = request.session.get('cart', {})
+    products = Product.objects.filter(id__in=cart.keys())
+    cart_items = [(product, cart[str(product.id)]) for product in products]
+    return render(request, 'store/cart.html', {'cart_items': cart_items})
+
+
+def view_cart(request):
+    cart = request.session.get('cart', {})
+    product_ids = list(map(int, cart.keys()))
+    products = Product.objects.filter(id__in=product_ids)
+    cart_items = []
+    total = 0
+    for product in products:
+        quantity = cart[str(product.id)]
+        total += product.price * quantity
+        cart_items.append({
+            'product': product,
+            'quantity': quantity,
+            'total_price': product.price * quantity,
+        })
+    context = {
+        'cart_items': cart_items,
+        'total': total,
+    }
+    return render(request, 'store/cart.html', context)
+
+
+@csrf_exempt
+def remove_from_cart(request):
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
-        product = Product.objects.get(id=product_id)
         cart = request.session.get('cart', {})
-        cart[product_id] = cart.get(product_id, 0) + 1
-        request.session['cart'] = cart
-        return redirect('store')
+        if product_id in cart:
+            del cart[product_id]
+            request.session['cart'] = cart
+        total = calculate_cart_total(request)
+        return JsonResponse({'total': total})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
-    # Get cart from session
+
+def calculate_cart_total(request):
     cart = request.session.get('cart', {})
-    cart_items = []
-    for product_id, quantity in cart.items():
-        product = Product.objects.get(id=product_id)
-        cart_items.append({'product': product, 'quantity': quantity})
-
-    context.update({
-        'cart_items': cart_items,
-    })
-    return render(request, 'store/store.html', context)
+    product_ids = list(map(int, cart.keys()))
+    products = Product.objects.filter(id__in=product_ids)
+    total = sum(product.price * cart[str(product.id)] for product in products)
+    return total

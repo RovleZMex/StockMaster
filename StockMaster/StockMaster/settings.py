@@ -54,6 +54,8 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
 ROOT_URLCONF = "StockMaster.urls"
 
 TEMPLATES = [

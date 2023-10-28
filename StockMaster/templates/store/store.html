@@ -61,6 +61,7 @@
 <section class="section-content padding-y">
     <div class="container">
         <div class="row">
+
             <aside class="col-md-3">
                 <div class="card">
                     <article class="filter-group">
@@ -72,12 +73,22 @@
                         </header>
                         <div class="filter-content collapse show" id="collapse_1">
                             <div class="card-body">
-                                <ul class="list-menu">
-                                    <li><a href="#">Categoria 1</a></li>
-                                    <li><a href="#">Categoria 2</a></li>
-                                    <li><a href="#">Categoria 3</a></li>
-                                    <!-- More categories -->
-                                </ul>
+                                <!-- All Categories Option -->
+                                <li>
+                                    <a href="?query={{ query }}"
+                                       class="{% if not selected_category %}active{% endif %}">
+                                        Todos
+                                    </a>
+                                </li>
+                                <!-- Specific Categories -->
+                                {% for code, name in categories %}
+                                    <li>
+                                        <a href="?category={{ code }}&query={{ query }}"
+                                           class="{% if selected_category == code %}active{% endif %}">
+                                            {{ name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
                             </div> <!-- card-body.// -->
                         </div>
                     </article> <!-- filter-group  .// -->
@@ -86,7 +97,7 @@
                 </div> <!-- card.// -->
             </aside> <!-- col.// -->
 
-            <main class="col-md-9">
+            <main class="col-md-7">
                 <!-- Main content -->
                 <header class="border-bottom mb-4 pb-3">
 
@@ -97,6 +108,8 @@
 
                     </div>
                 </header><!-- sect-heading -->
+
+                <div id="search-results" class="row"></div>
                 <div class="row">
                     {% for product in products %}
                         <div class="col-md-4">
@@ -115,39 +128,39 @@
                                             <span class="price">Disponibles: {{ product.quantity }}</span>
                                         </div> <!-- price-wrap.// -->
                                     </div>
-                                    <a href="#" class="btn btn-block btn-success">Agregar al Carrito </a>
+                                    <form method="post" action="">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                                        <button type="submit" class="btn btn-block btn-success">Agregar al Carrito
+                                        </button>
+                                    </form>
                                 </figcaption>
                             </figure>
                         </div> <!-- col.// -->
                     {% endfor %}
                 </div> <!-- row end.// -->
 
-                <nav class="mt-4" aria-label="Page navigation sample">
-                    <ul class="pagination">
-                        <li class="page-item {% if products.has_previous %}{% else %}disabled{% endif %}">
-                            {% if products.has_previous %}
-                                <a class="page-link" href="?page={{ products.previous_page_number }}">Anterior</a>
-                            {% else %}
-                                <span class="page-link">Anterior</span>
-                            {% endif %}
-                        </li>
-                        {% for i in products.paginator.page_range %}
-                            <li class="page-item {% if products.number == i %}active{% endif %}">
-                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                            </li>
-                        {% endfor %}
-                        <li class="page-item {% if products.has_next %}{% else %}disabled{% endif %}">
-                            {% if products.has_next %}
-                                <a class="page-link" href="?page={{ products.next_page_number }}">Siguiente</a>
-                            {% else %}
-                                <span class="page-link">Siguiente</span>
-                            {% endif %}
-                        </li>
-                    </ul>
-                </nav>
-
 
             </main> <!-- col.// -->
+            <!-- Cart Sidebar -->
+            <aside class="col-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="title">Carrito</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for item in cart_items %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ item.product.name }}
+                                    <span class="badge badge-primary badge-pill">{{ item.quantity }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
         </div>
     </div> <!-- container .//  -->
 </section>
@@ -155,22 +168,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
+<
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
         const searchBar = document.getElementById('searchBar');
         searchBar.addEventListener('input', (e) => {
-            const searchQuery = e.target.value.toLowerCase();
-            const products = document.querySelectorAll('.card-product-grid');
-            products.forEach((product) => {
-                const productName = product.querySelector('.title').textContent.toLowerCase();
+            const searchQuery = normalizeString(e.target.value);
+            const productContainers = document.querySelectorAll('.col-md-4');
+            productContainers.forEach((container) => {
+                const productName = normalizeString(container.querySelector('.title').textContent);
                 if (productName.includes(searchQuery)) {
-                    product.classList.remove('hidden-product');
+                    container.classList.remove('d-none');
                 } else {
-                    product.classList.add('hidden-product');
+                    container.classList.add('d-none');
                 }
             });
         });
     });
+
+    function normalizeString(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
 </script>
 
 

@@ -288,3 +288,5 @@ fabric.properties
 
 *.xml
 *.iml
+StockMaster/db.sqlite3
+StockMaster/db.sqlite3

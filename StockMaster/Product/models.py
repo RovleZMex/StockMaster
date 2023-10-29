@@ -9,7 +9,7 @@ class Product(models.Model):
     SKU = models.CharField(max_length=255, unique=True)  # Product SKU
     price = models.FloatField(default=0.0)  # Product price
     quantity = models.PositiveIntegerField(default=0)  # Current product stock
-    image = models.ImageField(upload_to='uploads/% Y/% m/% d/', blank=True)  # Product Image
+    image = models.ImageField(upload_to='uploads/%Y/%m/%d/', blank=True)  # Product Image
     threshold = models.PositiveIntegerField(default=0)  # Low stock threshold
     category = models.CharField(max_length=255, choices=[
         ('ELE', 'Eléctrico'),  # Different categories per product

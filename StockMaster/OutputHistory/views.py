@@ -1,55 +1,74 @@
+import unicodedata
+from datetime import datetime, timedelta
+
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render
 
-'''
-I wanted to prove that we can link orders with multiple products to a singular worker
-With the use of a new model OutputOrder that stores the worker object, and a helper model
-OutputOrderItem, this model stores a singular product and the quantity that was taken in this order,
-and is linked to a OutputOrder. We can pin point a worker searching by name, or worker code with:
-
- >> worker = Worker.objects.get(name='Karl')
-or 
- >> worker = Worker.objects.get(workerCode=935431)
-
-We can then access all of the orders attached to a worker with:
-
- >> allOrders = OutputOrder.objects.filter(worker=worker)
-
-allOrders will contain an array of OutputOrder models with all the orders attached to worker, to then access the items 
-and quantities for each item in the order we can do it with:
-
- >> allItemsInOrder = allOrders[index].GetItems()
- 
-allItemsInOrder is an array of OutputOrderItem models, each of them contains a Product model, and quantity
-for each, por example:
-
- >> allItemsInOrder[0].product.name -> "Esponja"
- >> allItemsInOrder[0].quantity -> 2
-
-What that means is that Karl took 2 esponjas from the storage.
-
-To create a new order we first have to create a Worker model, create a new OutputOrder and link it to the worker. 
-Then we can create OutputOrderItem and link it to the OutputOrder just created.
+from InputHistory.models import InputOrder
+from OutputHistory.models import OutputOrder
 
 
-| Worker 
-    | OutputOrder  (A Worker can have multiple OutputOrders but the OutputOrder only one Worker)
-        | OutputOrderItem (A OutputOrder can have multiple OutputOrderItems but the OutputOrderItems only one OutputOrder)
-                          (A Product can have multiple OutputOrderItems but the OutputOrderItem only one Product)
-            | Product 
-'''
-
-
-# Create your views here.
-
-@login_required(login_url='login')
-def history(request):
-    return render(request, 'outputHistoryWorker.html')
-
+# TODO CREATE A VIEW FOR ALL ORDERS (OUTPUT/INPUT)
 @login_required(login_url='login')
 def outputHistory(request):
-    return render(request, 'outputHistory.html')
+    searchQuery = request.GET.get("search")
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    outputOrders = OutputOrder.objects.all()
+
+    if searchQuery:
+        search_query_normalized = remove_accents(searchQuery).lower()
+        outputOrders = outputOrders.filter(
+            Q(worker__name__icontains=search_query_normalized)
+        )
+
+    if start_date and end_date:
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
+        outputOrders = outputOrders.filter(date_created__range=[start_date_obj, end_date_obj])
+
+    paginator = Paginator(outputOrders, 5)
+    pageNumber = request.GET.get("page")
+    page_obj = paginator.get_page(pageNumber)
+
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'outputHistory.html', context)
+
 
 @login_required(login_url='login')
 def inputHistory(request):
-    return render(request, 'inputHistory.html')
+    searchQuery = request.GET.get("search")
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    inputOrders = InputOrder.objects.all()
+
+    if searchQuery:
+        search_query_normalized = remove_accents(searchQuery).lower()
+        inputOrders = inputOrders.filter(
+            Q(id__icontains=search_query_normalized)
+        )
+
+    if start_date and end_date:
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
+        inputOrders = inputOrders.filter(date_created__range=[start_date_obj, end_date_obj])
+
+    paginator = Paginator(inputOrders, 5)
+    pageNumber = request.GET.get("page")
+    page_obj = paginator.get_page(pageNumber)
+
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'inputHistory.html', context)
+
+
+def remove_accents(input_str):
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])

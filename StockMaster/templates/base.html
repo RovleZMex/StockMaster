@@ -23,22 +23,28 @@
         <div class="collapse navbar-collapse" id="navmenu">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+                    <a href="{% url 'dashboard' %}" class="nav-link" data-toggle="tooltip" data-placement="top"
+                       title="Dashboard"><i class="bi bi-speedometer"></i></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'inventory' %}" class="nav-link">Inventario</a>
+                    <a href="{% url 'inventory' %}" class="nav-link" data-toggle="tooltip" data-placement="top"
+                       title="Inventario"><i class="bi bi-archive"></i></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'outputHistory' %}" class="nav-link">Pedidos</a>
+                    <a href="{% url 'outputHistory' %}" class="nav-link" data-toggle="tooltip" data-placement="top"
+                       title="Salidas"><i class="bi bi-box-arrow-up"></i></i></a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'inputHistory' %}" class="nav-link">Compras</a>
+                    <a href="{% url 'inputHistory' %}" class="nav-link" data-toggle="tooltip" data-placement="top"
+                       title="Entradas"><i class="bi bi-box-arrow-in-down"></i></a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Trabajadores</a>
+                    <a href="{% url 'workers' %}" class="nav-link" data-toggle="tooltip" data-placement="top"
+                       title="Personal"><i class="bi bi-people"></i></a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Informes</a>
+                    <a href="#" class="nav-link" data-toggle="tooltip" data-placement="top"
+                       title="Informes"><i class="bi bi-receipt"></i></a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'logout' %}" class="nav-link"><i class="bi bi-box-arrow-left"></i></a>
@@ -55,7 +61,7 @@
 <!-- Footer -->
 <div class="container">
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-        <p class="col-md-4 mb-0 text-body-secondary">&copy; 2023 </p>
+        <p class="col-md-4 mb-0 text-body-secondary">&copy; StockMaster 2023 </p>
     </footer>
 </div>
 

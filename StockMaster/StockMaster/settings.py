@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "Product",
     "Workers",
     "Inventory",
+    "InputHistory",
     "OutputHistory",
     "Dashboard",
     "simple_history",
@@ -108,6 +109,7 @@ TIME_ZONE = "MST"
 USE_I18N = True
 
 USE_TZ = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

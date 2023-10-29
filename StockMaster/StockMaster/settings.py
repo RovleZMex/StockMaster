@@ -55,6 +55,8 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
 ROOT_URLCONF = "StockMaster.urls"
 
 TEMPLATES = [
@@ -125,3 +127,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+

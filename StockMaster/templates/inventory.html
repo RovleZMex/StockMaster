@@ -25,12 +25,31 @@
             }
 
             #custom-select {
-                background-color: green; /* Predetermined style */
+                background-color: #146cf4; /* Predetermined style */
                 color: white; /* text color */
                 border: none;
                 border-radius: 5px;
                 padding: 10px;
             }
+
+            .custom-bg-color {
+                background-color: #146cf4;
+                /* Otros estilos CSS si es necesario */
+            }
+
+            .btn-secondary.dropdown-toggle.buen-stock {
+                background-color: green;
+            }
+
+            .btn-secondary.dropdown-toggle.bajo-stock {
+                background-color: yellow;
+                color: black;
+            }
+
+            .btn-secondary.dropdown-toggle.no-stock {
+                background-color: red;
+            }
+
 
         </style>
 
@@ -43,38 +62,84 @@
                 <div class="row text-center g-4">
                     <div class="col-md">
                         <h1>Inventario Actual</h1>
-                        <div class="container mt-4">
+                        <div class="container mt-6">
                             <div class="row">
-                                <div class="col-md-3">
-                                    <select class="form-select" aria-label="Default select example">
-                                        <option selected>Busqueda por categoría</option>
-                                        <option value="1">Eléctrico</option>
-                                        <option value="2">Oficina</option>
-                                        <option value="3">Limpieza</option>
-                                        <option value="4">Plomería</option>
-                                    </select>
-                                </div>
                                 <div class="col-md-2">
-                                    <select id="custom-select" class="form-select" aria-label="Default select example">
-                                        <option value="5">Buen stock</option>
-                                        <option value="4">Bajo stock</option>
-                                        <option value="3">Out of stock</option>
-                                    </select>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle custom-bg-color" type="button"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            {% if request.GET.category == 'ELE' %} Electricidad
+                                            {% elif request.GET.category == 'PLU' %} Plomeria
+                                            {% elif request.GET.category == 'OFF' %} Oficina
+                                            {% elif request.GET.category == 'CLE' %} Limpieza
+                                            {% else %} Todas las categorías
+                                            {% endif %}
+                                        </button>
+
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{% url 'inventory' %}">Todas las
+                                                categorias</a></li>
+                                            <li><a class="dropdown-item"
+                                                   href="{% url 'filtered' %}?category=ELE{% if request.GET.stock %}&stock={{ request.GET.stock }}{% endif %}">Electricidad</a>
+                                            </li>
+                                            <li><a class="dropdown-item"
+                                                   href="{% url 'filtered' %}?category=PLU{% if request.GET.stock %}&stock={{ request.GET.stock }}{% endif %}">Plomeria</a>
+                                            </li>
+                                            <li><a class="dropdown-item"
+                                                   href="{% url 'filtered' %}?category=OFF{% if request.GET.stock %}&stock={{ request.GET.stock }}{% endif %}">Oficina</a>
+                                            </li>
+                                            <li><a class="dropdown-item"
+                                                   href="{% url 'filtered' %}?category=CLE{% if request.GET.stock %}&stock={{ request.GET.stock }}{% endif %}">Limpieza</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
 
+
+                                <div class="col-md-2">
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle custom-bg-color" id="stock-dropdown"
+                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {% if request.GET.stock == 'good-stock-inventory' %} Buen stock
+                                            {% elif request.GET.stock == 'low-stock-inventory' %} Bajo stock
+                                            {% elif request.GET.stock == 'no-stock-inventory' %} No stock
+                                            {% else %}Todos los productos
+                                            {% endif %}
+                                        </button>
+
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{% url 'inventory' %}">Todos los
+                                                productos</a></li>
+                                            <li><a class="dropdown-item"
+                                                   href="{% url 'filtered' %}?stock=good-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Buen
+                                                stock</a></li>
+                                            <li><a class="dropdown-item"
+                                                   href="{% url 'filtered' %}?stock=low-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Bajo
+                                                stock</a></li>
+                                            <li><a class="dropdown-item"
+                                                   href="{% url 'filtered' %}?stock=no-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">No
+                                                stock</a></li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+
                                 <div class="col">
-                                    <form class="mb-3">
+                                    <form class="mb-3" id="search-form" action="" method="get">
                                         <div class="input-group">
-                                            <input type="text" id="search" class="form-control"
-                                                   placeholder="Busqueda por nombre o SKU">
+                                            <input type="text" id="search" name="search" class="form-control"
+                                                   placeholder="Busqueda por nombre o SKU" value="{{ searchQuery }}">
+                                            <button type="submit" class="btn btn-primary">Buscar</button>
                                         </div>
                                     </form>
                                 </div>
+
+
                             </div>
                         </div>
 
                         <div class="container mt-4">
-
                             <table class="table mt-3 table-hover tableRoundedm">
                                 <thead class="table-dark">
                                 <tr>
@@ -85,317 +150,131 @@
                                 </tr>
                                 </thead>
                                 <tbody id="inventory-table">
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A200</td>
-                                    <td>Papel higiénico</td>
-                                    <td>20</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A100</td>
-                                    <td>Trapeadores</td>
-                                    <td>5</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>Lámparas</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>hojas</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>pantalones</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>zapatos</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>silla</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>reloj</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>cable</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>enchufe</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>bocinas</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>teclados</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>mouse</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
-                                <tr class="table-row clickableRow" data-href="">
-                                    <td>A300</td>
-                                    <td>focos</td>
-                                    <td>10</td>
-                                    <td>insane.png</td>
-                                </tr>
+                                {% for product in products %}
+                                    <tr class="table-row clickableRow" data-href="">
+                                        <td>{{ product.SKU }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.quantity }}</td>
+                                        <td>{{ product.image.url }}</td>
+                                    </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                 </div>
             </div>
         </section>
         <div class="text-center">
-            <button id="prevPage" class="btn btn-secondary" disabled>Anterior</button>
-            <span id="currentPage">Página 1</span>
-            <button id="nextPage" class="btn btn-secondary">Siguiente</button>
+            <div class="d-flex justify-content-center">
+                <ul class="pagination">
+                    {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page=1
+                           {% if request.GET.threshold_filter %}&threshold_filter={{ request.GET.threshold_filter }}{% endif %}
+                           {% if request.GET.category %}&category={{ request.GET.category }}{% endif %}"
+                               aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=
+                        {{ products.previous_page_number }}
+                        {% if request.GET.threshold_filter %}&threshold_filter={{ request.GET.threshold_filter }}{% endif %}
+                        {% if request.GET.category %}&category={{ request.GET.category }}{% endif %}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">Página {{ products.number }} de {{ products.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=
+                        {{ products.next_page_number }}
+                        {% if request.GET.threshold_filter %}&threshold_filter={{ request.GET.threshold_filter }}{% endif %}
+                        {% if request.GET.category %}&category={{ request.GET.category }}{% endif %}"
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=
+                        {{ products.paginator.num_pages }}
+                        {% if request.GET.threshold_filter %}&threshold_filter={{ request.GET.threshold_filter }}{% endif %}
+                        {% if request.GET.category %}&category={{ request.GET.category }}{% endif %}"
+                               aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
 
+
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous">
+    </script>
+
+    <!-- Update the URL with search parameters -->
+<script>
+    document.getElementById("search-form").addEventListener("submit", function (event) {
+        // Prevent the default form behavior (page reload)
+        event.preventDefault();
+        // Get the search value entered by the user
+        const searchQuery = document.getElementById("search").value;
+        // Get the current URL of the page
+        const currentURL = window.location.href;
+        // Create a new URL object from the current URL
+        const newURL = new URL(currentURL);
+        // Set the search parameter in the new URL
+        newURL.searchParams.set("search", searchQuery);
+        // Redirect the page to the new URL with the updated search parameter
+        window.location.href = newURL.toString();
+    });
+</script>
+
+
+    <!--Update stock button styles -->
+<script>
+    // Function to update the stock button styles
+    function updateStockButtonStyle() {
+        var stockButton = document.getElementById('stock-dropdown');
+        // Get the value of the 'stock' parameter from the GET request (possibly from the URL)
+        var selectedStock = '{{ request.GET.stock }}';
+
+        stockButton.classList.remove('good-stock', 'low-stock', 'no-stock', 'inventory');
+
+        if (selectedStock === 'good-stock-inventory') {
+            stockButton.classList.add('good-stock');
+        } else if (selectedStock === 'low-stock-inventory') {
+            stockButton.classList add('low-stock');
+        } else if (selectedStock === 'no-stock-inventory') {
+            stockButton.classList.add('no-stock');
+        } else if (selectedStock === 'inventory') {
+            stockButton.classList.add('inventory');
+        }
+    }
+
+    // Call the function to update stock button styles
+    updateStockButtonStyle();
+</script>
+
+
+
     </body>
 
-    <script>
 
-        function removeAccents(str) {
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.getElementById("search");
-            const tableBody = document.getElementById("inventory-table");
-            const inventoryData = [
-                {
-                    SKU: "A200",
-                    nombre: "Papel higiénico",
-                    cantidad: 20,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A100",
-                    nombre: "Trapeadores",
-                    cantidad: 5,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "Lámparas",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "hojas",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "pantalones",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "zapatos",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "silla",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "reloj",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "cable",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "enchufe",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "bocinas",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "teclados",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "mouse",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-                {
-                    SKU: "A300",
-                    nombre: "Focos",
-                    cantidad: 10,
-                    imagen: "insane.png"
-                },
-            ];
-            let visibleProducts = 8; // Number of products shown per page
-            let currentPage = 1; // Current page
 
-            // Function to update the table with new data
-            function updateTable(data) {
-                tableBody.innerHTML = "";
-                data.forEach(item => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                <td>${item.SKU}</td>
-                <td>${item.nombre}</td>
-                <td>${item.cantidad}</td>
-                <td>${item.imagen}</td>
-            `;
-                    tableBody.appendChild(row);
-                });
-            }
 
-            // Add an event listener to the search input for filtering data
-            searchInput.addEventListener("input", function () {
-                // Get the search text and filter the data
-                const searchText = removeAccents(searchInput.value.toLowerCase());
-                const filteredData = inventoryData.filter(item =>
-                    removeAccents(item.nombre.toLowerCase()).includes(searchText) ||
-                    item.SKU.toLowerCase().includes(searchText)
-                );
 
-                // Limit the data to the visibleProducts and update the table
-                const limitedData = filteredData.slice(0, visibleProducts);
-                currentPage = 1; // Reset to the first page
-                updatePagination();
-                updateTable(limitedData);
-            });
-
-            // Add an event listener for a custom select dropdown to change the number of visible products
-            customSelect.addEventListener("change", function () {
-                const selectedOption = customSelect.options[customSelect.selectedIndex];
-                const selectedValue = selectedOption.value;
-                visibleProducts = 8;
-                currentPage = 1; // Reset to the first page
-                updatePagination();
-                const limitedData = inventoryData.slice(0, visibleProducts);
-                updateTable(limitedData);
-            });
-
-            // Get references to previous and next page buttons and the current page display
-            const prevPageBtn = document.getElementById("prevPage");
-            const nextPageBtn = document.getElementById("nextPage");
-            const currentPageSpan = document.getElementById("currentPage");
-
-            // Add an event listener to the previous page button
-            prevPageBtn.addEventListener("click", function () {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updatePagination();
-                    const start = (currentPage - 1) * visibleProducts;
-                    const end = start + visibleProducts;
-                    const pageData = inventoryData.slice(start, end);
-                    updateTable(pageData);
-                }
-            });
-
-            // Add an event listener to the next page button
-            nextPageBtn.addEventListener("click", function () {
-                const totalPages = Math.ceil(inventoryData.length / visibleProducts);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updatePagination();
-                    const start = (currentPage - 1) * visibleProducts;
-                    const end = start + visibleProducts;
-                    const pageData = inventoryData.slice(start, end);
-                    updateTable(pageData);
-                }
-            });
-
-            // Function to update the pagination display
-            function updatePagination() {
-                const totalPages = Math.ceil(inventoryData.length / visibleProducts);
-                currentPageSpan.textContent = `Página ${currentPage} de ${totalPages}`;
-
-                // Enable or disable buttons based on the current page
-                prevPageBtn.disabled = currentPage === 1;
-                nextPageBtn.disabled = currentPage === totalPages;
-            }
-
-            // Initial data display
-            const initialData = inventoryData.slice(0, visibleProducts);
-            updateTable(initialData);
-            updatePagination();
-        });
-    </script>
-
-    <script>
-        // Dropdown menu is obtained with its id
-        const customSelect = document.getElementById("custom-select");
-
-        // An event is made to change the background color and text according to the selected option
-        customSelect.addEventListener("change", function () {
-            const selectedOption = customSelect.options[customSelect.selectedIndex];
-            const selectedValue = selectedOption.value;
-
-            // Define background colors, and text depending on the values of the options
-            const colorMap = {
-                "5": {backgroundColor: "green", textColor: "white"}, // Buen stock
-                "4": {backgroundColor: "yellow", textColor: "black"}, // Bajo stock
-                "3": {backgroundColor: "red", textColor: "white"} // Out of stock
-            };
-
-            // Obtain styles
-            const styles = colorMap[selectedValue];
-
-            // Apply styles to dropdown menu
-            customSelect.style.backgroundColor = styles.backgroundColor;
-            customSelect.style.color = styles.textColor;
-        });
-
-    </script>
 {% endblock content %}

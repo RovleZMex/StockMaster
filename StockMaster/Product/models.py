@@ -19,5 +19,9 @@ class Product(models.Model):
     isExternal = models.BooleanField(default=False)  # If acquired outside the institution
     history = HistoricalRecords()  # Used to manage history modifications
 
+    def isLowStock(self):
+        return self.quantity<=self.threshold
+
+
     def __str__(self):
         return self.name

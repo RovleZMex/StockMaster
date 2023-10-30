@@ -98,7 +98,8 @@
 
                                 <div class="col-md-2">
                                     <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle custom-bg-color" id="stock-dropdown"
+                                        <button class="btn btn-secondary dropdown-toggle custom-bg-color"
+                                                id="stock-dropdown"
                                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             {% if request.GET.stock == 'good-stock-inventory' %} Buen stock
                                             {% elif request.GET.stock == 'low-stock-inventory' %} Bajo stock
@@ -151,11 +152,11 @@
                                 </thead>
                                 <tbody id="inventory-table">
                                 {% for product in products %}
-                                    <tr class="table-row clickableRow" data-href="">
+                                    <tr class="table-row clickableRow" data-href="{% url 'editProduct' product.id %}">
                                         <td>{{ product.SKU }}</td>
                                         <td>{{ product.name }}</td>
                                         <td>{{ product.quantity }}</td>
-                                        <td><img src="{{ product.image.url }}" alt=""></td>
+                                        <td><img width="200" src="{{ product.image.url }}" alt=""></td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -225,56 +226,60 @@
     </script>
 
     <!-- Update the URL with search parameters -->
-<script>
-    document.getElementById("search-form").addEventListener("submit", function (event) {
-        // Prevent the default form behavior (page reload)
-        event.preventDefault();
-        // Get the search value entered by the user
-        const searchQuery = document.getElementById("search").value;
-        // Get the current URL of the page
-        const currentURL = window.location.href;
-        // Create a new URL object from the current URL
-        const newURL = new URL(currentURL);
-        // Set the search parameter in the new URL
-        newURL.searchParams.set("search", searchQuery);
-        // Redirect the page to the new URL with the updated search parameter
-        window.location.href = newURL.toString();
-    });
-</script>
+    <script>
+        document.getElementById("search-form").addEventListener("submit", function (event) {
+            // Prevent the default form behavior (page reload)
+            event.preventDefault();
+            // Get the search value entered by the user
+            const searchQuery = document.getElementById("search").value;
+            // Get the current URL of the page
+            const currentURL = window.location.href;
+            // Create a new URL object from the current URL
+            const newURL = new URL(currentURL);
+            // Set the search parameter in the new URL
+            newURL.searchParams.set("search", searchQuery);
+            // Redirect the page to the new URL with the updated search parameter
+            window.location.href = newURL.toString();
+        });
+    </script>
 
 
     <!--Update stock button styles -->
-<script>
-    // Function to update the stock button styles
-    function updateStockButtonStyle() {
-        var stockButton = document.getElementById('stock-dropdown');
-        // Get the value of the 'stock' parameter from the GET request (possibly from the URL)
-        var selectedStock = '{{ request.GET.stock }}';
+    <script>
+        // Function to update the stock button styles
+        function updateStockButtonStyle() {
+            var stockButton = document.getElementById('stock-dropdown');
+            // Get the value of the 'stock' parameter from the GET request (possibly from the URL)
+            var selectedStock = '{{ request.GET.stock }}';
 
-        stockButton.classList.remove('good-stock', 'low-stock', 'no-stock', 'inventory');
+            stockButton.classList.remove('good-stock', 'low-stock', 'no-stock', 'inventory');
 
-        if (selectedStock === 'good-stock-inventory') {
-            stockButton.classList.add('good-stock');
-        } else if (selectedStock === 'low-stock-inventory') {
-            stockButton.classList add('low-stock');
-        } else if (selectedStock === 'no-stock-inventory') {
-            stockButton.classList.add('no-stock');
-        } else if (selectedStock === 'inventory') {
-            stockButton.classList.add('inventory');
+            if (selectedStock === 'good-stock-inventory') {
+                stockButton.classList.add('good-stock');
+            } else if (selectedStock === 'low-stock-inventory') {
+                stockButton.classList
+                add('low-stock');
+            } else if (selectedStock === 'no-stock-inventory') {
+                stockButton.classList.add('no-stock');
+            } else if (selectedStock === 'inventory') {
+                stockButton.classList.add('inventory');
+            }
         }
-    }
 
-    // Call the function to update stock button styles
-    updateStockButtonStyle();
+        // Call the function to update stock button styles
+        updateStockButtonStyle();
+    </script>
+    <script>
+    // Función para redirigir a la URL al hacer clic en una fila
+    document.querySelectorAll('.clickableRow').forEach(item => {
+        item.addEventListener('click', event => {
+            // Obtén la URL del atributo 'data-href' de la fila clicada
+            const url = item.getAttribute('data-href');
+            // Redirige a la URL
+            window.location.href = url;
+        });
+    });
 </script>
-
-
-
     </body>
-
-
-
-
-
 
 {% endblock content %}

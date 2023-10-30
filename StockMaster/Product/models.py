@@ -2,7 +2,6 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 
-
 # Represents all different products registered in the DB
 class Product(models.Model):
     name = models.CharField(max_length=255)  # Product name
@@ -21,8 +20,7 @@ class Product(models.Model):
     history = HistoricalRecords()  # Used to manage history modifications
 
     def isLowStock(self):
-        return self.quantity<=self.threshold
-
+        return self.quantity <= self.threshold
 
     def __str__(self):
         return self.name

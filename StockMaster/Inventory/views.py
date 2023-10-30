@@ -1,12 +1,10 @@
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from Product.models import Product
-from django.core.paginator import Paginator
-from django.db.models import Q
-from django.db.models import F
 import unicodedata
 
+from Product.models import Product
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render, get_object_or_404, redirect
 
 
 @login_required(login_url='login')
@@ -80,6 +78,34 @@ def filterInventory(request):
     })
 
 
+@login_required(login_url='login')
+def EditProduct(request, productid):
+    product = get_object_or_404(Product, id=productid)
+    if request.method == "POST":
+        product.name = request.POST.get("nombreProducto")
+        product.quantity = request.POST.get("cantidadProducto")
+        if len(request.FILES) != 0:
+            product.image = request.FILES['imagenProducto']
+        product.category = mapCategory(request.POST.get("categoriaProducto"))
+        product.isExternal = request.POST.get('compradoPorFuera') == 'on'
+        product.threshold = request.POST.get("bajoUmbralProducto")
+        product.save()
+        return redirect('inventory')
+
+    context = {'product': product,
+               'ind': productid}
+
+    return render(request, 'product-edit.html', context)
+
+
 def remove_accents(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+
+def mapCategory(valor):
+    categorias = {'1': 'OFF',
+                  '2': 'CLE',
+                  '3': 'ELE',
+                  '4': 'PLU'}
+    return categorias[valor]

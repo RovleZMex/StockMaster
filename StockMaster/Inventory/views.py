@@ -79,6 +79,13 @@ def filterInventory(request):
 
 
 @login_required(login_url='login')
+def AddProducts(request):
+    allProducts = Product.objects.all()
+    context = {'products': allProducts}
+    return render(request, 'add-products.html', context)
+
+
+@login_required(login_url='login')
 def EditProduct(request, productid):
     product = get_object_or_404(Product, id=productid)
     if request.method == "POST":

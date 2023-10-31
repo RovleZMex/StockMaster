@@ -63,7 +63,8 @@
                     <div class="col-md">
                         <h1>Inventario Actual</h1>
                         <div class="container mt-6">
-                            <div class="row">
+                            <a href="{% url 'addProducts' %}" class="btn btn-success">Añadir productos</a>
+                            <div class="row g-2 pt-3">
                                 <div class="col-md-2">
                                     <div class="dropdown">
                                         <button class="btn btn-secondary dropdown-toggle custom-bg-color" type="button"
@@ -100,7 +101,7 @@
                                     <div class="dropdown">
                                         <button class="btn btn-secondary dropdown-toggle custom-bg-color"
                                                 id="stock-dropdown"
-                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                type="button" data-bs-toggle="dropdown">
                                             {% if request.GET.stock == 'good-stock-inventory' %} Buen stock
                                             {% elif request.GET.stock == 'low-stock-inventory' %} Bajo stock
                                             {% elif request.GET.stock == 'no-stock-inventory' %} No stock
@@ -141,26 +142,29 @@
                         </div>
 
                         <div class="container mt-4">
-                            <table class="table mt-3 table-hover tableRoundedm">
-                                <thead class="table-dark">
-                                <tr>
-                                    <th>SKU</th>
-                                    <th>Nombre</th>
-                                    <th>Cantidad</th>
-                                    <th>Imagen</th>
-                                </tr>
-                                </thead>
-                                <tbody id="inventory-table">
-                                {% for product in products %}
-                                    <tr class="table-row clickableRow" data-href="{% url 'editProduct' product.id %}">
-                                        <td>{{ product.SKU }}</td>
-                                        <td>{{ product.name }}</td>
-                                        <td>{{ product.quantity }}</td>
-                                        <td><img width="200" src="{{ product.image.url }}" alt=""></td>
+                            <div class="table-responsive">
+
+                                <table class="table mt-3 table-hover tableRoundedm">
+                                    <thead class="table-dark">
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Nombre</th>
+                                        <th>Cantidad</th>
+                                        <th>Imagen</th>
                                     </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody id="inventory-table">
+                                    {% for product in products %}
+                                        <tr class="table-row clickableRow" data-href="">
+                                            <td>{{ product.SKU }}</td>
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.quantity }}</td>
+                                            <td><img src="{{ product.image.url }}" alt="" width="200"></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -257,8 +261,7 @@
             if (selectedStock === 'good-stock-inventory') {
                 stockButton.classList.add('good-stock');
             } else if (selectedStock === 'low-stock-inventory') {
-                stockButton.classList
-                add('low-stock');
+                stockButton.classList.add('low-stock');
             } else if (selectedStock === 'no-stock-inventory') {
                 stockButton.classList.add('no-stock');
             } else if (selectedStock === 'inventory') {
@@ -269,17 +272,13 @@
         // Call the function to update stock button styles
         updateStockButtonStyle();
     </script>
-    <script>
-    // Función para redirigir a la URL al hacer clic en una fila
-    document.querySelectorAll('.clickableRow').forEach(item => {
-        item.addEventListener('click', event => {
-            // Obtén la URL del atributo 'data-href' de la fila clicada
-            const url = item.getAttribute('data-href');
-            // Redirige a la URL
-            window.location.href = url;
-        });
-    });
-</script>
+
+
     </body>
+
+
+
+
+
 
 {% endblock content %}

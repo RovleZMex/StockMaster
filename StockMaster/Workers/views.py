@@ -3,6 +3,9 @@ from Product.models import Product
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+import json
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 
 
 def store(request):
@@ -80,3 +83,29 @@ def calculate_cart_total(request):
     products = Product.objects.filter(id__in=product_ids)
     total = sum(product.price * cart[str(product.id)] for product in products)
     return total
+
+
+@require_POST
+def confirm_order(request):
+    employee_number = request.POST.get('employee_number')
+    order_items_json = request.POST.get('order_items')
+    order_items = json.loads(order_items_json)
+
+    # Constructing the order details string
+    order_details = "Employee Number: {}\n".format(employee_number)
+    order_details += "Products:\n"
+
+    for item in order_items:
+        product = Product.objects.get(id=item['productId'])
+        quantity = item['quantity']
+        order_details += "- {} ({}): {}\n".format(product.name, product.SKU, quantity)
+
+
+
+    print(order_details)  # For demonstration, printing the order details to the console
+
+    # Clear the cart
+    if 'cart' in request.session:
+        del request.session['cart']
+
+    return HttpResponse('Orden confirmada!!!!!,(Check console for details)')

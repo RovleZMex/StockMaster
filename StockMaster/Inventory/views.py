@@ -23,7 +23,7 @@ def inventory(request):
 
     # If a search query is obtain, apply to the search condition
     if searchQuery:
-        searchCondition = searchCondition & Q(name__icontains=searchQuery)
+        searchCondition = searchCondition & Q(name__icontains=searchQuery) | Q(SKU__icontains=searchQuery)
 
     # Filter products according to the search condition and threshold filter
     filteredProducts = allProducts.filter(searchCondition)
@@ -69,7 +69,7 @@ def filterInventory(request):
             if product.quantity == 0:
                 noStock.append(product)
         allProducts = noStock
-
+    print(allProducts)
     paginator = Paginator(allProducts, 5)
     page = request.GET.get("page")
     products = paginator.get_page(page)

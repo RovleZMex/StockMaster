@@ -108,4 +108,4 @@ def confirm_order(request):
     if 'cart' in request.session:
         del request.session['cart']
 
-    return HttpResponse('Orden confirmada!!!!!,(Check console for details)')
+    return HttpResponse('Orden confirmada!!!!!(Check console for details)')

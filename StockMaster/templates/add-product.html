@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <section class="p-5">
+        <div class="container">
+            <h2>Registrar productos</h2>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <form action="" id="productForm">
+                <div id="productInputs" class="row g-3">
+                    <div class="col-md">
+                        <input class="form-control product-input" list="datalistOptions0" id="exampleDataList0"
+                               placeholder="Buscar producto..." onchange="updateFirstRow(this);">
+                        <datalist id="datalistOptions0">
+                            {% for product in products %}
+                                <option value="{{ product.name }} - {{ product.SKU }}" data-price="{{ product.price }}"
+                                        data-is-external="{{ product.isExternal }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="col-md">
+                        <!-- quantity -->
+                        <input type="number" step="1" min="1" class="form-control" placeholder="Cantidad">
+                    </div>
+                    <div class="col-md">
+                        <!-- price -->
+                        <input type="number" step="0.01" min="0" class="form-control" id="priceInput0"
+                               placeholder="Precio">
+                    </div>
+                    <div class="col-md">
+                        <!-- isExternal -->
+                        <input type="checkbox" class="form-check-input" value="" id="externalCheckbox0">
+                        <label for="externalCheckbox0" class="form-check-label">Es externo</label>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        var counter = 1; // Counter for dynamic IDs
+
+        function addProductInput(element) {
+            var container = document.getElementById('productInputs');
+            var newInputRow = document.createElement('div');
+            newInputRow.className = 'row g-3';
+            newInputRow.innerHTML = `
+            <div class="col-md">
+                <input class="form-control product-input" list="datalistOptions${counter}" id="exampleDataList${counter}"
+                       placeholder="Buscar producto..." onchange="updateDynamicRow(this, ${counter});">
+                <datalist id="datalistOptions${counter}">
+                    {% for product in products %}
+                        <option value="{{ product.name }} - {{ product.SKU }}" data-price="{{ product.price }}"
+                                data-is-external="{{ product.isExternal }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md">
+                <input type="number" step="1" min="1" class="form-control" placeholder="Cantidad">
+            </div>
+            <div class="col-md">
+                <input type="number" step="0.01" min="0" class="form-control" id="priceInput${counter}" placeholder="Precio">
+            </div>
+            <div class="col-md">
+                <input type="checkbox" class="form-check-input" value="" id="externalCheckbox${counter}">
+                <label for="externalCheckbox${counter}" class="form-check-label">Es externo</label>
+            </div>
+            `;
+            container.appendChild(newInputRow);
+            counter++;
+        }
+
+        function updateFirstRow(element) {
+            var dataList = element.list;
+            var selectedOption;
+            for (var option of dataList.options) {
+                if (option.value === element.value) {
+                    selectedOption = option;
+                    break;
+                }
+            }
+            if (selectedOption) {
+                document.getElementById('priceInput0').value = selectedOption.getAttribute('data-price');
+                var isExternalValue = selectedOption.getAttribute('data-is-external');
+                document.getElementById('externalCheckbox0').checked = isExternalValue === 'true' || isExternalValue === 'True';
+            }
+            addProductInput(element);
+        }
+
+        function updateDynamicRow(element, rowNumber) {
+            var dataList = element.list;
+            var selectedOption;
+            for (var option of dataList.options) {
+                if (option.value === element.value) {
+                    selectedOption = option;
+                    break;
+                }
+            }
+            if (selectedOption) {
+                document.getElementById('priceInput' + rowNumber).value = selectedOption.getAttribute('data-price');
+                var isExternalValue = selectedOption.getAttribute('data-is-external');
+                document.getElementById('externalCheckbox' + rowNumber).checked = isExternalValue === 'true' || isExternalValue === 'True';
+            }
+            addProductInput(element);
+        }
+    </script>
+
+{% endblock content %}

@@ -4,6 +4,7 @@ from Product.models import Product
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 
@@ -83,6 +84,13 @@ def AddProducts(request):
     allProducts = Product.objects.all()
     context = {'products': allProducts}
     return render(request, 'add-products.html', context)
+
+
+@login_required(login_url='login')
+def AddProducts(request):
+    allProducts = Product.objects.all()
+    context = {'products': allProducts}
+    return render(request, 'add-product.html', context)
 
 
 @login_required(login_url='login')

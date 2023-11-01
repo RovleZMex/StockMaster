@@ -2,9 +2,10 @@ import unicodedata
 
 from Product.models import Product
 from django.contrib.auth.decorators import login_required
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 
@@ -69,7 +70,6 @@ def filterInventory(request):
             if product.quantity == 0:
                 noStock.append(product)
         allProducts = noStock
-    print(allProducts)
     paginator = Paginator(allProducts, 5)
     page = request.GET.get("page")
     products = paginator.get_page(page)
@@ -82,13 +82,10 @@ def filterInventory(request):
 @login_required(login_url='login')
 def AddProducts(request):
     allProducts = Product.objects.all()
-    context = {'products': allProducts}
-    return render(request, 'add-products.html', context)
 
-
-@login_required(login_url='login')
-def AddProducts(request):
-    allProducts = Product.objects.all()
+    if request.method == "POST":
+        print(request.POST.getlist("productname"))  # GETS THE LIST OF PRODUCTS
+        print(request.POST.getlist("quantity"))  # GETS THE LIST OF QUANTITIES
     context = {'products': allProducts}
     return render(request, 'add-product.html', context)
 
@@ -111,6 +108,59 @@ def EditProduct(request, productid):
                'ind': productid}
 
     return render(request, 'product-edit.html', context)
+
+
+# used by AJAX to create a new product
+def add_product(request):
+    if request.method == "POST":
+        print(request.POST.get("nombreProducto"))
+        # Get data from request
+        if verifyProductForm(request):
+            name = request.POST.get('nombreProducto')
+            quantity = 0
+            threshold = request.POST.get('bajoUmbralProducto')
+            category = request.POST.get('categoriaProducto')
+            SKU = request.POST.get('SKU')
+            price = float(request.POST.get('price'))
+            is_external = True if request.POST.get('compradoPorFuera') == 'true' else False
+            # Crear un nuevo objeto Product
+            new_product = Product.objects.create(
+                name=name,
+                quantity=quantity,
+                threshold=threshold,
+                category=category,
+                isExternal=is_external,
+                SKU=SKU,
+                price=price,
+            )
+            print('AAAAAA')
+            if 'imagenProducto' in request.FILES:
+                print('AAAAAA')
+                imagen = request.FILES['imagenProducto']
+                # Guardar la imagen en el sistema de archivos
+                file_name = default_storage.save(imagen.name, imagen)
+                # Asociar la imagen guardada con el producto recién creado
+                new_product.image = file_name
+                new_product.save()
+
+            # Puedes devolver los datos del producto recién creado en formato JSON
+            return JsonResponse({
+                'success': True,
+                'newProduct': {
+                    'name': new_product.name,
+                    'price': new_product.price,
+                    'isExternal': new_product.isExternal
+                }
+            })
+    return JsonResponse({'error': 'Error, verifica los datos.'}, status=400)
+
+
+def verifyProductForm(request):
+    if 'nombreProducto' in request.POST:
+        if 'price' in request.POST:
+            if 'SKU' in request.POST:
+                return True
+    return False
 
 
 def remove_accents(input_str):

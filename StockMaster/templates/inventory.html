@@ -158,7 +158,11 @@
                                             <td>{{ product.SKU }}</td>
                                             <td>{{ product.name }}</td>
                                             <td>{{ product.quantity }}</td>
-                                            <td><img src="{{ product.image.url }}" alt="" width="200"></td>
+                                            {% if product.image %}
+                                                <td><img src="{{ product.image.url }}" alt="" width="200"></td>
+                                            {% else %}
+                                                <td></td>
+                                            {% endif %}
                                         </tr>
                                     {% endfor %}
                                     </tbody>
@@ -274,10 +278,6 @@
 
 
     </body>
-
-
-
-
 
 
 {% endblock content %}

@@ -328,31 +328,35 @@
                     newInputRow.innerHTML = `
                     <div class="col-md">
                         <input class="form-control product-input" value="${newProduct.name} - ${newProduct.sku}" data-price="${newProduct.price}" data-is-external="${newProduct.isExternal}">
+                        <small>${newProduct.sku}</small>
                     </div>
                     <div class="col-md">
-                        <select name="quantityType" class="form-select"
-                                onchange="showAdditionalFields(this.value, '0')">
-                            <option value="unidades" selected>Unidades</option>
-                            <option value="caja">Caja</option>
-                        </select>
-                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <select name="quantityType" class="form-select"
+                                        onchange="showAdditionalFields(this.value, ${counter})">
+                                    <option value="unidades" selected>Unidades</option>
+                                    <option value="caja">Caja</option>
+                                </select>
+                            </div>
                             <div class="col-md" id="unitsPerBoxField${counter}" style="display: none;">
                                 <input type="number" step="1" min="1" value="1" class="form-control"
-                                           id="unitsPerBoxInput" placeholder="Unidades por caja" name="unitsPerBox">
+                                       id="unitsPerBoxInput${counter}" placeholder="Unidades por caja" name="unitsPerBox">
                                 <small>uds. p. caja</small>
                             </div>
                             <div class="col-md">
                                 <input type="number" step="1" min="1" value="1" class="form-control"
-                                           id="quantityInput" placeholder="Cantidad" name="quantity">
+                                       id="quantityInput${counter}" placeholder="Cantidad" name="quantity">
                                 <small id="pack-quantityDesc${counter}" style="display: none">cant. de cajas</small>
                             </div>
+                        </div>
                     </div>
-                    <div class="col-md">
+                    <div class="col-md-2">
                         <input type="number" step="0.01" min="0" class="form-control" id="priceInput${counter}"
-                                value="${newProduct.price}">
+                               value="${newProduct.price}">
                         <small id="packPrice${counter}" style="display: none">precio p. caja</small>
                     </div>
-                    <div class="col-md">
+                    <div class="col-md-2">
                         <input type="checkbox" id="externalCheckbox${counter}" class="form-check-input" value="" ${newProduct.isExternal ? 'checked' : ''}>
                         <label class="form-check-label">Es externo</label>
                         <button type="button" class="btn btn-danger" onclick="removeRow(${counter})"><i class="bi bi-trash"></i></button>
@@ -361,7 +365,7 @@
                     var container = document.getElementById('productInputs');
                     container.appendChild(newInputRow);
 
-                    $('#exampleModal').modal('hide')
+                    $('#exampleModal').modal('hide');
                     counter++;
                 },
                 error: function (error) {

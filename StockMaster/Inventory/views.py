@@ -1,3 +1,4 @@
+import json
 import unicodedata
 
 from Product.models import Product
@@ -7,6 +8,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+
+from InputHistory.models import InputOrder, InputOrderItem
 
 
 @login_required(login_url='login')
@@ -113,7 +116,6 @@ def EditProduct(request, productid):
 # used by AJAX to create a new product
 def add_product(request):
     if request.method == "POST":
-        print(request.POST.get("nombreProducto"))
         # Get data from request
         if verifyProductForm(request):
             name = request.POST.get('nombreProducto')
@@ -133,9 +135,7 @@ def add_product(request):
                 SKU=SKU,
                 price=price,
             )
-            print('AAAAAA')
             if 'imagenProducto' in request.FILES:
-                print('AAAAAA')
                 imagen = request.FILES['imagenProducto']
                 # Guardar la imagen en el sistema de archivos
                 file_name = default_storage.save(imagen.name, imagen)
@@ -149,10 +149,29 @@ def add_product(request):
                 'newProduct': {
                     'name': new_product.name,
                     'price': new_product.price,
-                    'isExternal': new_product.isExternal
+                    'isExternal': new_product.isExternal,
+                    'sku': new_product.SKU
                 }
             })
     return JsonResponse({'error': 'Error, verifica los datos.'}, status=400)
+
+
+# views.py
+
+def handle_product_data(request):
+    if request.method == 'POST':
+        products_data = request.POST.get('productsData')  # Aquí se obtienen los datos de los productos del frontend
+
+        products_data_list = json.loads(products_data)
+
+        newOrder = InputOrder()
+        newOrder.save()
+        for product_data in products_data_list:
+            VerifyAndUpdate(product_data)
+            CreateOrderItem(product_data, newOrder)
+        return JsonResponse({'message': 'Datos de productos recibidos con éxito'})
+    else:
+        return JsonResponse({'message': 'Error al procesar la solicitud'}, status=400)
 
 
 def verifyProductForm(request):
@@ -161,6 +180,45 @@ def verifyProductForm(request):
             if 'SKU' in request.POST:
                 return True
     return False
+
+
+# UPDATED THE PRODUCT INFORMATION
+def VerifyAndUpdate(product):
+    if product["productName"] == "":
+        return
+    name1 = borrar_izquierda_hasta_patron(product["productName"], " - ").strip()
+    dbProduct = Product.objects.get(SKU=name1)
+    dbProduct.isExternal = product['isExternal']
+    if product['quantityType'] == "unidades":
+        dbProduct.quantity += int(product['quantity'])
+        dbProduct.price = product['price']
+    else:
+        dbProduct.quantity += int(product['quantity']) * int(product['unitsPerBox'])
+        dbProduct.price = int(product['price']) / int(product['unitsPerBox'])
+    dbProduct.save()
+
+
+def CreateOrderItem(product_data, order):
+    if product_data["productName"] == "":
+        return
+    product = Product.objects.get(SKU=borrar_izquierda_hasta_patron(product_data["productName"], " - ").strip())
+    if product_data['quantityType'] == "unidades":
+        quantity = int(product_data['quantity'])
+    else:
+        quantity = int(product_data['quantity']) * int(product_data['unitsPerBox'])
+    InputOrderItem.objects.create(
+        product=product,
+        quantity=quantity,
+        inputOrder=order
+    )
+
+
+def borrar_izquierda_hasta_patron(cadena, patron):
+    index = cadena.rfind(patron)
+    if index != -1:
+        return cadena[(index + len(patron)):]
+    else:
+        return cadena
 
 
 def remove_accents(input_str):

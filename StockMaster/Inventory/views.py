@@ -1,10 +1,15 @@
+import json
 import unicodedata
 
 from Product.models import Product
 from django.contrib.auth.decorators import login_required
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+
+from InputHistory.models import InputOrder, InputOrderItem
 
 
 @login_required(login_url='login')
@@ -22,7 +27,7 @@ def inventory(request):
 
     # If a search query is obtain, apply to the search condition
     if searchQuery:
-        searchCondition = searchCondition & Q(name__icontains=searchQuery)
+        searchCondition = searchCondition & Q(name__icontains=searchQuery) | Q(SKU__icontains=searchQuery)
 
     # Filter products according to the search condition and threshold filter
     filteredProducts = allProducts.filter(searchCondition)
@@ -68,7 +73,6 @@ def filterInventory(request):
             if product.quantity == 0:
                 noStock.append(product)
         allProducts = noStock
-
     paginator = Paginator(allProducts, 5)
     page = request.GET.get("page")
     products = paginator.get_page(page)
@@ -76,6 +80,17 @@ def filterInventory(request):
     return render(request, 'inventory.html', {
         'products': products,
     })
+
+
+@login_required(login_url='login')
+def AddProducts(request):
+    allProducts = Product.objects.all()
+
+    if request.method == "POST":
+        print(request.POST.getlist("productname"))  # GETS THE LIST OF PRODUCTS
+        print(request.POST.getlist("quantity"))  # GETS THE LIST OF QUANTITIES
+    context = {'products': allProducts}
+    return render(request, 'add-product.html', context)
 
 
 @login_required(login_url='login')
@@ -96,6 +111,114 @@ def EditProduct(request, productid):
                'ind': productid}
 
     return render(request, 'product-edit.html', context)
+
+
+# used by AJAX to create a new product
+def add_product(request):
+    if request.method == "POST":
+        # Get data from request
+        if verifyProductForm(request):
+            name = request.POST.get('nombreProducto')
+            quantity = 0
+            threshold = request.POST.get('bajoUmbralProducto')
+            category = request.POST.get('categoriaProducto')
+            SKU = request.POST.get('SKU')
+            price = float(request.POST.get('price'))
+            is_external = True if request.POST.get('compradoPorFuera') == 'true' else False
+            # Crear un nuevo objeto Product
+            new_product = Product.objects.create(
+                name=name,
+                quantity=quantity,
+                threshold=threshold,
+                category=category,
+                isExternal=is_external,
+                SKU=SKU,
+                price=price,
+            )
+            if 'imagenProducto' in request.FILES:
+                imagen = request.FILES['imagenProducto']
+                # Guardar la imagen en el sistema de archivos
+                file_name = default_storage.save(imagen.name, imagen)
+                # Asociar la imagen guardada con el producto recién creado
+                new_product.image = file_name
+                new_product.save()
+
+            # Puedes devolver los datos del producto recién creado en formato JSON
+            return JsonResponse({
+                'success': True,
+                'newProduct': {
+                    'name': new_product.name,
+                    'price': new_product.price,
+                    'isExternal': new_product.isExternal,
+                    'sku': new_product.SKU
+                }
+            })
+    return JsonResponse({'error': 'Error, verifica los datos.'}, status=400)
+
+
+# views.py
+
+def handle_product_data(request):
+    if request.method == 'POST':
+        products_data = request.POST.get('productsData')  # Aquí se obtienen los datos de los productos del frontend
+
+        products_data_list = json.loads(products_data)
+
+        newOrder = InputOrder()
+        newOrder.save()
+        for product_data in products_data_list:
+            VerifyAndUpdate(product_data)
+            CreateOrderItem(product_data, newOrder)
+        return JsonResponse({'message': 'Datos de productos recibidos con éxito'})
+    else:
+        return JsonResponse({'message': 'Error al procesar la solicitud'}, status=400)
+
+
+def verifyProductForm(request):
+    if 'nombreProducto' in request.POST:
+        if 'price' in request.POST:
+            if 'SKU' in request.POST:
+                return True
+    return False
+
+
+# UPDATED THE PRODUCT INFORMATION
+def VerifyAndUpdate(product):
+    if product["productName"] == "":
+        return
+    name1 = borrar_izquierda_hasta_patron(product["productName"], " - ").strip()
+    dbProduct = Product.objects.get(SKU=name1)
+    dbProduct.isExternal = product['isExternal']
+    if product['quantityType'] == "unidades":
+        dbProduct.quantity += int(product['quantity'])
+        dbProduct.price = product['price']
+    else:
+        dbProduct.quantity += int(product['quantity']) * int(product['unitsPerBox'])
+        dbProduct.price = int(product['price']) / int(product['unitsPerBox'])
+    dbProduct.save()
+
+
+def CreateOrderItem(product_data, order):
+    if product_data["productName"] == "":
+        return
+    product = Product.objects.get(SKU=borrar_izquierda_hasta_patron(product_data["productName"], " - ").strip())
+    if product_data['quantityType'] == "unidades":
+        quantity = int(product_data['quantity'])
+    else:
+        quantity = int(product_data['quantity']) * int(product_data['unitsPerBox'])
+    InputOrderItem.objects.create(
+        product=product,
+        quantity=quantity,
+        inputOrder=order
+    )
+
+
+def borrar_izquierda_hasta_patron(cadena, patron):
+    index = cadena.rfind(patron)
+    if index != -1:
+        return cadena[(index + len(patron)):]
+    else:
+        return cadena
 
 
 def remove_accents(input_str):

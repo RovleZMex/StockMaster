@@ -13,6 +13,12 @@ from Workers.models import Worker
 
 # Create your views here.
 def LoginPage(request):
+    """
+    Displays the login page or redirects to the dashboard if the user is already authenticated.
+
+    Returns:
+        A rendered login page or a redirection to the dashboard if the user is already logged in.
+    """
     if request.user.is_authenticated:
         return redirect('dashboard')  # The user is already signed in
 
@@ -32,12 +38,24 @@ def LoginPage(request):
 # Simply used to log out the user and redirect.
 @login_required(login_url='login')
 def LogoutPage(request):
+    """
+    Logs out the user and redirects to the login page.
+
+    Returns:
+        Redirection to the login page.
+    """
     logout(request)
     return redirect('login')
 
 
 @login_required(login_url='login')
 def dashboard(request):
+    """
+    Displays the dashboard with various statistics and data about products, orders, and more.
+
+    Returns:
+        A rendered dashboard page with relevant statistics and data.
+    """
     allProducts = Product.objects.all()
     lowStockProducts = 0
     for product in allProducts:  # We count the amount products that are in low stock.
@@ -68,6 +86,12 @@ def dashboard(request):
 
 @login_required(login_url='login')
 def workers(request):
+    """
+    Displays a list of workers and provides a search functionality.
+
+    Returns:
+        A rendered workers page with a list of workers and search functionality.
+    """
     searchQuery = request.GET.get('search')
     if searchQuery:
         search_query_normalized = remove_accents(searchQuery).lower()
@@ -92,5 +116,14 @@ def workers(request):
 
 
 def remove_accents(input_str):
+    """
+    Removes accents from a string.
+
+    Args:
+        input_str (str): The string from which to remove accents.
+
+    Returns:
+        str: The string without accents.
+    """
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])

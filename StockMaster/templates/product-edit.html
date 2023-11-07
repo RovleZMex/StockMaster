@@ -39,6 +39,11 @@
                                value="{{ product.quantity }}">
                     </div>
                     <div class="mb-3">
+                        <label for="productPrice" class="form-label">Precio:</label>
+                        <input type="text" min="0" class="form-control" id="productPrice" name="productPrice"
+                               value="{{ product.price }}">
+                    </div>
+                    <div class="mb-3">
                         <label for="bajoUmbralProducto" class="form-label">Bajo stock a partir de:</label>
                         <input type="number" min="0" class="form-control" id="bajoUmbralProducto"
                                name="bajoUmbralProducto"

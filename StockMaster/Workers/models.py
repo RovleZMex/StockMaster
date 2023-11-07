@@ -1,11 +1,31 @@
 from django.db import models
 
 
-# Create your models here.
 class Worker(models.Model):
-    name = models.CharField(max_length=255)  # Employee name
-    employeeNumber = models.IntegerField(unique=True)  # Employee number
-    workArea = models.CharField(max_length=255)  # Work area of employee
+    """
+    Represents an employee in the organization.
+    """
+
+    name = models.CharField(max_length=255)
+    """
+    str: The name of the employee.
+    """
+
+    employeeNumber = models.IntegerField(unique=True)
+    """
+    int: The unique employee number.
+    """
+
+    workArea = models.CharField(max_length=255)
+    """
+    str: The work area of the employee.
+    """
 
     def __str__(self):
+        """
+        Returns the string representation of the employee.
+
+        Returns:
+            str: The name of the employee.
+        """
         return self.name

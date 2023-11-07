@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from Product.models import Product
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
@@ -6,6 +6,7 @@ from django.http import JsonResponse
 import json
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+
 
 
 def store(request):
@@ -109,3 +110,8 @@ def confirm_order(request):
         del request.session['cart']
 
     return HttpResponse('Orden confirmada!!!!!(Check console for details)')
+
+
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    return render(request, 'store/product_detail.html', {'product': product})

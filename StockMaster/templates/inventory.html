@@ -132,7 +132,7 @@
                                     </thead>
                                     <tbody id="inventory-table">
                                     {% for product in products %}
-                                        <tr class="table-row clickableRow" data-href="{% url 'editProduct' product.id %}">
+                                        <tr class="table-row clickableRow" data-href="{% url 'productDetails' product.id %}">
                                             <td>{{ product.SKU }}</td>
                                             <td>{{ product.name }}</td>
                                             <td>{{ product.quantity }}</td>

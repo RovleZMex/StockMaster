@@ -144,7 +144,7 @@ def EditProduct(request, productid):
         product.threshold = request.POST.get("bajoUmbralProducto")
         product.price = request.POST.get("productPrice")
         product.save()
-        return redirect('inventory')
+        return redirect('productDetails', product.id)
 
     context = {'product': product,
                'ind': productid}
@@ -193,6 +193,15 @@ def ProductGraph(request, productid):
         'priceData': json.dumps(filteredPrices),
     }
     return render(request, 'product-graph.html', context)
+
+
+@login_required(login_url='login')
+def ProductDetails(request, productid):
+    product = get_object_or_404(Product, id=productid)
+    context = {
+        'product': product
+    }
+    return render(request, 'product-details.html', context)
 
 
 def GetProductPriceData(request):

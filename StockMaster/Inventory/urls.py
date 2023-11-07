@@ -12,4 +12,5 @@ urlpatterns = [
     path('informe-producto/<int:productid>', views.ProductGraph, name="productGraph"),
     path('gpmd/', views.GetProductQuantityData, name='productMonthData'),
     path('gppd/', views.GetProductPriceData, name='productDataPrice'),
+    path('detalles-producto/<int:productid>', views.ProductDetails, name="productDetails"),
 ]

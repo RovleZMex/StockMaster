@@ -5,6 +5,7 @@
     <title>Carrito</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
     <style>
         .cart-item {
             border-bottom: 1px solid #ccc;
@@ -54,16 +55,15 @@
                 {% endfor %}
             </ul>
             <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
-            <form id="order-form" method="post" action="{% url 'confirm_order' %}">
+            <form id="order-form">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="employeeNumber">Numero de empleado:</label>
-                    <input type="text" class="form-control" id="employeeNumber" name="employee_number"
-                           required>
+                    <input type="int" class="form-control" id="employeeNumber" name="employee_number" required>
                 </div>
                 <input type="hidden" id="orderItems" name="order_items">
-                <button type="button" class="btn btn-confirm" onclick="confirmOrder()">Confirm Order
-                </button>
+                <!-- Updated the button to only call the confirmOrder function -->
+                <button type="button" class="btn btn-confirm" onclick="confirmOrder()">Confirmar Orden</button>
             </form>
         {% else %}
             <p>Your cart is empty.</p>
@@ -72,8 +72,29 @@
         {% endif %}
     </div>
 
-
 </div>
+
+<!-- Bootstrap Modal for confirmation message -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirmación de Orden</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage">Su orden ha sido confirmada.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function removeFromCart(productId) {
         $.ajax({
@@ -90,23 +111,40 @@
     }
 
 
-
     function confirmOrder() {
-        const employeeNumber = document.getElementById('employeeNumber').value;
+        const employeeNumber = $('#employeeNumber').val();
         if (!employeeNumber) {
-            alert('Se requiere numero de empleado!!');
+            alert('Se requiere numero de empleado!');
             return;
         }
 
-        const cartItems = [];
-        $('#cart-items li').each(function () {
+        const cartItems = $('#cart-items li').map(function () {
             const productId = this.id.split('-')[2];
             const quantity = $(this).find('input').val();
-            cartItems.push({productId, quantity});
-        });
+            return {productId, quantity};
+        }).get();
 
-        document.getElementById('orderItems').value = JSON.stringify(cartItems);
-        document.getElementById('order-form').submit();
+        $.ajax({
+            url: '{% url "confirm_order" %}',
+            method: 'POST',
+            data: {
+                'employee_number': employeeNumber,
+                'order_items': JSON.stringify(cartItems),
+                'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+            },
+            success: function (response) {
+                // Show the Bootstrap modal on success
+                $('#confirmationMessage').text(response.message);
+                $('#confirmationModal').modal('show');
+                // Empty the cart items list
+                $('#cart-items').empty();
+                // Optionally, update the cart count in the UI if you have it
+                // $('#cart-count').text('0');
+            },
+            error: function () {
+                alert('Hubo un error al confirmar la orden.');
+            }
+        });
     }
 </script>
 </body>

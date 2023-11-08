@@ -10,7 +10,6 @@ from django.db import transaction
 from OutputHistory.models import OutputOrder, OutputOrderItem, Worker, Product
 
 
-
 def store(request):
     query = request.GET.get('query', '')
     category = request.GET.get('category', '')
@@ -40,7 +39,6 @@ def add_to_cart(request, product_id):
         cart[str(product_id)] = quantity
     request.session['cart'] = cart
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'store'))  # Redirect back to the same page
-
 
 
 def show_cart(request):
@@ -117,12 +115,12 @@ def confirm_order(request):
                 outputOrder=output_order
             )
 
-        # Clear the cart
+            # Clear the cart from the session
         if 'cart' in request.session:
             del request.session['cart']
 
     return HttpResponse('Order confirmed!')
-    return HttpResponse('Orden confirmada!!!!!(Check console for details)')
+    return JsonResponse({'message': 'Order confirmed successfully!'})
 
 
 def product_detail(request, product_id):

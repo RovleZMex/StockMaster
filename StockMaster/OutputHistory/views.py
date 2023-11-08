@@ -4,10 +4,11 @@ from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
+from Workers.models import Worker
 
 
 # TODO CREATE A VIEW FOR ALL ORDERS (OUTPUT/INPUT)
@@ -72,3 +73,31 @@ def inputHistory(request):
 def remove_accents(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+
+def outputDetails(request, orderid):
+    output_order = get_object_or_404(OutputOrder, id=orderid)
+    worker_name = output_order.worker.name
+
+    total_price = output_order.GetTotal()
+    total_quantity = output_order.GetQuantity()
+    date = output_order.date_created
+
+    context = {
+        'output_order': output_order,
+        'worker_name': worker_name,
+        'total_price': total_price,
+        'total_quantity': total_quantity,
+        'date': date,
+    }
+
+    return render(request, 'outputHistoryWorker.html', context)
+
+
+def redirection(request):
+
+    context = {
+
+    }
+    return render(request, 'inventory.html', context)
+

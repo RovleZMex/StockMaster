@@ -17,6 +17,12 @@ class OutputOrder(models.Model):
             total += item.quantity * item.product.price
         return round(total, 3)
 
+    def GetQuantity(self):
+        total = 0
+        for item in self.GetItems():
+            total += item.quantity
+        return total
+
     def __str__(self):
         return f"Orden de {self.worker} [{self.id}]"
 

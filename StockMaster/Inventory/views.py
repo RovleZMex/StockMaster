@@ -46,6 +46,7 @@ def Inventory(request):
     return render(request, 'inventory.html', {'products': products, 'searchQuery': searchQuery})
 
 
+@login_required(login_url='login')
 def FilterInventory(request):
     """
     Filter the products in the inventory based on different criteria.
@@ -204,6 +205,7 @@ def ProductDetails(request, productid):
     return render(request, 'product-details.html', context)
 
 
+@login_required(login_url='login')
 def GetProductPriceData(request):
     """
     Retrieve product price data for a specific month and year.
@@ -240,6 +242,7 @@ def GetProductPriceData(request):
         })
 
 
+@login_required(login_url='login')
 def GetProductQuantityData(request):
     """
     Retrieve product quantity data for a specific month and year.
@@ -277,6 +280,7 @@ def GetProductQuantityData(request):
     return JsonResponse({'error': 'Error, verifica los datos.'}, status=400)
 
 
+@login_required(login_url='login')
 def AddProduct(request):
     """
     Add a new product based on the form data.
@@ -324,8 +328,7 @@ def AddProduct(request):
     return JsonResponse({'error': 'Error, verifica los datos.'}, status=400)
 
 
-# views.py
-
+@login_required(login_url='login')
 def HandleProductData(request):
     """
     Handle the data for multiple products received from the frontend.
@@ -478,7 +481,7 @@ def FilterSameDates(labels, otherList):
     else:
         filteredLabels = labels
         filteredPrices = otherList
-
+    print(labels)
     return filteredLabels, filteredPrices
 
 

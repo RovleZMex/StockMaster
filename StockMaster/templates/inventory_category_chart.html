@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+    <head>
+        <title>Inventory Category Chart</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+    <section class="p-5">
+        <div class="container">
+            <div style="width: 400px; height: 400px;">
+                <canvas id="inventoryChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+        let ctx = document.getElementById('inventoryChart').getContext('2d');
+
+        let categories = "{{ categories }}".split(',');
+        let quantities = JSON.parse("{{ quantities }}");
+
+        let colors = ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)'];
+
+        let myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'Cantidad por categoría',
+                    data: quantities,
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.2', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    </body>
+{% endblock content %}

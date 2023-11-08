@@ -49,7 +49,7 @@ def LogoutPage(request):
 
 
 @login_required(login_url='login')
-def dashboard(request):
+def Dashboard(request):
     """
     Displays the dashboard with various statistics and data about products, orders, and more.
 
@@ -85,7 +85,7 @@ def dashboard(request):
 
 
 @login_required(login_url='login')
-def workers(request):
+def Workers(request):
     """
     Displays a list of workers and provides a search functionality.
 
@@ -94,11 +94,11 @@ def workers(request):
     """
     searchQuery = request.GET.get('search')
     if searchQuery:
-        search_query_normalized = remove_accents(searchQuery).lower()
+        search_query_normalized = RemoveAccents(searchQuery).lower()
         worker_list = Worker.objects.all()
         filtered_workers = []
         for worker in worker_list:
-            if search_query_normalized in remove_accents(worker.name).lower():
+            if search_query_normalized in RemoveAccents(worker.name).lower():
                 filtered_workers.append(worker)
         paginator = Paginator(filtered_workers, 5)  # Muestra 10 trabajadores por página
     else:
@@ -115,7 +115,7 @@ def workers(request):
     return render(request, 'workers.html', context)
 
 
-def remove_accents(input_str):
+def RemoveAccents(input_str):
     """
     Removes accents from a string.
 

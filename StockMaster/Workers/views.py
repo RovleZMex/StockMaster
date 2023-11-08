@@ -6,6 +6,8 @@ from django.http import JsonResponse
 import json
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
+from django.db import transaction
+from OutputHistory.models import OutputOrder, OutputOrderItem, Worker, Product
 
 
 
@@ -96,23 +98,30 @@ def confirm_order(request):
     order_items_json = request.POST.get('order_items')
     order_items = json.loads(order_items_json)
 
-    # Constructing the order details string
-    order_details = "Employee Number: {}\n".format(employee_number)
-    order_details += "Products:\n"
+    # Retrieve the worker by employee number
+    worker = get_object_or_404(Worker, employeeNumber=employee_number)
 
-    for item in order_items:
-        product = Product.objects.get(id=item['productId'])
-        quantity = item['quantity']
-        order_details += "- {} ({}): {}\n".format(product.name, product.SKU, quantity)
+    # Start a database transaction
+    with transaction.atomic():
+        # Create a new OutputOrder
+        output_order = OutputOrder(worker=worker)
+        output_order.save()
 
+        # Create OutputOrderItem instances for each item in the order
+        for item in order_items:
+            product = get_object_or_404(Product, id=item['productId'])
+            quantity = item['quantity']
+            OutputOrderItem.objects.create(
+                product=product,
+                quantity=quantity,
+                outputOrder=output_order
+            )
 
+        # Clear the cart
+        if 'cart' in request.session:
+            del request.session['cart']
 
-    print(order_details)  # For demonstration, printing the order details to the console
-
-    # Clear the cart
-    if 'cart' in request.session:
-        del request.session['cart']
-
+    return HttpResponse('Order confirmed!')
     return HttpResponse('Orden confirmada!!!!!(Check console for details)')
 
 

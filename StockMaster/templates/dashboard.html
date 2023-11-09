@@ -120,7 +120,7 @@
                             <tbody>
                             {% for order in lastOutputOrders %}
                                 <tr class="clickableRow">
-                                    <th scope="row"><a href="" class="link-info">{{ order.id }}</a></th>
+                                    <th scope="row"><a href="{% url 'outputDetails' order.id %}" class="link-info">{{ order.id }}</a></th>
                                     <td>{{ order.worker.name }}</td>
                                     <td>{{ order.GetItems.count }}</td>
                                     <td>{{ order.date_created }}</td>

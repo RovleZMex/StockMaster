@@ -24,14 +24,19 @@
                     <thead class="table-dark">
                     <tr>
                         <th>Producto</th>
+                        <th>Sku</th>
                         <th>Cantidad</th>
+                        <th>Subtotal</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for item in output_order.outputorderitem_set.all %}
                         <tr class="table-row clickableRow" data-href="{% url 'inventory' %}">
                             <td>{{ item.product.name }}</td>
+                            <td>{{ item.product.SKU }}</td>
                             <td>{{ item.quantity }}</td>
+                            <!--Ask santy-->
+                            <td>{{ item.product.price }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

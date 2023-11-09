@@ -10,9 +10,14 @@ from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 
 
-# TODO CREATE A VIEW FOR ALL ORDERS (OUTPUT/INPUT)
 @login_required(login_url='login')
-def outputHistory(request):
+def OutputHistory(request):
+    """
+    Displays the output history page with search and date range filtering.
+
+    Returns:
+        A rendered output history page with search and date range filtering.
+    """
     searchQuery = request.GET.get("search")
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -20,7 +25,7 @@ def outputHistory(request):
     outputOrders = OutputOrder.objects.all()
 
     if searchQuery:
-        search_query_normalized = remove_accents(searchQuery).lower()
+        search_query_normalized = RemoveAccents(searchQuery).lower()
         outputOrders = outputOrders.filter(
             Q(worker__name__icontains=search_query_normalized)
         )
@@ -41,7 +46,13 @@ def outputHistory(request):
 
 
 @login_required(login_url='login')
-def inputHistory(request):
+def InputHistory(request):
+    """
+    Displays the input history page with search and date range filtering.
+
+    Returns:
+        A rendered input history page with search and date range filtering.
+    """
     searchQuery = request.GET.get("search")
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -49,7 +60,7 @@ def inputHistory(request):
     inputOrders = InputOrder.objects.all()
 
     if searchQuery:
-        search_query_normalized = remove_accents(searchQuery).lower()
+        search_query_normalized = RemoveAccents(searchQuery).lower()
         inputOrders = inputOrders.filter(
             Q(id__icontains=search_query_normalized)
         )
@@ -69,6 +80,15 @@ def inputHistory(request):
     return render(request, 'inputHistory.html', context)
 
 
-def remove_accents(input_str):
+def RemoveAccents(input_str):
+    """
+    Removes accents from a string.
+
+    Args:
+        input_str (str): The string from which to remove accents.
+
+    Returns:
+        str: The string without accents.
+    """
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])

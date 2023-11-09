@@ -3,7 +3,7 @@ import unicodedata
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
@@ -89,6 +89,20 @@ def workers(request):
     }
 
     return render(request, 'workers.html', context)
+
+def workerDetails(request, employeeNumber):
+    worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
+    output_orders = worker.outputorder_set.all()
+
+    paginator = Paginator(output_orders, 5)
+    page = request.GET.get('page', 1)
+    output_orders_page = paginator.get_page(page)
+
+    context = {
+        'worker': worker,
+        'output_orders_page': output_orders_page,
+        'ind': employeeNumber}
+    return render(request, 'workerDetails.html', context)
 
 
 def remove_accents(input_str):

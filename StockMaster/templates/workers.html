@@ -51,12 +51,14 @@
                                 </thead>
                                 <tbody id="inventory-table">
                                 {% for worker in page_obj %}
-                                    <tr class="table-row clickableRow" data-href="">
+                                    <tr class="table-row clickableRow"
+                                        data-href="{% url 'workerDetails' worker.employeeNumber %}">
                                         <td>{{ worker.name }}</td>
                                         <td>{{ worker.employeeNumber }}</td>
                                         <td>{{ worker.workArea }}</td>
                                     </tr>
                                 {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -91,7 +93,19 @@
             }
         });
     </script>
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll('.clickableRow');
+            rows.forEach(row => {
+                row.addEventListener('click', function () {
+                    const href = row.getAttribute('data-href');
+                    if (href) {
+                        window.location.href = href
+                    }
+                });
+            });
+        });
+    </script>
 
     </body>
 {% endblock content %}

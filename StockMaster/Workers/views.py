@@ -80,3 +80,5 @@ def calculate_cart_total(request):
     products = Product.objects.filter(id__in=product_ids)
     total = sum(product.price * cart[str(product.id)] for product in products)
     return total
+
+

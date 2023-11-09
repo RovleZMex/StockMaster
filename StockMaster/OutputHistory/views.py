@@ -83,21 +83,25 @@ def outputDetails(request, orderid):
     total_quantity = output_order.GetQuantity()
     date = output_order.date_created
 
+    products = {}
+
+    for product in output_order.outputorderitem_set.all():
+        products[product] = product.quantity * product.product.price
+
     context = {
         'output_order': output_order,
         'worker_name': worker_name,
         'total_price': total_price,
         'total_quantity': total_quantity,
         'date': date,
+        'products': products
     }
 
     return render(request, 'outputHistoryWorker.html', context)
 
 
 def redirection(request):
-
     context = {
 
     }
     return render(request, 'inventory.html', context)
-

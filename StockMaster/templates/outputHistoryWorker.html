@@ -30,13 +30,12 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for item in output_order.outputorderitem_set.all %}
+                    {% for product, subtotal in products.items %}
                         <tr class="table-row clickableRow" data-href="{% url 'inventory' %}">
-                            <td>{{ item.product.name }}</td>
-                            <td>{{ item.product.SKU }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <!--Ask santy-->
-                            <td>{{ item.product.price }}</td>
+                            <td>{{ product.product.name }}</td>
+                            <td>{{ product.product.SKU }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>${{ subtotal }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

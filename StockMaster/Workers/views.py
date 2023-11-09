@@ -119,8 +119,7 @@ def confirm_order(request):
         if 'cart' in request.session:
             del request.session['cart']
 
-    return HttpResponse('Order confirmed!')
-    return JsonResponse({'message': 'Order confirmed successfully!'})
+    return JsonResponse({'message': 'Orden confirmada!'})
 
 
 def product_detail(request, product_id):

@@ -9,4 +9,5 @@ urlpatterns = [
     path('personal/', views.workers, name="workers"),
     path('iniciar-sesion/', views.LoginPage, name="login"),
     path('cerrar-sesion/', views.LogoutPage, name="logout"),
+    path('detalles-personal/<int:employeeNumber>', views.workerDetails, name="workerDetails"),
 ]

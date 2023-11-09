@@ -198,6 +198,16 @@ def ProductGraph(request, productid):
 
 @login_required(login_url='login')
 def ProductDetails(request, productid):
+    """
+    Renders the product details page for a specific product.
+
+    Args:
+        request (HttpRequest): The HTTP request.
+        productid (int): The ID of the product.
+
+    Returns:
+        HttpResponse: The rendered product details page with information about the specified product.
+    """
     product = get_object_or_404(Product, id=productid)
     context = {
         'product': product

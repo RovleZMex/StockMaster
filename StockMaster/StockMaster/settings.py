@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "InputHistory",
     "OutputHistory",
     "Dashboard",
+    "Charts",
     "simple_history",
 ]
 

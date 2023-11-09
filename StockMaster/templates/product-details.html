@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <head>
+        <meta charset="UTF-8">
+        <title>Detalles de product</title>
+    </head>
+    <body>
+    <section class="p-5">
+        <div class="container">
+            <h2>{{ product.name }}</h2>
+            <hr>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-md text-center">
+                <img src="{{ product.image.url }}" style="width: 100%" alt="">
+            </div>
+            <div class="col-md tex-center">
+                <h4>Detalles del producto</h4>
+                <p class="lead">SKU: {{ product.SKU }}</p>
+                <p class="lead">Precio: ${{ product.price }} M.N.</p>
+                <p class="lead">Categoría: {{ product.get_category_display }}</p>
+                <p class="lead">Cantidad actual: {{ product.quantity }}</p>
+                <label for="isExternalCheckbox" class="lead">Es externo</label>
+                {% if product.isExternal %}
+                    <input type="checkbox" id="isExternalCheckbox" checked disabled>
+                {% else %}
+                    <input type="checkbox" id="isExternalCheckbox" disabled>
+                {% endif %}
+                <p class="lead pt-3">Bajo stock a partir de: {{ product.threshold }}</p>
+
+                <a href="{% url 'editProduct' product.id %}" class="btn btn-primary">Editar detalles</a>
+                <a href="{% url 'productGraph' product.id %}" class="btn btn-secondary">Ver informes</a>
+            </div>
+        </div>
+    </section>
+    </body>
+{% endblock content %}

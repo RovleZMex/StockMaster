@@ -113,27 +113,27 @@
                 <div class="row">
                     {% for product in products %}
                         <div class="col-md-4 mb-4">
-                            <a href="#" class="text-decoration-none"> <!--TODO ADD LINK TO PRODUCT DETAILS -->
-                                <div class="card h-100">
+                            <div class="card h-100">
+                                <div class="text-center">
+                                    {% if product.image %}
+                                        <a href="{% url 'product_detail' product.id %}"><img
+                                                src="{{ product.image.url }}" class="product-image" alt="Product Image"></a>
+                                    {% else %}
+                                        <div class="img-placeholder">No Image</div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title product-name text-center">
+                                        <a href="{% url 'product_detail' product.id %}"
+                                           class="text-decoration-none text-dark">{{ product.name }}</a>
+                                    </h5>
+                                    <p class="card-text text-center">Disponibles: {{ product.quantity }}</p>
                                     <div class="text-center">
-                                        {% if product.image %}
-                                            <a href="#"><img src="{{ product.image.url }}" class="product-image"
-                                                             alt="Product Image"></a>
-                                        {% else %}
-                                            <div class="img-placeholder">No Image</div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="card-body">
-                                        <h5 class="card-title product-name text-center">{{ product.name }}</h5>
-                                        <p class="card-text text-center">Disponibles: {{ product.quantity }}</p>
-                                        <div class="text-center">
-                                            <a href="{% url 'add_to_cart' product.id %}" class="btn btn-success">Agregar
-                                                al
-                                                Carrito</a>
-                                        </div>
+                                        <a href="{% url 'add_to_cart' product.id %}" class="btn btn-success">Agregar al
+                                            Carrito</a>
                                     </div>
                                 </div>
-                            </a>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>

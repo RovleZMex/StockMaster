@@ -48,25 +48,27 @@
                             <button id="searchButton" class="btn btn-primary">Buscar</button>
                         </div>
                         <div class="container mt-4">
-                            <table class="table mt-3 table-hover tableRoundedm">
-                                <thead class="table-dark">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Personal</th>
-                                    <th>Cantidad de Productos</th>
-                                    <th>Fecha/Hora</th>
-                                </tr>
-                                </thead>
-                                <tbody id="inventory-table">
-                                {% for order in page_obj %}
-                                    <tr class="table-row clickableRow" data-href="">
-                                        <td>#{{ order.id }}</td>
-                                        <td>{{ order.worker.name }}</td>
-                                        <td>{{ order.GetItems.count }}</td>
-                                        <td>{{ order.date_created }}</td>
+                            <div class="table-responsive">
+                                <table class="table mt-3 table-hover tableRoundedm">
+                                    <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Personal</th>
+                                        <th>Cantidad de Productos</th>
+                                        <th>Fecha/Hora</th>
                                     </tr>
-                                {% endfor %}
-                            </table>
+                                    </thead>
+                                    <tbody id="inventory-table">
+                                    {% for order in page_obj %}
+                                        <tr class="table-row clickableRow" data-href="">
+                                            <td>#{{ order.id }}</td>
+                                            <td>{{ order.worker.name }}</td>
+                                            <td>{{ order.GetItems.count }}</td>
+                                            <td>{{ order.date_created }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <head>
+        <title>Informes</title>
+        <!-- Include Chart.js library -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Include Ajax library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+    <body>
+    <section class="p-4">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md">
+                    <h2>Stock total</h2>
+                    <form>
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="monthSelectStock1" onchange="GetStockData(1)">
+                                        <option value="1">Enero</option>
+                                        <option value="2">Febrero</option>
+                                        <option value="3">Marzo</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Mayo</option>
+                                        <option value="6">Junio</option>
+                                        <option value="7">Julio</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="yearSelectStock1" onchange="GetStockData(1)">
+                                        {% for y in years %}
+                                            <option value="{{ y }}">{{ y }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <p class="lead">Vs.</p>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="monthSelectStock2" onchange="GetStockData(2)">
+                                        <option value="1">Enero</option>
+                                        <option value="2">Febrero</option>
+                                        <option value="3">Marzo</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Mayo</option>
+                                        <option value="6">Junio</option>
+                                        <option value="7">Julio</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="yearSelectStock2" onchange="GetStockData(2)">
+                                        {% for y in years %}
+                                            <option value="{{ y }}">{{ y }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div style="width: 100%; height: 600px;">
+                        <canvas id="stockVersusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="p-5 bg-light">
+        <div class="row text-center align-items-center">
+            <div class="col-md">
+                <h2>Cantidad actual por categoría</h2>
+                <div style="width: 100%; height: 400px;">
+                    <canvas id="inventoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md">
+                <h2>Porcentaje actual por categoría</h2>
+                <div class="d-flex justify-content-center">
+                    <div style="width: 55%;">
+                        <canvas id="percentageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Link context variables -->
+    <script>
+        let categories = "{{ categories }}".split(',');
+        let quantities = JSON.parse("{{ quantities }}");
+        let getStockMonthURL = "{% url 'getStockMonth' %}"
+        let percentages = JSON.parse("{{ percentages }}")
+    </script>
+    <!-- Chart JS -->
+    <script src="{% static 'js/report-charts.js' %}"></script>
+    </body>
+{% endblock content %}

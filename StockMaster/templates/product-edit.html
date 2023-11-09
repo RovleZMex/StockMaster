@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+    <head>
+        <meta charset="UTF-8">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+              crossorigin="anonymous">
+        <style>
+            .custom-form {
+                border-radius: 10px;
+                padding: 20px;
+                border: gray solid 1px;
+            }
+
+            .middle-container {
+                width: 50%;
+                margin: auto;
+            }
+        </style>
+        <title>Prueba formularios</title>
+    </head>
+    <body>
+    <section class="p-5">
+        <div class="container middle-container">
+            <div class="custom-form bg-light">
+                <h1>
+                    Editar producto
+                </h1>
+                <form action="{% url 'editProduct' ind %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="nombreProducto" class="form-label">Nombre de producto:</label>
+                        <input type="text" class="form-control" id="nombreProducto" name="nombreProducto"
+                               value="{{ product.name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cantidadProducto" class="form-label">Cantidad:</label>
+                        <input type="number" min="0" class="form-control" id="cantidadProducto" name="cantidadProducto"
+                               value="{{ product.quantity }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="productPrice" class="form-label">Precio:</label>
+                        <input type="text" min="0" class="form-control" id="productPrice" name="productPrice"
+                               value="{{ product.price }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bajoUmbralProducto" class="form-label">Bajo stock a partir de:</label>
+                        <input type="number" min="0" class="form-control" id="bajoUmbralProducto"
+                               name="bajoUmbralProducto"
+                               value="{{ product.threshold }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="imagenProducto" class="form-label">Imagen:</label>
+                        <input name="imagenProducto" class="form-control" type="file" accept="image/*"
+                               id="imagenProducto">
+                        <small>Imagen actual: {{ product.image.name }}</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="categoriaProducto">Categoria:</label>
+                        <select class="form-select" id="categoriaProducto" name="categoriaProducto">
+                            {% if product.category == "PLU" %}
+                                <option value="1" selected>Plomería</option>
+                            {% else %}
+                                <option value="1">Plomería</option>
+                            {% endif %}
+                            {% if product.category == "OFF" %}
+                                <option value="2" selected>Oficina</option>
+                            {% else %}
+                                <option value="2">Oficina</option>
+                            {% endif %}
+                            {% if product.category == "ELE" %}
+                                <option value="3" selected>Eléctricos</option>
+                            {% else %}
+                                <option value="3">Eléctricos</option>
+                            {% endif %}
+                            {% if product.category == "CLE" %}
+                                <option value="4" selected>Limpieza</option>
+                            {% else %}
+                                <option value="4">Limpieza</option>
+                            {% endif %}
+
+                        </select>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <label class="form-check-label" for="compradoPorFuera">
+                            Comprado por fuera
+                        </label>
+                        {% if product.isExternal %}
+                            <input name="compradoPorFuera" class="form-check-input" type="checkbox"
+                                   id="compradoPorFuera"
+                                   checked>
+                        {% else %}
+                            <input name="compradoPorFuera" class="form-check-input" type="checkbox"
+                                   id="compradoPorFuera">
+                        {% endif %}
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Script Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
+    </body>
+{% endblock content %}

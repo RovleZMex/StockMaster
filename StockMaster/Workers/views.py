@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from Product.models import Product
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from OutputHistory.models import OutputOrder, OutputOrderItem, Worker, Product
@@ -38,7 +36,7 @@ def add_to_cart(request, product_id):
     else:
         cart[str(product_id)] = quantity
     request.session['cart'] = cart
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'store'))  # Redirect back to the same page
+    return redirect('store')  # Redirect back to the same page
 
 
 def show_cart(request):
@@ -118,7 +116,6 @@ def confirm_order(request):
             # Clear the cart from the session
         if 'cart' in request.session:
             del request.session['cart']
-
     return JsonResponse({'message': 'Orden confirmada!'})
 
 

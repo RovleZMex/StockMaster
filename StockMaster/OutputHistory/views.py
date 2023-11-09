@@ -3,9 +3,15 @@ from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
+<<<<<<< HEAD
+from django.shortcuts import get_object_or_404, render
+
+=======
 from django.shortcuts import render
+>>>>>>> 3eba94c75b21fd678e5be6c1f5388b670a92f0f7
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
+from Workers.models import Worker
 
 
 @login_required(login_url='login')
@@ -90,3 +96,35 @@ def RemoveAccents(input_str):
     """
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+
+def outputDetails(request, orderid):
+    output_order = get_object_or_404(OutputOrder, id=orderid)
+    worker_name = output_order.worker.name
+
+    total_price = output_order.GetTotal()
+    total_quantity = output_order.GetQuantity()
+    date = output_order.date_created
+
+    products = {}
+
+    for product in output_order.outputorderitem_set.all():
+        products[product] = product.quantity * product.product.price
+
+    context = {
+        'output_order': output_order,
+        'worker_name': worker_name,
+        'total_price': total_price,
+        'total_quantity': total_quantity,
+        'date': date,
+        'products': products
+    }
+
+    return render(request, 'outputHistoryWorker.html', context)
+
+
+def redirection(request):
+    context = {
+
+    }
+    return render(request, 'inventory.html', context)

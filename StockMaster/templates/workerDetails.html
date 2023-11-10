@@ -6,6 +6,8 @@
     <head>
         <meta charset="UTF-8">
         <title>Perfil de trabajador</title>
+        <!-- Include Ajax library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     </head>
     <body>
     <section style="background-color: #eee;">
@@ -53,6 +55,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card mb-4 mb-md-0">
@@ -60,8 +63,10 @@
                                     <p class="mb-4"><span
                                             class="text-primary font-italic me-1">Historial de salidas</span>
                                     </p>
-                                    <table class="table mt-3 table-hover rounded-2 overflow-hidden">
-                                        <thead class="table-dark table-bordered">
+                                    <table id="outputOrdersTable"
+                                           class="table mt-3 table-hover rounded-2 overflow-hidden">
+                                        <thead id="outputOrdersTable"
+                                               class="table-dark table-bordered">
                                         <tr>
                                             <th>ID de la Orden</th>
                                             <th>Fecha de Creación</th>
@@ -70,6 +75,36 @@
                                         </tr>
                                         </thead>
                                         <tbody>
+                                        <form action="">
+                                            {% csrf_token %}
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <select id="monthSelect" class="form-select"
+                                                            onchange="GetMonthData()">
+                                                        <option value="0" selected>Todos</option>
+                                                        <option value="1">Enero</option>
+                                                        <option value="2">Febrero</option>
+                                                        <option value="3">Marzo</option>
+                                                        <option value="4">Abril</option>
+                                                        <option value="5">Mayo</option>
+                                                        <option value="6">Junio</option>
+                                                        <option value="7">Julio</option>
+                                                        <option value="8">Agosto</option>
+                                                        <option value="9">Septiembre</option>
+                                                        <option value="10">Octubre</option>
+                                                        <option value="11">Noviembre</option>
+                                                        <option value="12">Diciembre</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <select id="yearSelect" class="form-select" onchange="GetMonthData()">
+                                                        {% for y in years %}
+                                                            <option value="{{ y }}">{{ y }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </form>
                                         {% for output_order in output_orders_page %}
                                             <tr class="table-row clickableRow" data-href="#">
                                                 <td>{{ output_order.id }}</td>
@@ -87,24 +122,6 @@
                                         {% endfor %}
                                         </tbody>
                                     </table>
-                                    <div class="text-center">
-                                        {% if output_orders_page.has_previous %}
-                                            <a href="?page={{ output_orders_page.previous_page_number }}" id="prevPage"
-                                               class="btn btn-secondary">Anterior</a>
-                                        {% else %}
-                                            <button class="btn btn-secondary" disabled>Anterior</button>
-                                        {% endif %}
-
-                                        <span id="currentPage">Página {{ output_orders_page.number }}</span>
-
-                                        {% if output_orders_page.has_next %}
-                                            <a href="?page={{ output_orders_page.next_page_number }}" id="nextPage"
-                                               class="btn btn-secondary">Siguiente</a>
-                                        {% else %}
-                                            <button class="btn btn-secondary" disabled>Siguiente</button>
-                                        {% endif %}
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -121,5 +138,71 @@
             crossorigin="anonymous">
 
     </script>
+
+    <script>
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+        function GetMonthData() {
+            let month = $("#monthSelect").val();
+            let year = $("#yearSelect").val();  // Puedes obtener el año actual de manera dinámica si es necesario
+            let csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'getWorkerOrdersMonth' %}",
+                data: {
+                    "employeeNumber": "{{ worker.employeeNumber }}",
+                    "month": month,
+                    "year": year,
+                    'csrfmiddlewaretoken': csrftoken,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Limpiar la tabla antes de agregar nuevos datos
+                        $("#outputOrdersTable tbody").empty();
+
+                        // Iterar sobre los nuevos datos y agregar filas a la tabla
+                        for (let order of response.data) {
+                            let row = `
+                        <tr class="table-row clickableRow" data-href="#">
+                            <td>${order.id}</td>
+                            <td>${order.date_created}</td>
+                            <td>
+                                <ul>
+                                    ${order.items.map(item => `<li>${item.product.name} - Cantidad: ${item.quantity}</li>`).join('')}
+                                </ul>
+                            </td>
+                            <td>$${order.total}</td>
+                        </tr>`;
+                            $("#outputOrdersTable tbody").append(row);
+                        }
+                    } else {
+                        console.error('Error al recibir los datos de la respuesta.');
+                    }
+                },
+                error: function (error) {
+                    console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+                }
+            });
+        }
+
+
+    </script>
+
 
 {% endblock content %}

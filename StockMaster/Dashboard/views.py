@@ -3,12 +3,14 @@ import unicodedata
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 from Product.models import Product
 from Workers.models import Worker
+from datetime import datetime
 
 
 # Create your views here.
@@ -114,19 +116,50 @@ def Workers(request):
 
     return render(request, 'workers.html', context)
 
+
+@login_required(login_url='login')
 def workerDetails(request, employeeNumber):
     worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
+
     output_orders = worker.outputorder_set.all()
 
-    paginator = Paginator(output_orders, 5)
-    page = request.GET.get('page', 1)
-    output_orders_page = paginator.get_page(page)
-
     context = {
+        'years': range(2023, datetime.now().year +1),
         'worker': worker,
-        'output_orders_page': output_orders_page,
-        'ind': employeeNumber}
+        'output_orders_page': output_orders,
+        'ind': employeeNumber
+    }
+
     return render(request, 'workerDetails.html', context)
+
+
+def GetWorkerOrdersMonth(request):
+    if request.method == "POST":
+        month = int(request.POST.get("month"))
+        year = int(request.POST.get("year"))
+        employeeNumber = int(request.POST.get("employeeNumber"))
+
+        allOrders = OutputOrder.objects.filter(worker__employeeNumber=employeeNumber)
+        filteredOrders = []
+
+        for order in allOrders:
+            if order.date_created.month == month and order.date_created.year == year:
+                order_data = {
+                    'id': order.id,
+                    'date_created': order.date_created.strftime('%Y-%m-%d %H:%M:%S'),  # Formatear la fecha como string
+                    'items': [{'product': {'name': item.product.name}, 'quantity': item.quantity} for item in
+                              order.GetItems()],
+                    'total': order.GetTotal(),
+                }
+                filteredOrders.append(order_data)
+        print(filteredOrders)
+        return JsonResponse({
+            'success': True,
+            'data': filteredOrders
+        })
+    return JsonResponse({
+        'success': False,
+    })
 
 
 def RemoveAccents(input_str):

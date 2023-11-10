@@ -8,6 +8,11 @@
         <title>Perfil de trabajador</title>
         <!-- Include Ajax library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <style>
+            .clickableRow {
+                cursor: pointer;
+            }
+        </style>
     </head>
     <body>
     <section style="background-color: #eee;">
@@ -97,7 +102,8 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2">
-                                                    <select id="yearSelect" class="form-select" onchange="GetMonthData()">
+                                                    <select id="yearSelect" class="form-select"
+                                                            onchange="GetMonthData()">
                                                         {% for y in years %}
                                                             <option value="{{ y }}">{{ y }}</option>
                                                         {% endfor %}
@@ -106,7 +112,8 @@
                                             </div>
                                         </form>
                                         {% for output_order in output_orders_page %}
-                                            <tr class="table-row clickableRow" data-href="#">
+                                            <tr class="table-row clickableRow"
+                                                data-href="{% url 'outputDetails' output_order.id %}">
                                                 <td>{{ output_order.id }}</td>
                                                 <td>{{ output_order.date_created }}</td>
                                                 <td>
@@ -122,13 +129,12 @@
                                         {% endfor %}
                                         </tbody>
                                     </table>
+                                </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
-        </div>
     </section>
     </body>
     </html>
@@ -140,6 +146,18 @@
     </script>
 
     <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll('.clickableRow');
+            rows.forEach(row => {
+                row.addEventListener('click', function () {
+                    const href = row.getAttribute('data-href');
+                    if (href) {
+                        window.location.href = href
+                    }
+                });
+            });
+        });
 
         function getCookie(name) {
             var cookieValue = null;

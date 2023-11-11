@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 from Workers.models import Worker
+from .models import Product, OutputOrderItem
 
 
 @login_required(login_url='login')
@@ -123,16 +124,50 @@ def ModifyOutputOrders(request, orderid):
     order = get_object_or_404(OutputOrder, id=orderid)
     workers = Worker.objects.all()
     products = order.GetItems()
-    if request.method=="POST":
-        order.worker = request.POST.get("nameWorker")
-        order.date_created = request.POST.get("dateCreation")
+    all_products = Product.objects.all()
 
-        redirect('outputDetails', orderid)
+    if request.method == "POST":
+        form_data = request.POST  # Use a different variable name
+
+        # Update order details
+        order.worker = Worker.objects.get(name=form_data.get("nameWorker"))
+        order.date_created = form_data.get("dateCreation")
+        order.save()
+
+        # Update product quantities
+        for product_item in products:
+            product_item.quantity = form_data.get(f"quantityProduct_{product_item.product.id}")
+            product_item.save()
+
+            # Update product quantities and handle product deletions
+        for product_item in products:
+            quantity_key = f"quantityProduct_{product_item.product.id}"
+            product_item.quantity = form_data.get(quantity_key)
+            product_item.save()
+
+            # Handle product deletions
+            if int(form_data.get(quantity_key, 0)) == 0:
+                product_item.delete()
+
+        new_product_names = request.POST.getlist('newProductName[]')
+        new_product_quantities = request.POST.getlist('newProductQuantity[]')
+
+        for name, quantity in zip(new_product_names, new_product_quantities):
+            if name:
+                # Check if the product with the given name exists
+                existing_product = Product.objects.filter(name=name).first()
+
+                if existing_product:
+                    # Add the existing product to the order
+                    OutputOrderItem.objects.create(product=existing_product, quantity=quantity, outputOrder=order)
+
+        return redirect('outputDetails', orderid)
 
     context = {
         "order": order,
         "id": orderid,
         "products": products,
-        "workers": workers,
+        "workers": workers,  # Pass the worker names to the template to create datalist
+        "all_products": all_products,  # Pass the product names to the template to create datalist
     }
     return render(request, "outputHistory-edit.html", context)

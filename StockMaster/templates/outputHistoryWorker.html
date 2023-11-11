@@ -21,8 +21,16 @@
     <body>
     <section class="p-5">
         <div class="container middle-container">
-            <h1>Detalles de la Orden</h1>
-            <h3>De: {{ worker_name }} hecha en {{ date }}</h3>
+        <h1>Detalles de la Orden</h1>
+            <div class="row">
+                <div class="col-md-auto">
+                    <h3>De: {{ worker_name }} hecha en {{ date }}</h3>
+                </div>
+                <div class="col d-flex justify-content-end">
+                    <a href="{% url 'outputEdit' output_order.id %}" class="btn btn-primary">Editar detalles</a>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table mt-3 table-hover tableRoundedm">
                     <thead class="table-dark">

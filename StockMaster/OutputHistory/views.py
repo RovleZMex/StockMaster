@@ -4,8 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 
-from django.shortcuts import get_object_or_404, render
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render, redirect
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 from Workers.models import Worker
@@ -120,8 +119,20 @@ def outputDetails(request, orderid):
     return render(request, 'outputHistoryWorker.html', context)
 
 
-def redirection(request):
-    context = {
+def ModifyOutputOrders(request, orderid):
+    order = get_object_or_404(OutputOrder, id=orderid)
+    workers = Worker.objects.all()
+    products = order.GetItems()
+    if request.method=="POST":
+        order.worker = request.POST.get("nameWorker")
+        order.date_created = request.POST.get("dateCreation")
 
+        redirect('outputDetails', orderid)
+
+    context = {
+        "order": order,
+        "id": orderid,
+        "products": products,
+        "workers": workers,
     }
-    return render(request, 'inventory.html', context)
+    return render(request, "outputHistory-edit.html", context)

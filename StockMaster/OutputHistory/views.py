@@ -145,9 +145,11 @@ def inputOrderDetails(request, orderid):
 @login_required(login_url='login')
 def inputOrderEdit(request, orderid):
     if request.method == 'POST':
-        date = request.POST["date"]
         order = InputOrder.objects.get(id=orderid)
-
+        if request.POST.get("date") != '':
+            date = request.POST["date"] + "-00:00:00"
+            order.date_created = datetime.strptime(date,'%Y-%m-%d-%H:%M:%S')
+            order.save()
         # Delete current items in the order
         for item in order.inputorderitem_set.all():
             item.delete()

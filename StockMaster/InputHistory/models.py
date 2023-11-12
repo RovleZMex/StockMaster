@@ -59,6 +59,9 @@ class InputOrderItem(models.Model):
     inputOrder = models.ForeignKey(InputOrder, on_delete=models.CASCADE)
     """ForeignKey: The input order associated with the item."""
 
+    def getSubtotal(self):
+        return round(self.quantity * self.product.price, 2)
+
     def __str__(self):
         """
         Returns the string representation of the input order item.

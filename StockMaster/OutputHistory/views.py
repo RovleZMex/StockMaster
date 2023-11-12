@@ -4,10 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 
-from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse
+
+from django.shortcuts import get_object_or_404, render, redirect
 from django.shortcuts import render
-from InputHistory.models import InputOrder
+from InputHistory.models import InputOrder, InputOrderItem
 from OutputHistory.models import OutputOrder
+from Product.models import Product
 from Workers.models import Worker
 
 
@@ -95,6 +98,7 @@ def RemoveAccents(input_str):
     return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
+@login_required(login_url='login')
 def outputDetails(request, orderid):
     output_order = get_object_or_404(OutputOrder, id=orderid)
     worker_name = output_order.worker.name
@@ -117,11 +121,73 @@ def outputDetails(request, orderid):
         'products': products
     }
 
-    return render(request, 'outputHistoryWorker.html', context)
+    return render(request, 'outputHistory-details.html', context)
 
 
-def redirection(request):
+@login_required(login_url='login')
+def inputOrderDetails(request, orderid):
+    inputOrder = get_object_or_404(InputOrder, id=orderid)
+
+    total = 0
+    totalQuantity = 0
+    for product in inputOrder.inputorderitem_set.all():
+        total += product.getSubtotal()
+        totalQuantity += product.quantity
+
     context = {
-
+        'order': inputOrder,
+        'totalPrice': round(total, 2),
+        'totalQuantity': totalQuantity
     }
-    return render(request, 'inventory.html', context)
+    return render(request, 'inputHistory-details.html', context)
+
+
+@login_required(login_url='login')
+def inputOrderEdit(request, orderid):
+    if request.method == 'POST':
+        date = request.POST["date"]
+        order = InputOrder.objects.get(id=orderid)
+
+        # Delete current items in the order
+        for item in order.inputorderitem_set.all():
+            item.delete()
+
+        for i in range(1, len(request.POST) // 2):  # 2 attributes per item
+            try:
+                productName = request.POST[f"product{i}"]
+                quantity = request.POST[f"quantity{i}"]
+                print(f"Index {i}: {productName}, {quantity}")
+                product = Product.objects.get(name__icontains=productName)
+                # create the new items for the list
+                InputOrderItem.objects.create(
+                    product=product,
+                    quantity=quantity,
+                    inputOrder=order
+                )
+            except:
+                print(f"Error en el index {i}")
+        return redirect('inputHistory')
+
+    order = get_object_or_404(InputOrder, id=orderid)
+    allProducts = Product.objects.all()
+
+    context = {
+        'order': order,
+        'allProducts': allProducts,
+    }
+
+    return render(request, 'inputHistory-edit.html', context)
+
+
+@login_required(login_url="login")
+def deleteOrder(request):
+    if request.method == "POST":
+        id = int(request.POST["orderid"])
+        order = InputOrder.objects.get(id=id)
+        order.delete()
+        return JsonResponse({
+            'success': True,
+        })
+    return JsonResponse({
+        'success': False,
+    })

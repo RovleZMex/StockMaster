@@ -1,5 +1,4 @@
 import unicodedata
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -124,13 +123,45 @@ def workerDetails(request, employeeNumber):
     output_orders = worker.outputorder_set.all()
 
     context = {
-        'years': range(2023, datetime.now().year +1),
+        'years': range(2023, datetime.now().year + 1),
         'worker': worker,
         'output_orders_page': output_orders,
         'ind': employeeNumber
     }
 
     return render(request, 'workerDetails.html', context)
+
+
+@login_required(login_url='login')
+def EditWorker(request, employeeNumber):
+    """
+    Render the worker edit page and process the form data for updating worker information.
+
+    Args:
+        request: HTTP request object.
+        employeeNumber: Employee number of the worker to be edited.
+
+    Returns:
+        Rendered worker edit page or redirects to worker details.
+    """
+    worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
+
+    if request.method == "POST":
+        # Process form data and update worker information
+        worker.name = request.POST.get("nombreTrabajador")
+        worker.workArea = request.POST.get("areaTrabajo")
+
+        # Add other fields as needed
+
+        # Save the updated worker information
+        worker.save()
+
+        # Redirect to worker details page or any other desired page
+        return redirect('workerDetails', employeeNumber=employeeNumber)
+
+    context = {'worker': worker, 'ind': employeeNumber}
+
+    return render(request, 'workerEdit.html', context)
 
 
 def GetWorkerOrdersMonth(request):

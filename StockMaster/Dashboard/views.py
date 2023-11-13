@@ -150,18 +150,35 @@ def EditWorker(request, employeeNumber):
         # Process form data and update worker information
         worker.name = request.POST.get("nombreTrabajador")
         worker.workArea = request.POST.get("areaTrabajo")
-
-        # Add other fields as needed
+        worker.employeeNumber = request.POST.get("employeeNumber")
 
         # Save the updated worker information
         worker.save()
 
         # Redirect to worker details page or any other desired page
-        return redirect('workerDetails', employeeNumber=employeeNumber)
+        return redirect('workers')
 
     context = {'worker': worker, 'ind': employeeNumber}
 
     return render(request, 'workerEdit.html', context)
+
+
+@login_required(login_url='login')
+def deleteWorker(request, employeeNumber):
+    """
+    Deletes a worker from the database.
+
+    Args:
+        request: HTTP request object.
+        employeeNumber: Employee number of the worker to be deleted.
+
+    Returns:
+        Redirects to the workers list page after deleting the worker.
+    """
+    if request.method == 'POST' and request.POST.get('method') == 'DELETE':
+        worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
+        worker.delete()
+        return redirect('workers')
 
 
 def GetWorkerOrdersMonth(request):

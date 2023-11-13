@@ -39,10 +39,25 @@
                                value="{{ worker.workArea }}">
                     </div>
 
+                    <div class="mb-3">
+                        <label for="employeeNumber" class="form-label">Número de trabajador:</label>
+                        <input type="number" class="form-control" id="employeeNumber" name="employeeNumber"
+                               value="{{ worker.employeeNumber }}">
+                    </div>
+                    <!-- Delete Worker button and form -->
                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    <button type="button" class="btn btn-danger" onclick="showConfirmation()">
+                        Eliminar trabajador
+                    </button>
+                </form>
+
+                <form action="{% url 'deleteWorker' worker.employeeNumber %}" method="post" id="deleteWorkerForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="method" value="DELETE">
                 </form>
             </div>
         </div>
+
     </section>
 
     <!-- Script Bootstrap -->
@@ -50,4 +65,13 @@
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
             crossorigin="anonymous"></script>
     </body>
+
+    <script>
+        function showConfirmation() {
+            if (confirm("¿Estás seguro de que quieres eliminar este trabajador?")) {
+                document.getElementById("deleteWorkerForm").submit();
+            }
+        }
+    </script>
+
 {% endblock content %}

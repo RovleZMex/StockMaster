@@ -25,30 +25,51 @@ const percentageInventory = new Chart(percentageCanvas, {
 })
 /**********************************************************************************************************************/
 
-let inventoryPerCategoryCanvas = document.getElementById('inventoryChart').getContext('2d');
+// Obtén el contexto del canvas
+var ctx = document.getElementById('inventoryChart').getContext('2d');
 
-const inventoryPerCategory = new Chart(inventoryPerCategoryCanvas, {
+// Define los datos para las barras
+var datos = {
+    labels: ['Paso 1', 'Paso 2', 'Paso 3'],
+    datasets: [
+        {
+            label: 'Barra 1',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+            barPercentage: 0.4, // Ajusta el ancho de las barras
+            data: [10, 20, 15] // Datos para la Barra 1
+        },
+        {
+            label: 'Barra 2',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            barPercentage: 0.4, // Ajusta el ancho de las barras
+            data: [15, 10, 25] // Datos para la Barra 2
+        }
+    ]
+};
+
+// Configura la gráfica de barras
+var config = {
     type: 'bar',
-    data: {
-        labels: categories,
-        datasets: [{
-            label: 'Cantidad por categoría',
-            data: quantities,
-            backgroundColor: colors,
-            borderColor: colors.map(color => color.replace('0.2', '1')),
-            borderWidth: 1
-        }]
-    },
+    data: datos,
     options: {
-        responsive: true,
-        maintainAspectRatio: false,
         scales: {
+            x: {
+                stacked: false // No apila las barras horizontalmente
+            },
             y: {
-                beginAtZero: true
+                stacked: false // No apila las barras verticalmente
             }
         }
     }
-});
+};
+
+// Crea la instancia de la gráfica
+var miGrafica = new Chart(ctx, config);
+
 
 /**********************************************************************************************************************/
 let stockVersusCanvas = document.getElementById('stockVersusChart').getContext('2d');
@@ -125,6 +146,38 @@ function getCookie(name) {
 /**********************************************************************************************************************/
 
 function GetStockData(index) {
+    let csrftoken = getCookie('csrftoken');
+    let month = document.getElementById("monthSelectStock" + index);
+    let year = document.getElementById("yearSelectStock" + index);
+    $.ajax({
+        type: "POST",
+        url: getStockMonthURL,
+        data: {
+            "month": month.options[month.selectedIndex].value,
+            "year": year.options[year.selectedIndex].value,
+            'csrfmiddlewaretoken': csrftoken,
+            "productid": 1,
+        },
+        success: function (response) {
+            //update the current data with the new response
+            if (index === 1) {
+                stockVersus.data.datasets[0].data = JSON.parse(response.data)
+                stockVersus.data.datasets[0].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+            } else {
+                stockVersus.data.datasets[1].data = JSON.parse(response.data)
+                stockVersus.data.datasets[1].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+            }
+            stockVersus.data.labels = response.labels.split(',')
+            stockVersus.update();
+        },
+        error: function (error) {
+            console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+        }
+    });
+}
+
+
+function GetCategoriesMonth(index) {
     let csrftoken = getCookie('csrftoken');
     let month = document.getElementById("monthSelectStock" + index);
     let year = document.getElementById("yearSelectStock" + index);

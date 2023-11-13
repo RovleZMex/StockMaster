@@ -66,3 +66,66 @@ def GetStockMonth(request):
     return JsonResponse({
         'success': False,
     })
+
+
+@login_required(login_url="login")
+def GetCategoriesMonth(request):
+    if request.method == "POST":
+        year = int(request.POST.get("year"))
+        month = int(request.POST.get("month"))
+        dateObj = date(year, month, calendar.monthrange(year, month)[1])
+        historicInv = GetInventoryAsOfDate(dateObj)
+
+        return JsonResponse({
+            'success': True,
+            'data': json.dumps(GetQuantPerCategory(historicInv))
+        })
+    return JsonResponse({
+        'success': False,
+    })
+
+
+@login_required(login_url="login")
+def GetPercentagesMonth(request):
+    if request.method == "POST":
+        year = int(request.POST.get("year"))
+        month = int(request.POST.get("month"))
+        dateObj = date(year, month, calendar.monthrange(year, month)[1])
+        historicInv = GetInventoryAsOfDate(dateObj)
+        percentages = GetPercentagesPerCategory(historicInv)
+
+        return JsonResponse({
+            'success': True,
+            'data': json.dumps(percentages)
+        })
+    return JsonResponse({
+        'success': False,
+    })
+
+
+def GetInventoryAsOfDate(date):
+    inventory = []
+    for product in Product.objects.all():
+        try:
+            inventory.append(product.history.as_of(date))
+        except ObjectDoesNotExist:
+            print("NAAAAOOO")
+    return inventory
+
+def GetPercentagesPerCategory(inventory):
+    quantities = GetQuantPerCategory(inventory)
+    percentages = [round((x * 100) / sum(quantities), 2) for x in quantities]
+    return percentages
+
+def GetQuantPerCategory(inventory):
+    quantities = [0, 0, 0, 0]
+    for product in inventory:
+        if product.category == "ELE":
+            quantities[0] += product.quantity
+        elif product.category == "PLU":
+            quantities[1] += product.quantity
+        elif product.category == "OFF":
+            quantities[2] += product.quantity
+        elif product.category == "CLE":
+            quantities[3] += product.quantity
+    return quantities

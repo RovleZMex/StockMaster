@@ -68,67 +68,72 @@
                                     <p class="mb-4"><span
                                             class="text-primary font-italic me-1">Historial de salidas</span>
                                     </p>
-                                    <table id="outputOrdersTable"
-                                           class="table mt-3 table-hover rounded-2 overflow-hidden">
-                                        <thead id="outputOrdersTable"
-                                               class="table-dark table-bordered">
-                                        <tr>
-                                            <th>ID de la Orden</th>
-                                            <th>Fecha de Creación</th>
-                                            <th>Productos</th>
-                                            <th>Total</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <form action="">
-                                            {% csrf_token %}
-                                            <div class="row">
-                                                <div class="col-md-2">
-                                                    <select id="monthSelect" class="form-select"
-                                                            onchange="GetMonthData()">
-                                                        <option value="0" selected>Todos</option>
-                                                        <option value="1">Enero</option>
-                                                        <option value="2">Febrero</option>
-                                                        <option value="3">Marzo</option>
-                                                        <option value="4">Abril</option>
-                                                        <option value="5">Mayo</option>
-                                                        <option value="6">Junio</option>
-                                                        <option value="7">Julio</option>
-                                                        <option value="8">Agosto</option>
-                                                        <option value="9">Septiembre</option>
-                                                        <option value="10">Octubre</option>
-                                                        <option value="11">Noviembre</option>
-                                                        <option value="12">Diciembre</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <select id="yearSelect" class="form-select"
-                                                            onchange="GetMonthData()">
-                                                        {% for y in years %}
-                                                            <option value="{{ y }}">{{ y }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </form>
-                                        {% for output_order in output_orders_page %}
-                                            <tr class="table-row clickableRow"
-                                                data-href="{% url 'outputDetails' output_order.id %}">
-                                                <td>{{ output_order.id }}</td>
-                                                <td>{{ output_order.date_created }}</td>
-                                                <td>
-                                                    <ul>
-                                                        {% for item in output_order.GetItems %}
-                                                            <li>{{ item.product.name }} -
-                                                                Cantidad: {{ item.quantity }}</li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </td>
-                                                <td>${{ output_order.GetTotal }}</td>
+                                    <div class="table-responsive">
+                                        <table id="outputOrdersTable"
+                                               class="table mt-3 table-hover rounded-2 overflow-hidden">
+                                            <thead id="outputOrdersTable"
+                                                   class="table-dark table-bordered">
+                                            <tr>
+                                                <th>ID de la Orden</th>
+                                                <th>Fecha de Creación</th>
+                                                <th>Productos</th>
+                                                <th>Total</th>
                                             </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                            <form action="">
+                                                {% csrf_token %}
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <select id="monthSelect" class="form-select"
+                                                                onchange="GetMonthData()">
+                                                            <option value="0" selected>Todos</option>
+                                                            <option value="1">Enero</option>
+                                                            <option value="2">Febrero</option>
+                                                            <option value="3">Marzo</option>
+                                                            <option value="4">Abril</option>
+                                                            <option value="5">Mayo</option>
+                                                            <option value="6">Junio</option>
+                                                            <option value="7">Julio</option>
+                                                            <option value="8">Agosto</option>
+                                                            <option value="9">Septiembre</option>
+                                                            <option value="10">Octubre</option>
+                                                            <option value="11">Noviembre</option>
+                                                            <option value="12">Diciembre</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <select id="yearSelect" class="form-select"
+                                                                onchange="GetMonthData()">
+                                                            {% for y in years %}
+                                                                <option value="{{ y }}">{{ y }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            {% for output_order in output_orders_page %}
+
+                                                <tr class="table-row clickableRow"
+                                                    data-href="{% url 'outputDetails' output_order.id %}">
+                                                    <td>{{ output_order.id }}</td>
+                                                    <td>{{ output_order.date_created }}</td>
+                                                    <td>
+                                                        <ul>
+                                                            {% for item in output_order.GetItems %}
+                                                                <li>{{ item.product.name }} -
+                                                                    Cantidad: {{ item.quantity }}</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </td>
+                                                    <td>${{ output_order.GetTotal }}</td>
+                                                </tr>
+
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

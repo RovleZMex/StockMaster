@@ -40,6 +40,7 @@
 <p>Valor total del inventario: ${{ totalValue }} M.N.</p>
 <p>Rango de inventario: {{ fromDate }} - {{ toDate }}</p>
 
+<h2>Todo el inventario</h2>
 <table>
     <thead>
     <tr>
@@ -53,15 +54,52 @@
     <tbody>
     <!-- Aquí puedes agregar las filas con los datos del inventario -->
     {% for product in products %}
-    <tr>
-        <td>{{ product.SKU }}</td>
-        <td>{{ product.name }}</td>
-        <td>{{ product.quantity }}</td>
-        <td>${{ product.price }}</td>
-        <td>${{ product.getTotalValue }}</td>
-    </tr>
+        <tr>
+            <td>{{ product.SKU }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>${{ product.price }}</td>
+            <td>${{ product.getTotalValue }}</td>
+        </tr>
     {% endfor %}
     <!-- Puedes copiar y pegar esta fila para agregar más productos -->
+    </tbody>
+</table>
+<h2>Categorías</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Categoría</th>
+        <th>Cantidad</th>
+        <th>Porcentaje</th>
+        <th>Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>{{ categories.0 }}</td>
+        <td>{{ quantities.0 }}</td>
+        <td>{{ percentages.0 }}%</td>
+        <td>${{ catValues.0 }} M.N.</td>
+    </tr>
+    <tr>
+        <td>{{ categories.1 }}</td>
+        <td>{{ quantities.1 }}</td>
+        <td>{{ percentages.1 }}%</td>
+        <td>${{ catValues.1 }} M.N.</td>
+    </tr>
+    <tr>
+        <td>{{ categories.2 }}</td>
+        <td>{{ quantities.2 }}</td>
+        <td>{{ percentages.2 }}%</td>
+        <td>${{ catValues.2 }} M.N.</td>
+    </tr>
+    <tr>
+        <td>{{ categories.3 }}</td>
+        <td>{{ quantities.3 }}</td>
+        <td>{{ percentages.3 }}%</td>
+        <td>${{ catValues.3 }} M.N.</td>
+    </tr>
     </tbody>
 </table>
 </body>

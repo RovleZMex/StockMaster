@@ -46,12 +46,28 @@ class ViewPDF(View):
             fromDate = date(year, month, 1)
 
             totalValue = round(sum([product.getTotalValue() for product in products]), 2)
+            quantities = GetQuantPerCategory(products)
+            catValues = [0, 0, 0, 0]
+            for product in products:
+                if product.category == "ELE":
+                    catValues[0] += product.getTotalValue()
+                elif product.category == "PLU":
+                    catValues[1] += product.getTotalValue()
+                elif product.category == "OFF":
+                    catValues[2] += product.getTotalValue()
+                elif product.category == "CLE":
+                    catValues[3] += product.getTotalValue()
+
             context = {
                 'products': products,
                 'totalValue': totalValue,
                 'date': datetime.now().date(),
                 'fromDate': fromDate,
                 'toDate': toDate,
+                'categories': ["Eléctricos", "Plomería", "Oficina", "Limpieza"],
+                'quantities': quantities,
+                'percentages': [round((x * 100) / sum(quantities), 2) for x in quantities],
+                'catValues': catValues,
             }
             pdf = render_to_pdf('inventoryTextTemplate.html', contextDict=context)
             return HttpResponse(pdf, content_type='application/pdf')

@@ -9,6 +9,7 @@ from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 from Workers.models import Worker
 from .models import Product, OutputOrderItem
+from django.http import JsonResponse
 
 
 @login_required(login_url='login')
@@ -120,6 +121,7 @@ def outputDetails(request, orderid):
     return render(request, 'outputHistoryWorker.html', context)
 
 
+@login_required(login_url="login")
 def ModifyOutputOrders(request, orderid):
     order = get_object_or_404(OutputOrder, id=orderid)
     workers = Worker.objects.all()
@@ -180,3 +182,17 @@ def ModifyOutputOrders(request, orderid):
         "all_products": all_products,
     }
     return render(request, "outputHistory-edit.html", context)
+
+
+@login_required(login_url="login")
+def deleteOrderOutput(request):
+    if request.method == "POST":
+        id = int(request.POST["orderid"])
+        order = OutputOrder.objects.get(id=id)
+        order.delete()
+        return JsonResponse({
+            'success': True,
+        })
+    return JsonResponse({
+        'success': False,
+    })

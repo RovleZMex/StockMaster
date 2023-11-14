@@ -4,12 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 from Product.models import Product
 from Workers.models import Worker
 from datetime import datetime
+from django import forms
 
 
 # Create your views here.
@@ -179,6 +179,24 @@ def deleteWorker(request, employeeNumber):
         worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
         worker.delete()
         return redirect('workers')
+
+
+class WorkerForm(forms.ModelForm):
+    class Meta:
+        model = Worker
+        fields = ['name', 'employeeNumber', 'workArea','employeePassword']
+
+
+def addWorker(request):
+    if request.method == 'POST':
+        form = WorkerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('workers')  # Redirect to the workers list page after adding a worker
+    else:
+        form = WorkerForm()
+
+    return render(request, 'add_worker.html', {'form': form})
 
 
 def GetWorkerOrdersMonth(request):

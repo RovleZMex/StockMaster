@@ -1,13 +1,60 @@
 import calendar
 import json
 from datetime import date, datetime
+# HTML??
+from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.template.loader import get_template
+from django.views import View
+from xhtml2pdf import pisa
 
 from Product.models import Product
+
+
+#######
+
+def render_to_pdf(template_src, contextDict):
+    template = get_template(template_src)
+    html = template.render(contextDict)
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("utf-8")), result)
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+
+
+class ViewPDF(View):
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            month = int(request.POST.get("month"))
+            year = int(request.POST.get("year"))
+            if int(request.POST.get("month")) != datetime.now().month or int(
+                    request.POST.get("year")) != datetime.now().year:
+                products = GetInventoryAsOfDate(date(year, month, calendar.monthrange(year, month)[1]))
+                toDate = date(year, month, calendar.monthrange(year, month)[1])
+            elif int(request.POST.get("month")) == datetime.now().month or int(
+                    request.POST.get("year")) == datetime.now().year:
+                products = Product.objects.all()
+                toDate = datetime.now().date()
+            else:
+                products = []
+                toDate = datetime.now().date()
+            fromDate = date(year, month, 1)
+
+            totalValue = round(sum([product.getTotalValue() for product in products]), 2)
+            context = {
+                'products': products,
+                'totalValue': totalValue,
+                'date': datetime.now().date(),
+                'fromDate': fromDate,
+                'toDate': toDate,
+            }
+            pdf = render_to_pdf('inventoryTextTemplate.html', contextDict=context)
+            return HttpResponse(pdf, content_type='application/pdf')
 
 
 @login_required(login_url='login')
@@ -150,11 +197,6 @@ def TextInventory(request):
         'categories': categories,
     }
     return render(request, 'report-invText.html', context)
-
-
-@login_required(login_url='login')
-def GetTextInventory(request):
-    pass
 
 
 def GetInventoryAsOfDate(dateA):

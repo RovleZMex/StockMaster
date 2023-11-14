@@ -41,7 +41,7 @@
 
     <section class="">
         <div class="container text-center">
-            <form action="{% url 'textInventory' %}" method="post">
+            <form id="myForm" action="{% url 'textInventory' %}" method="post">
                 {% csrf_token %}
                 <div class="d-inline-block">
                     <select class="form-select" id="monthSelect" name="month" onchange="">
@@ -68,8 +68,12 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
+
+            <!-- Enlace "Ver PDF" con JavaScript para enviar la solicitud POST -->
+            <a href="#" id="verPDF" class="btn btn-info" target="_blank">Ver PDF</a>
         </div>
     </section>
+
 
     <!-- Cards -->
 
@@ -164,6 +168,54 @@
             document.getElementById('mainTitle').innerHTML = monthElement.options[monthElement.selectedIndex].text + " " + yearElement.options[yearElement.selectedIndex].text
         });
     </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $(document).ready(function () {
+            // Manejar clic en el enlace "Ver PDF"
+            $("#verPDF").click(function (e) {
+                e.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+
+                // Obtener los valores seleccionados de los select
+                var monthValue = $("#monthSelect").val();
+                var yearValue = $("#yearSelect").val();
+
+                // Obtener el token CSRF
+                var csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+
+                // Crear un formulario temporal y agregar los valores de los select y el token CSRF
+                var tempForm = $("<form>")
+                    .attr("method", "post")
+                    .attr("action", "{% url 'viewPDF' %}")
+                    .attr("target", "_blank")
+                    .append($('<input type="hidden" name="month" value="' + monthValue + '">'))
+                    .append($('<input type="hidden" name="year" value="' + yearValue + '">'))
+                    .append($('<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">'));
+
+                // Agregar el formulario temporal al cuerpo del documento y enviarlo
+                $("body").append(tempForm);
+                tempForm.submit();
+            });
+        });
+
+    </script>
+
+
     </body>
     </html>
 {% endblock content %}

@@ -38,182 +38,181 @@
     </section>
 
     <!-- Month & year select -->
-
     <section class="">
+        <div class="container">
+        </div>
         <div class="container text-center">
+
             <form id="myForm" action="{% url 'textInventory' %}" method="post">
                 {% csrf_token %}
                 <div class="d-inline-block">
                     <select class="form-select" id="monthSelect" name="month" onchange="">
-                        <option value="1">Enero</option>
-                        <option value="2">Febrero</option>
-                        <option value="3">Marzo</option>
-                        <option value="4">Abril</option>
-                        <option value="5">Mayo</option>
-                        <option value="6">Junio</option>
-                        <option value="7">Julio</option>
-                        <option value="8">Agosto</option>
-                        <option value="9">Septiembre</option>
-                        <option value="10">Octubre</option>
-                        <option value="11">Noviembre</option>
-                        <option value="12">Diciembre</option>
+                        <option value="1" {% if month == 1 %} selected {% endif %}>Enero</option>
+                        <option value="2" {% if month == 2 %} selected {% endif %}>Febrero</option>
+                        <option value="3" {% if month == 3 %} selected {% endif %}>Marzo</option>
+                        <option value="4" {% if month == 4 %} selected {% endif %}>Abril</option>
+                        <option value="5" {% if month == 5 %} selected {% endif %}>Mayo</option>
+                        <option value="6" {% if month == 6 %} selected {% endif %}>Junio</option>
+                        <option value="7" {% if month == 7 %} selected {% endif %}>Julio</option>
+                        <option value="8" {% if month == 8 %} selected {% endif %}>Agosto</option>
+                        <option value="9" {% if month == 9 %} selected {% endif %}>Septiembre</option>
+                        <option value="10" {% if month == 10 %} selected {% endif %}>Octubre</option>
+                        <option value="11" {% if month == 11 %} selected {% endif %}>Noviembre</option>
+                        <option value="12" {% if month == 12 %} selected {% endif %}>Diciembre</option>
                     </select>
                 </div>
                 <div class="d-inline-block">
                     <select class="form-select" id="yearSelect" name="year" onchange="">
                         {% for year in years %}
-                            <option value="{{ year }}">{{ year }}</option>
+                            <option value="{{ year }}" {% if forloop.counter1 == year %}
+                                    selected {% endif %}>{{ year }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary">Buscar</button>
+                <a href="#" id="verPDF" class="btn btn-info" target="_blank">Ver reporte <i
+                        class="bi bi-filetype-pdf"></i></a>
             </form>
-
-            <!-- Enlace "Ver PDF" con JavaScript para enviar la solicitud POST -->
-            <a href="#" id="verPDF" class="btn btn-info" target="_blank">Ver PDF</a>
         </div>
     </section>
-
-
-    <!-- Cards -->
-
-    <section class="pt-4 pb-2">
-        <div class="container d-flex flex-row justify-content-around">
-            <div class="card text-center" style="width: 18rem;">
-                <h5 class="card-title mt-2">Cantidad total</h5>
-                <h1>{{ totalQuant }}</h1>
+    {% if products %}
+        <!-- Cards -->
+        <section class="pt-4 pb-2">
+            <div class="container d-flex flex-row justify-content-around">
+                <div class="card text-center align-items-center"
+                     style="width: 18rem; display: flex; flex-direction: column; justify-content: center;">
+                    <h5 class="card-title mt-2">Cantidad total</h5>
+                    <h1>{{ totalQuant }}</h1>
+                </div>
+                <div class="card text-center align-items-center"
+                     style="width: 18rem; display: flex; flex-direction: column; justify-content: center;">
+                    <h5 class="card-title mt-2">Valor total</h5>
+                    <h1>${{ totalPrice }} M.N.</h1>
+                </div>
             </div>
-            <div class="card text-center" style="width: 18rem;">
-                <h5 class="card-title mt-2">Valor total</h5>
-                <h1>${{ totalPrice }} M.N.</h1>
-            </div>
-        </div>
-    </section>
+        </section>
 
 
-    <!-- Main table -->
-
-    <section class="">
-        <div class="container">
-            <div class="table-responsive">
-                <table class="table mt-3 table-hover tableRoundedm">
-                    <thead class="table-dark">
-                    <tr>
-                        <th>SKU</th>
-                        <th>Nombre</th>
-                        <th>Cantidad Disponible</th>
-                        <th>Precio Unitario</th>
-                        <th>Precio total</th>
-                    </tr>
-                    </thead>
-                    <tbody id="inventory-table">
-                    {% for product in products %}
-                        <tr class="table-row clickableRow"
-                            data-href="">
-                            <td>{{ product.SKU }}</td>
-                            <td>{{ product.name }}</td>
-                            <td>{{ product.quantity }}</td>
-                            <td>${{ product.price }}</td>
-                            <td>${{ product.getTotalValue }}</td>
+        <!-- Main table -->
+        <section class="">
+            <div class="container">
+                <div class="table-responsive">
+                    <table class="table mt-3 table-hover tableRoundedm">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>SKU</th>
+                            <th>Nombre</th>
+                            <th>Cantidad Disponible</th>
+                            <th>Precio Unitario</th>
+                            <th>Precio total</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="inventory-table">
+                        {% for product in products %}
+                            <tr class="table-row clickableRow"
+                                data-href="">
+                                <td>{{ product.SKU }}</td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.quantity }}</td>
+                                <td>${{ product.price }}</td>
+                                <td>${{ product.getTotalValue }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Category Table -->
-    <section>
-        <div class="container">
-            <div class="table-responsive">
-                <table class="table mt-3 table-hover tableRoundedm">
-                    <thead class="table-dark">
-                    <tr>
-                        <th>Categoría</th>
-                        <th>Cantidad</th>
-                        <th>Porcentaje</th>
-                        <th>Valor</th>
-                    </tr>
-                    </thead>
-                    <tbody id="inventory-table">
-                    {% for category in categories %}
-                        <tr class="table-row clickableRow"
-                            data-href="">
-                            <td>{{ category.0 }}</td>
-                            <td>{{ category.1 }}</td>
-                            <td>{{ category.2 }}%</td>
-                            <td>{{ category.3 }}</td>
+        <!-- Category Table -->
+        <section>
+            <div class="container">
+                <div class="table-responsive">
+                    <table class="table mt-3 table-hover tableRoundedm">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Cantidad</th>
+                            <th>Porcentaje</th>
+                            <th>Valor</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="inventory-table">
+                        {% for category in categories %}
+                            <tr class="table-row clickableRow"
+                                data-href="">
+                                <td>{{ category.0 }}</td>
+                                <td>{{ category.1 }}</td>
+                                <td>{{ category.2 }}%</td>
+                                <td>{{ category.3 }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+        <!-- Scripts -->
 
-    <!-- Scripts -->
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let today = new Date();
-            let currentMonth = today.getMonth() + 1; // Añadimos 1 porque los meses en JavaScript son base 0
-            let currentYear = today.getFullYear();
-
-            // Establecer los valores seleccionados por defecto
-            let monthElement = document.getElementById('monthSelect')
-            let yearElement = document.getElementById('yearSelect')
-            monthElement.value = currentMonth
-            yearElement.value = currentYear
-            document.getElementById('mainTitle').innerHTML = monthElement.options[monthElement.selectedIndex].text + " " + yearElement.options[yearElement.selectedIndex].text
-        });
-    </script>
-
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script>
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                let cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    let cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script>
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    let cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        let cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
                     }
                 }
+                return cookieValue;
             }
-            return cookieValue;
-        }
 
-        $(document).ready(function () {
-            // Manejar clic en el enlace "Ver PDF"
-            $("#verPDF").click(function (e) {
-                e.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+            $(document).ready(function () {
+                // Manejar clic en el enlace "Ver PDF"
+                $("#verPDF").click(function (e) {
+                    e.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
 
-                // Obtener los valores seleccionados de los select
-                var monthValue = $("#monthSelect").val();
-                var yearValue = $("#yearSelect").val();
+                    // Obtener los valores seleccionados de los select
+                    var monthValue = $("#monthSelect").val();
+                    var yearValue = $("#yearSelect").val();
 
-                // Obtener el token CSRF
-                var csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+                    // Obtener el token CSRF
+                    var csrfToken = $("input[name=csrfmiddlewaretoken]").val();
 
-                // Crear un formulario temporal y agregar los valores de los select y el token CSRF
-                var tempForm = $("<form>")
-                    .attr("method", "post")
-                    .attr("action", "{% url 'viewPDF' %}")
-                    .attr("target", "_blank")
-                    .append($('<input type="hidden" name="month" value="' + monthValue + '">'))
-                    .append($('<input type="hidden" name="year" value="' + yearValue + '">'))
-                    .append($('<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">'));
+                    // Crear un formulario temporal y agregar los valores de los select y el token CSRF
+                    var tempForm = $("<form>")
+                        .attr("method", "post")
+                        .attr("action", "{% url 'viewPDF' %}")
+                        .attr("target", "_blank")
+                        .append($('<input type="hidden" name="month" value="' + monthValue + '">'))
+                        .append($('<input type="hidden" name="year" value="' + yearValue + '">'))
+                        .append($('<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">'));
 
-                // Agregar el formulario temporal al cuerpo del documento y enviarlo
-                $("body").append(tempForm);
-                tempForm.submit();
+                    // Agregar el formulario temporal al cuerpo del documento y enviarlo
+                    $("body").append(tempForm);
+                    tempForm.submit();
+                });
             });
-        });
 
-    </script>
+        </script>
+    {% else %}
+        <div class="section p-5 d-flex align-items-center justify-content-center">
+            <div class="container">
+                <div class="card text-bg-warning mx-auto" style="max-width: 18rem;">
+                    <div class="card-header"></div>
+                    <div class="card-body">
+                        <h5 class="card-title">No se encontraron entradas</h5>
+                        <p class="card-text">No hay entradas para esta combinación de mes y año.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
 
 
     </body>

@@ -152,7 +152,9 @@ def GetPercentagesMonth(request):
 @login_required(login_url='login')
 def TextInventory(request):
     years = range(2023, datetime.now().year + 1)
+    month = None
     if request.method == "POST":
+        print("POSTIIIIIINGGGG")
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
         if int(request.POST.get("month")) != datetime.now().month or int(
@@ -165,12 +167,11 @@ def TextInventory(request):
             products = []
     else:
         products = Product.objects.all()
+        month = datetime.now().month
+        year = datetime.now().year
 
     percentages = GetPercentagesPerCategory(products)
     catQuantities = GetQuantPerCategory(products)
-
-    print(percentages)
-    print(catQuantities)
 
     catValues = [0, 0, 0, 0]
 
@@ -195,6 +196,8 @@ def TextInventory(request):
         'totalQuant': sum([product.quantity for product in products]),
         'totalPrice': round(sum([product.getTotalValue() for product in products]), 2),
         'categories': categories,
+        'month': int(month),
+        'year': int(year),
     }
     return render(request, 'report-invText.html', context)
 

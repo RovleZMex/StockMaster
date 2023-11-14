@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard.views &mdash; StockMaster 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            StockMaster
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html">Inventory Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html#module-Dashboard.views">Dashboard Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html#module-OutputHistory.views">Orders Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html#module-Charts.views">Graphs Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html">Product Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html#module-Workers.models">Worker Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html#module-InputHistory.models">Input Order Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html#module-OutputHistory.models">Output Order Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">StockMaster</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Dashboard.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Dashboard.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">unicodedata</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">authenticate</span><span class="p">,</span> <span class="n">login</span><span class="p">,</span> <span class="n">logout</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span>
+
+<span class="kn">from</span> <span class="nn">InputHistory.models</span> <span class="kn">import</span> <span class="n">InputOrder</span>
+<span class="kn">from</span> <span class="nn">OutputHistory.models</span> <span class="kn">import</span> <span class="n">OutputOrder</span>
+<span class="kn">from</span> <span class="nn">Product.models</span> <span class="kn">import</span> <span class="n">Product</span>
+<span class="kn">from</span> <span class="nn">Workers.models</span> <span class="kn">import</span> <span class="n">Worker</span>
+
+
+<span class="c1"># Create your views here.</span>
+<div class="viewcode-block" id="LoginPage"><a class="viewcode-back" href="../../modules/views.html#Dashboard.views.LoginPage">[docs]</a><span class="k">def</span> <span class="nf">LoginPage</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Displays the login page or redirects to the dashboard if the user is already authenticated.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A rendered login page or a redirection to the dashboard if the user is already logged in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;dashboard&#39;</span><span class="p">)</span>  <span class="c1"># The user is already signed in</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">]</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">]</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">authenticate</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>  <span class="c1"># Does the user exist?</span>
+        <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>  <span class="c1"># If it does, log them in</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;dashboard&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>  <span class="c1"># If it doesn&#39;t, reload the page</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;login.html&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1"># Simply used to log out the user and redirect.</span>
+<div class="viewcode-block" id="LogoutPage"><a class="viewcode-back" href="../../modules/views.html#Dashboard.views.LogoutPage">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">LogoutPage</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logs out the user and redirects to the login page.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Redirection to the login page.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logout</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;login&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dashboard"><a class="viewcode-back" href="../../modules/views.html#Dashboard.views.Dashboard">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">Dashboard</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Displays the dashboard with various statistics and data about products, orders, and more.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A rendered dashboard page with relevant statistics and data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allProducts</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">lowStockProducts</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">product</span> <span class="ow">in</span> <span class="n">allProducts</span><span class="p">:</span>  <span class="c1"># We count the amount products that are in low stock.</span>
+        <span class="k">if</span> <span class="n">product</span><span class="o">.</span><span class="n">quantity</span> <span class="o">&lt;=</span> <span class="n">product</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+            <span class="n">lowStockProducts</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">noStockProducts</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">quantity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>  <span class="c1"># Filter and count the amount of products out of stock</span>
+
+    <span class="n">categoryData</span> <span class="o">=</span> <span class="p">[</span><span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s1">&#39;ELE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+                    <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s1">&#39;PLU&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+                    <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s1">&#39;OFF&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+                    <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s1">&#39;CLE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()]</span>
+
+    <span class="n">lastInputOrders</span> <span class="o">=</span> <span class="n">InputOrder</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()[:</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">lastOutputOrders</span> <span class="o">=</span> <span class="n">OutputOrder</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()[:</span><span class="mi">5</span><span class="p">]</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;allProducts&#39;</span><span class="p">:</span> <span class="n">allProducts</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+               <span class="s1">&#39;goodStockProducts&#39;</span><span class="p">:</span> <span class="n">allProducts</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="n">noStockProducts</span> <span class="o">-</span> <span class="n">lowStockProducts</span><span class="p">,</span>
+               <span class="s1">&#39;lowStockProducts&#39;</span><span class="p">:</span> <span class="n">lowStockProducts</span><span class="p">,</span>
+               <span class="s1">&#39;noStockProducts&#39;</span><span class="p">:</span> <span class="n">noStockProducts</span><span class="p">,</span>
+               <span class="s1">&#39;productData&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">allProducts</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="n">noStockProducts</span> <span class="o">-</span> <span class="n">lowStockProducts</span><span class="p">,</span>
+                               <span class="n">lowStockProducts</span><span class="p">,</span>
+                               <span class="n">noStockProducts</span><span class="p">],</span>
+               <span class="s1">&#39;categoryData&#39;</span><span class="p">:</span> <span class="n">categoryData</span><span class="p">,</span>
+               <span class="s1">&#39;lastInputOrders&#39;</span><span class="p">:</span> <span class="n">lastInputOrders</span><span class="p">,</span>
+               <span class="s1">&#39;lastOutputOrders&#39;</span><span class="p">:</span> <span class="n">lastOutputOrders</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;dashboard.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Workers"><a class="viewcode-back" href="../../modules/views.html#Dashboard.views.Workers">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">Workers</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Displays a list of workers and provides a search functionality.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A rendered workers page with a list of workers and search functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">searchQuery</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;search&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">searchQuery</span><span class="p">:</span>
+        <span class="n">search_query_normalized</span> <span class="o">=</span> <span class="n">RemoveAccents</span><span class="p">(</span><span class="n">searchQuery</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="n">Worker</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">filtered_workers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="n">worker_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">search_query_normalized</span> <span class="ow">in</span> <span class="n">RemoveAccents</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">filtered_workers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
+        <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">filtered_workers</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Muestra 10 trabajadores por página</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="n">Worker</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">worker_list</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Muestra 10 trabajadores por página</span>
+
+    <span class="n">page_number</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">)</span>
+    <span class="n">page_obj</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="n">page_number</span><span class="p">)</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;page_obj&#39;</span><span class="p">:</span> <span class="n">page_obj</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;workers.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RemoveAccents"><a class="viewcode-back" href="../../modules/views.html#Dashboard.views.RemoveAccents">[docs]</a><span class="k">def</span> <span class="nf">RemoveAccents</span><span class="p">(</span><span class="n">input_str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes accents from a string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_str (str): The string from which to remove accents.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The string without accents.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nfkd_form</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;NFKD&#39;</span><span class="p">,</span> <span class="n">input_str</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">u</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">nfkd_form</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">combining</span><span class="p">(</span><span class="n">c</span><span class="p">)])</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, StockMaster.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

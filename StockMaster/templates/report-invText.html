@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block content %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <style>
+            .tableRoundedm {
+                border-radius: 10px;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+    <!-- Navbar tabs -->
+    <section class="p-5">
+        <div class="container">
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button">Gráficos</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Inventario</a></li>
+                        <li><a class="dropdown-item" href="#">Gastos</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
+                       role="button">Textual</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Inventario</a></li>
+                        <li><a class="dropdown-item" href="#">Gastos</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Month & year select -->
+
+    <section class="">
+        <div class="container text-center">
+            <form action="{% url 'textInventory' %}" method="post">
+                {% csrf_token %}
+                <div class="d-inline-block">
+                    <select class="form-select" id="monthSelect" name="month" onchange="">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <div class="d-inline-block">
+                    <select class="form-select" id="yearSelect" name="year" onchange="">
+                        {% for year in years %}
+                            <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Cards -->
+
+    <section class="pt-4 pb-2">
+        <div class="container d-flex flex-row justify-content-around">
+            <div class="card text-center" style="width: 18rem;">
+                <h5 class="card-title mt-2">Cantidad total</h5>
+                <h1>{{ totalQuant }}</h1>
+            </div>
+            <div class="card text-center" style="width: 18rem;">
+                <h5 class="card-title mt-2">Valor total</h5>
+                <h1>${{ totalPrice }} M.N.</h1>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Main table -->
+
+    <section class="">
+        <div class="container">
+            <div class="table-responsive">
+                <table class="table mt-3 table-hover tableRoundedm">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>SKU</th>
+                        <th>Nombre</th>
+                        <th>Cantidad Disponible</th>
+                        <th>Precio Unitario</th>
+                        <th>Precio total</th>
+                    </tr>
+                    </thead>
+                    <tbody id="inventory-table">
+                    {% for product in products %}
+                        <tr class="table-row clickableRow"
+                            data-href="">
+                            <td>{{ product.SKU }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>${{ product.price }}</td>
+                            <td>${{ product.getTotalValue }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Table -->
+    <section>
+        <div class="container">
+            <div class="table-responsive">
+                <table class="table mt-3 table-hover tableRoundedm">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Cantidad</th>
+                        <th>Porcentaje</th>
+                        <th>Valor</th>
+                    </tr>
+                    </thead>
+                    <tbody id="inventory-table">
+                    {% for category in categories %}
+                        <tr class="table-row clickableRow"
+                            data-href="">
+                            <td>{{ category.0 }}</td>
+                            <td>{{ category.1 }}</td>
+                            <td>{{ category.2 }}%</td>
+                            <td>{{ category.3 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let today = new Date();
+            let currentMonth = today.getMonth() + 1; // Añadimos 1 porque los meses en JavaScript son base 0
+            let currentYear = today.getFullYear();
+
+            // Establecer los valores seleccionados por defecto
+            let monthElement = document.getElementById('monthSelect')
+            let yearElement = document.getElementById('yearSelect')
+            monthElement.value = currentMonth
+            yearElement.value = currentYear
+            document.getElementById('mainTitle').innerHTML = monthElement.options[monthElement.selectedIndex].text + " " + yearElement.options[yearElement.selectedIndex].text
+        });
+    </script>
+    </body>
+    </html>
+{% endblock content %}

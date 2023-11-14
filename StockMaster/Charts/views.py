@@ -24,14 +24,13 @@ def ReportCharts(request):
         elif product.category == "CLE":
             quantities[3] += product.quantity
     percentages = [round((x * 100) / sum(quantities), 2) for x in quantities]
-    print(percentages)
     context = {
-        'years': range(2023, 2074),
+        'years': range(2023, datetime.now().year + 1),
         'quantities': json.dumps(quantities),
         'categories': ','.join(categories),
         'percentages': json.dumps(percentages),
     }
-    return render(request, 'report-charts.html', context)
+    return render(request, 'report-invCharts.html', context)
 
 
 @login_required(login_url='login')
@@ -103,19 +102,80 @@ def GetPercentagesMonth(request):
     })
 
 
-def GetInventoryAsOfDate(date):
+@login_required(login_url='login')
+def TextInventory(request):
+    years = range(2023, datetime.now().year + 1)
+    if request.method == "POST":
+        year = int(request.POST.get("year"))
+        month = int(request.POST.get("month"))
+        if int(request.POST.get("month")) != datetime.now().month or int(
+                request.POST.get("year")) != datetime.now().year:
+            products = GetInventoryAsOfDate(date(year, month, calendar.monthrange(year, month)[1]))
+        elif int(request.POST.get("month")) == datetime.now().month or int(
+                request.POST.get("year")) == datetime.now().year:
+            products = Product.objects.all()
+        else:
+            products = []
+    else:
+        products = Product.objects.all()
+
+    percentages = GetPercentagesPerCategory(products)
+    catQuantities = GetQuantPerCategory(products)
+
+    print(percentages)
+    print(catQuantities)
+
+    catValues = [0, 0, 0, 0]
+
+    for product in products:
+        if product.category == "ELE":
+            catValues[0] += product.getTotalValue()
+        elif product.category == "PLU":
+            catValues[1] += product.getTotalValue()
+        elif product.category == "OFF":
+            catValues[2] += product.getTotalValue()
+        elif product.category == "CLE":
+            catValues[3] += product.getTotalValue()
+
+    categories = []
+
+    for i in range(len(percentages)):
+        categories.append([MapCategory(i), catQuantities[i], percentages[i], catValues[i]])
+
+    context = {
+        'years': years,
+        'products': products,
+        'totalQuant': sum([product.quantity for product in products]),
+        'totalPrice': round(sum([product.getTotalValue() for product in products]), 2),
+        'categories': categories,
+    }
+    return render(request, 'report-invText.html', context)
+
+
+@login_required(login_url='login')
+def GetTextInventory(request):
+    pass
+
+
+def GetInventoryAsOfDate(dateA):
     inventory = []
-    for product in Product.objects.all():
-        try:
-            inventory.append(product.history.as_of(date))
-        except ObjectDoesNotExist:
-            print("NAAAAOOO")
+    if dateA <= datetime.now().date() or dateA.month == datetime.now().month:
+        for product in Product.objects.all():
+            try:
+                inventory.append(product.history.as_of(dateA))
+            except ObjectDoesNotExist:
+                pass
     return inventory
+
 
 def GetPercentagesPerCategory(inventory):
     quantities = GetQuantPerCategory(inventory)
-    percentages = [round((x * 100) / sum(quantities), 2) for x in quantities]
+    if sum(quantities) != 0:
+        percentages = [round((x * 100) / sum(quantities), 2) for x in quantities]
+    else:
+        percentages = [0, 0, 0, 0]
     return percentages
+
 
 def GetQuantPerCategory(inventory):
     quantities = [0, 0, 0, 0]
@@ -129,3 +189,8 @@ def GetQuantPerCategory(inventory):
         elif product.category == "CLE":
             quantities[3] += product.quantity
     return quantities
+
+
+def MapCategory(value):
+    categories = ["Eléctricos", "Plomería", "Oficina", "Limpieza"]
+    return categories[value]

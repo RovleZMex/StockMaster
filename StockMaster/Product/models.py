@@ -58,6 +58,9 @@ class Product(models.Model):
     HistoricalRecords: Used to manage historical modifications of the product.
     """
 
+    def getTotalValue(self):
+        return round(self.price * self.quantity, 2)
+
     def isLowStock(self):
         """
         Check if the product is in low stock.

@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.ReportCharts, name="reportCharts"),
+    path("inventario-textual/", views.TextInventory, name="textInventory"),
     path("gspm/", views.GetStockMonth, name="getStockMonth"),
     path("gcpm/", views.GetCategoriesMonth, name="getCategoriesMonth"),
     path("gppm/", views.GetPercentagesMonth, name="getPercentagesPerCategory")

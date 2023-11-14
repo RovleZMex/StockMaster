@@ -15,11 +15,34 @@
     </head>
     <body>
 
+    <section class="p-5">
+        <div class="container">
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
+                       role="button">Gráficos</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Inventario</a></li>
+                        <li><a class="dropdown-item" href="#">Gastos</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button">Textual</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Inventario</a></li>
+                        <li><a class="dropdown-item" href="#">Gastos</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </section>
+
     <section class="p-4">
         <div class="container">
             <div class="row text-center">
                 <div class="col-md">
-                    <h2>Stock total</h2>
+                    <h2>Existencia total</h2>
                     <form>
                         {% csrf_token %}
                         <div class="row">
@@ -98,19 +121,21 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="row text-center align-items-center">
-                <div class="col-md d-flex flex-column align-items-center">
-                    <h2 id="percTitle1">Porcentaje por categoría</h2>
-                    <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
-                        <canvas id="percentageChart"></canvas>
-                    </div>
+    <section class="p-5">
+        <div class="row text-center align-items-center">
+            <div class="col-md d-flex flex-column align-items-center">
+                <h2 id="percTitle1">Porcentaje por categoría</h2>
+                <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
+                    <canvas id="percentageChart"></canvas>
                 </div>
-                <div class="col-md d-flex flex-column align-items-center">
-                    <h2 id="percTitle2">Porcentaje por categoría</h2>
-                    <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
-                        <canvas id="percentageChart1"></canvas>
-                    </div>
+            </div>
+            <div class="col-md d-flex flex-column align-items-center">
+                <h2 id="percTitle2">Porcentaje por categoría</h2>
+                <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
+                    <canvas id="percentageChart1"></canvas>
                 </div>
             </div>
         </div>
@@ -177,8 +202,8 @@
             datasets: [
                 {
                     label: 'Barra 1',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1,
                     barPercentage: 0.4, // Ajusta el ancho de las barras
                     data: [10, 20, 15] // Datos para la Barra 1

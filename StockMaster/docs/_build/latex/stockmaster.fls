@@ -1,0 +1,17 @@
+PWD /Users/santiagorobles/Documents/Programacion/StockMaster/StockMaster/docs/_build/latex
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf.cnf
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/web2c/texmf.cnf
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT stockmaster.tex
+OUTPUT stockmaster.log
+INPUT ./sphinxmanual.cls
+INPUT sphinxmanual.cls
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/report.cls
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/report.cls
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/size10.clo
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/size10.clo
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/size10.clo
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/textcomp.sty
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
+INPUT /Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/inputenc.sty

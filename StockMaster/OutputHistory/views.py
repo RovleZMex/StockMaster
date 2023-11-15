@@ -152,14 +152,17 @@ def inputOrderEdit(request, orderid):
             order.save()
         # Delete current items in the order
         for item in order.inputorderitem_set.all():
+            item.product.quantity -= item.quantity
+            item.product.save()
             item.delete()
 
         for i in range(1, len(request.POST) // 2):  # 2 attributes per item
             try:
                 productName = request.POST[f"product{i}"]
                 quantity = request.POST[f"quantity{i}"]
-                print(f"Index {i}: {productName}, {quantity}")
                 product = Product.objects.get(name__icontains=productName)
+                product.quantity += int(quantity)
+                product.save()
                 # create the new items for the list
                 InputOrderItem.objects.create(
                     product=product,
@@ -167,7 +170,7 @@ def inputOrderEdit(request, orderid):
                     inputOrder=order
                 )
             except:
-                print(f"Error en el index {i}")
+                pass
         return redirect('inputHistory')
 
     order = get_object_or_404(InputOrder, id=orderid)
@@ -186,6 +189,9 @@ def deleteOrder(request):
     if request.method == "POST":
         id = int(request.POST["orderid"])
         order = InputOrder.objects.get(id=id)
+        for item in order.inputorderitem_set.all():
+            item.product.quantity -= item.quantity
+            item.product.save()
         order.delete()
         return JsonResponse({
             'success': True,

@@ -10,7 +10,7 @@ from django.contrib import messages
 
 
 def store(request):
-    if not request.session.get('verified'):
+    if not request.session.get('employee_number'):
         return redirect('verify_employee')  # Redirect to the verification view
     query = request.GET.get('query', '')
     category = request.GET.get('category', '')
@@ -78,6 +78,10 @@ def show_cart(request):
 
 
 def view_cart(request):
+    # Check if the user is logged in by looking for 'employee_number' in the session
+    if not request.session.get('employee_number'):
+        # If not logged in, redirect to the login page
+        return redirect('verify_employee')
     cart = request.session.get('cart', {})
     product_ids = list(map(int, cart.keys()))
     products = Product.objects.filter(id__in=product_ids)

@@ -152,6 +152,9 @@ def EditWorker(request, employeeNumber):
         worker.name = request.POST.get("nombreTrabajador")
         worker.workArea = request.POST.get("areaTrabajo")
         worker.employeeNumber = request.POST.get("employeeNumber")
+        worker.employeePassword = request.POST.get("employeePassword")
+
+
 
         # Save the updated worker information
         worker.save()

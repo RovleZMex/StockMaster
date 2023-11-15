@@ -1,16 +1,16 @@
 import unicodedata
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 from Product.models import Product
 from Workers.models import Worker
 from datetime import datetime
+from django import forms
+from django.core.exceptions import ValidationError
 
 
 # Create your views here.
@@ -124,13 +124,85 @@ def workerDetails(request, employeeNumber):
     output_orders = worker.outputorder_set.all()
 
     context = {
-        'years': range(2023, datetime.now().year +1),
+        'years': range(2023, datetime.now().year + 1),
         'worker': worker,
         'output_orders_page': output_orders,
         'ind': employeeNumber
     }
 
     return render(request, 'workerDetails.html', context)
+
+
+@login_required(login_url='login')
+def EditWorker(request, employeeNumber):
+    """
+    Render the worker edit page and process the form data for updating worker information.
+
+    Args:
+        request: HTTP request object.
+        employeeNumber: Employee number of the worker to be edited.
+
+    Returns:
+        Rendered worker edit page or redirects to worker details.
+    """
+    worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
+
+    if request.method == "POST":
+        # Process form data and update worker information
+        worker.name = request.POST.get("nombreTrabajador")
+        worker.workArea = request.POST.get("areaTrabajo")
+        worker.employeeNumber = request.POST.get("employeeNumber")
+
+        # Save the updated worker information
+        worker.save()
+
+        # Redirect to worker details page or any other desired page
+        return redirect('workers')
+
+    context = {'worker': worker, 'ind': employeeNumber}
+
+    return render(request, 'workerEdit.html', context)
+
+
+@login_required(login_url='login')
+def deleteWorker(request, employeeNumber):
+    """
+    Deletes a worker from the database.
+
+    Args:
+        request: HTTP request object.
+        employeeNumber: Employee number of the worker to be deleted.
+
+    Returns:
+        Redirects to the workers list page after deleting the worker.
+    """
+    if request.method == 'POST' and request.POST.get('method') == 'DELETE':
+        worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
+        worker.delete()
+        return redirect('workers')
+
+
+class WorkerForm(forms.ModelForm):
+    class Meta:
+        model = Worker
+        fields = ['name', 'employeeNumber', 'workArea', 'employeePassword']
+
+    def clean_employeeNumber(self):
+        employeeNumber = self.cleaned_data.get('employeeNumber')
+        if Worker.objects.filter(employeeNumber=employeeNumber).exists():
+            raise ValidationError("Este numero de empleado ya existe.")
+        return employeeNumber
+
+def addWorker(request):
+    if request.method == 'POST':
+        form = WorkerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('workers')  # Redirect to the workers list page after adding a worker
+    else:
+        form = WorkerForm()
+
+    return render(request, 'add_worker.html', {'form': form})
 
 
 def GetWorkerOrdersMonth(request):

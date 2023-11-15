@@ -22,7 +22,7 @@
                        role="button">Gráficos</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Inventario</a></li>
-                        <li><a class="dropdown-item" href="#">Gastos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'expensesCharts' %}">Gastos</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -36,6 +36,10 @@
             </ul>
         </div>
     </section>
+
+    <div class="container">
+        <h1>Informe Inventario</h1>
+    </div>
 
     <!-- Month & year select -->
     <section class="">

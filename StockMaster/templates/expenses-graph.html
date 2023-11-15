@@ -1,20 +1,16 @@
 {% extends 'base.html' %}
-{% load static %}
 {% block content %}
     <!DOCTYPE html>
-    <html lang="es">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gráficos Inventario</title>
         <!-- Include Chart.js library -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <!-- Include Ajax library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <title>Gráficos gastos</title>
     </head>
     <body>
-
     <section class="p-5">
         <div class="container">
             <ul class="nav nav-tabs">
@@ -39,14 +35,14 @@
     </section>
 
     <div class="container">
-        <h1>Informe Inventario</h1>
+        <h1>Informe Gastos</h1>
     </div>
 
     <section class="">
         <div class="container">
             <div class="row text-center">
                 <div class="col-md">
-                    <h2>Existencia total</h2>
+                    <h2>Gastos totales</h2>
                     <form>
                         {% csrf_token %}
                         <div class="row">
@@ -105,7 +101,6 @@
                             </div>
                         </div>
                     </form>
-
                     <div style="width: 100%; max-width: 1200px; margin: 0 auto; max-height: 600px; height: 500px">
                         <canvas id="stockVersusChart"></canvas>
                     </div>
@@ -119,9 +114,9 @@
             <!-- Gráficas comparativas -->
             <div class="row text-center align-items-center m-4">
                 <div class="col-md d-flex flex-column align-items-center">
-                    <h2>Cantidad por categoría</h2>
+                    <h2>Gastos por categoría</h2>
                     <div style="width: 100%; max-width: 1200px; margin: 0 auto; max-height: 600px; height: 500px">
-                        <canvas id="inventoryChart"></canvas>
+                        <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -129,129 +124,29 @@
     </section>
 
     <section class="p-5">
-        <div class="row text-center align-items-center">
-            <div class="col-md d-flex flex-column align-items-center">
-                <h2 id="percTitle1">Porcentaje por categoría</h2>
-                <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
-                    <canvas id="percentageChart"></canvas>
+        <div class="container">
+            <div class="row text-center align-items-center">
+                <div class="col-md d-flex flex-column align-items-center">
+                    <h2 id="percTitle1">Porcentaje por categoría</h2>
+                    <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
+                        <canvas id="percentageChart1"></canvas>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md d-flex flex-column align-items-center">
-                <h2 id="percTitle2">Porcentaje por categoría</h2>
-                <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
-                    <canvas id="percentageChart1"></canvas>
+                <div class="col-md d-flex flex-column align-items-center">
+                    <h2 id="percTitle2">Porcentaje por categoría</h2>
+                    <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
+                        <canvas id="percentageChart2"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-
-    <!-- Chart JS -->
     <script>
-        let categories = "{{ categories }}".split(',');
-        let quantities = JSON.parse("{{ quantities }}");
-        let getStockMonthURL = "{% url 'getStockMonth' %}"
-        let percentages = JSON.parse("{{ percentages }}")
-        /**********************************************************************************************************************/
-
-        let colors = ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)'];
-
-        /**********************************************************************************************************************/
-
-        let percentageCanvas = document.getElementById('percentageChart').getContext('2d');
-        let percentageCanvas1 = document.getElementById('percentageChart1').getContext('2d');
-
-        const percentageInventory = new Chart(percentageCanvas, {
-            type: 'doughnut',
-            data: {
-                labels: categories,
-                datasets: [{
-                    label: '%',
-                    data: percentages,
-                    backgroundColor: colors,
-                    borderColor: colors.map(color => color.replace('0.2', '1')),
-                    borderWidth: 1,
-                }],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                }
-            }
-        })
-        const percentageInventory1 = new Chart(percentageCanvas1, {
-            type: 'doughnut',
-            data: {
-                labels: categories,
-                datasets: [{
-                    label: '%',
-                    data: percentages,
-                    backgroundColor: colors,
-                    borderColor: colors.map(color => color.replace('0.2', '1')),
-                    borderWidth: 1,
-                }],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                }
-            }
-        })
-        /**********************************************************************************************************************/
-
-        // Obtén el contexto del canvas
-        var ctx = document.getElementById('inventoryChart').getContext('2d');
-
-        // Define los datos para las barras
-        var datos = {
-            labels: ['Eléctricos', 'Plomería', 'Oficina', 'Limpieza'],
-            datasets: [
-                {
-                    label: 'Barra 1',
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    barPercentage: 0.4, // Ajusta el ancho de las barras
-                    data: [10, 20, 15] // Datos para la Barra 1
-                },
-                {
-                    label: 'Barra 2',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1,
-                    barPercentage: 0.4, // Ajusta el ancho de las barras
-                    data: [15, 10, 25] // Datos para la Barra 2
-                }
-            ]
-        };
-
-        // Configura la gráfica de barras
-        var config = {
-            type: 'bar',
-            data: datos,
-            options: {
-
-                responsive: true,
-                maintainAspectRatio: false,
-
-                scales: {
-                    x: {
-                        stacked: false // No apila las barras horizontalmente
-                    },
-                    y: {
-                        stacked: false // No apila las barras verticalmente
-                    }
-                }
-            }
-        };
-
-        // Crea la instancia de la gráfica
-        var barGraph = new Chart(ctx, config);
-
-
-        /**********************************************************************************************************************/
         let stockVersusCanvas = document.getElementById('stockVersusChart').getContext('2d');
 
         const data = {
-            labels: [],
+            labels: ['Paso 1', 'Paso 2', 'Paso 3'],
             datasets: [
                 {
                     label: '',
@@ -304,7 +199,93 @@
             },
         })
 
-        /**********************************************************************************************************************/
+        // Obtén el contexto del canvas
+        var ctx = document.getElementById('categoryChart').getContext('2d');
+
+        // Define los datos para las barras
+        var datos = {
+            labels: ['Eléctricos', 'Plomería', 'Oficina', 'Limpieza'],
+            datasets: [
+                {
+                    label: '',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.4, // Ajusta el ancho de las barras
+                    data: [] // Datos para la Barra 1
+                },
+                {
+                    label: '',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.4, // Ajusta el ancho de las barras
+                    data: [] // Datos para la Barra 2
+                }
+            ]
+        };
+
+        // Configura la gráfica de barras
+        var config = {
+            type: 'bar',
+            data: datos,
+            options: {
+
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    x: {
+                        stacked: false // No apila las barras horizontalmente
+                    },
+                    y: {
+                        stacked: false // No apila las barras verticalmente
+                    }
+                }
+            }
+        };
+
+        // Crea la instancia de la gráfica
+        var barGraph = new Chart(ctx, config);
+        let colors = ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)'];
+        let percentageCanvas = document.getElementById('percentageChart1').getContext('2d');
+        let percentageCanvas1 = document.getElementById('percentageChart2').getContext('2d');
+        let categories = ['Eléctricos', 'Plomería', 'Oficina', 'Limpieza']
+        const percentageInventory1 = new Chart(percentageCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: '%',
+                    data: [],
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.2', '1')),
+                    borderWidth: 1,
+                }],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            }
+        })
+        const percentageInventory2 = new Chart(percentageCanvas1, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: '%',
+                    data: [],
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.2', '1')),
+                    borderWidth: 1,
+                }],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            }
+        })
+
 
         function getCookie(name) {
             var cookieValue = null;
@@ -321,36 +302,62 @@
             return cookieValue;
         }
 
-        /**********************************************************************************************************************/
 
-        function updateCharts(index) {
-            GetStockData(index);
-            GetCategories(index);
-            GetPercentageData(index);
-        }
-
-        function GetPercentageData(index) {
+        function getExpensesData(index) {
             let csrftoken = getCookie('csrftoken');
             let month = document.getElementById("monthSelectStock" + index);
             let year = document.getElementById("yearSelectStock" + index);
-            let title = document.getElementById("percTitle" + index);
             $.ajax({
                 type: "POST",
-                url: "{% url 'getPercentagesPerCategory' %}",
+                url: "{% url 'getExpensesMonth' %}",
                 data: {
                     "month": month.options[month.selectedIndex].value,
                     "year": year.options[year.selectedIndex].value,
                     'csrfmiddlewaretoken': csrftoken,
                 },
                 success: function (response) {
+                    if (index === 1) {
+                        stockVersus.data.datasets[0].data = JSON.parse(response.data)
+                        stockVersus.data.datasets[0].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+                        stockVersus.update()
+                    } else {
+                        stockVersus.data.datasets[1].data = JSON.parse(response.data)
+                        stockVersus.data.datasets[1].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+                        stockVersus.update()
+                    }
+                    stockVersus.data.labels = response.labels.split(',')
+
+                },
+                error: function (error) {
+                    console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+                }
+            });
+        }
+
+        function GetExpensesPercentageData(index) {
+            console.log("llamando....")
+            let csrftoken = getCookie('csrftoken');
+            let month = document.getElementById("monthSelectStock" + index);
+            let year = document.getElementById("yearSelectStock" + index);
+            let title = document.getElementById("percTitle" + index);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'getExpensesPercentages' %}",
+                data: {
+                    "month": month.options[month.selectedIndex].value,
+                    "year": year.options[year.selectedIndex].value,
+                    'csrfmiddlewaretoken': csrftoken,
+                },
+                success: function (response) {
+                    console.log("todo bien")
+                    console.log(JSON.parse(response.data))
                     //update the current data with the new response
                     if (index === 1) {
-                        percentageInventory.data.datasets[0].data = JSON.parse(response.data)
-                        percentageInventory.update()
-                    } else {
-
                         percentageInventory1.data.datasets[0].data = JSON.parse(response.data)
                         percentageInventory1.update()
+                    } else {
+                        percentageInventory2.data.datasets[0].data = JSON.parse(response.data)
+                        percentageInventory2.update()
                     }
                     title.innerHTML = "Porcentaje por categoría en " + month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
                 },
@@ -360,59 +367,28 @@
             });
         }
 
-        function GetStockData(index) {
+        function getExpensesPerCategoryData(index) {
             let csrftoken = getCookie('csrftoken');
             let month = document.getElementById("monthSelectStock" + index);
             let year = document.getElementById("yearSelectStock" + index);
             $.ajax({
                 type: "POST",
-                url: getStockMonthURL,
+                url: "{% url 'getExpensesPerCategory' %}",
                 data: {
                     "month": month.options[month.selectedIndex].value,
                     "year": year.options[year.selectedIndex].value,
                     'csrfmiddlewaretoken': csrftoken,
                 },
                 success: function (response) {
-                    //update the current data with the new response
-                    if (index === 1) {
-                        stockVersus.data.datasets[0].data = JSON.parse(response.data)
-                        stockVersus.data.datasets[0].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
-                    } else {
-                        stockVersus.data.datasets[1].data = JSON.parse(response.data)
-                        stockVersus.data.datasets[1].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
-                    }
-                    stockVersus.data.labels = response.labels.split(',')
-                    stockVersus.update();
-                },
-                error: function (error) {
-                    console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
-                }
-            });
-        }
-
-        function GetCategories(index) {
-            let csrftoken = getCookie('csrftoken');
-            let month = document.getElementById("monthSelectStock" + index);
-            let year = document.getElementById("yearSelectStock" + index);
-            $.ajax({
-                type: "POST",
-                url: "{% url 'getCategoriesMonth' %}",
-                data: {
-                    "month": month.options[month.selectedIndex].value,
-                    "year": year.options[year.selectedIndex].value,
-                    'csrfmiddlewaretoken': csrftoken,
-                },
-                success: function (response) {
-                    //update the current data with the new response
                     if (index === 1) {
                         barGraph.data.datasets[0].data = JSON.parse(response.data)
                         barGraph.data.datasets[0].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
-                        barGraph.update()
+
                     } else {
                         barGraph.data.datasets[1].data = JSON.parse(response.data)
                         barGraph.data.datasets[1].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
-                        barGraph.update()
                     }
+                    barGraph.update()
                 },
                 error: function (error) {
                     console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
@@ -420,7 +396,12 @@
             });
         }
 
-        /**********************************************************************************************************************/
+
+        function updateCharts(index) {
+            getExpensesData(index);
+            getExpensesPerCategoryData(index);
+            GetExpensesPercentageData(index);
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             let today = new Date();
@@ -436,9 +417,8 @@
             updateCharts(2);
         });
 
-        /**********************************************************************************************************************/
-
-
     </script>
+
     </body>
+    </html>
 {% endblock content %}

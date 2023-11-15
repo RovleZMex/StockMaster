@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... [Add necessary head content here] ... -->
+    <title>Carrito</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .cart-item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+
+        .cart-total {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .btn-remove {
+            background-color: #ff6666;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background-color: #ff4d4d;
+        }
+
+        .btn-confirm {
+            background-color: #66cc66;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background-color: #33cc33;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Carrito</h1>
+    <div>
+        {% if cart_items %}
+            <ul class="list-unstyled" id="cart-items">
+                {% for item in cart_items %}
+                    <li class="cart-item" id="cart-item-{{ item.product.id }}">
+                        {{ item.product.name }} -
+                        <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1">
+
+                        <button type="button" class="btn btn-remove ml-2"
+                                onclick="removeFromCart({{ item.product.id }})">Eliminar
+                        </button>
+                    </li>
+
+                {% endfor %}
+            </ul>
+            <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
+            <form id="order-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="employeeNumber">Numero de empleado:</label>
+                    <input type="int" class="form-control" id="employeeNumber" name="employee_number" required>
+                </div>
+                <input type="hidden" id="orderItems" name="order_items">
+                <!-- Updated the button to only call the confirmOrder function -->
+                <button type="button" class="btn btn-confirm" onclick="confirmOrder()">Confirmar Orden</button>
+            </form>
+        {% else %}
+            <p>Your cart is empty.</p>
+            <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
+
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Bootstrap Modal for confirmation message -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirmación de Orden</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage">Su orden ha sido confirmada.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'store' %}" class="btn btn-secondary">Volver a la tienda</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function removeFromCart(productId) {
+        $.ajax({
+            url: '{% url "remove_from_cart" %}',
+            method: 'POST',
+            data: {
+                'product_id': productId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (response) {
+                $('#cart-item-' + productId).remove();
+            }
+        });
+    }
+
+
+    function confirmOrder() {
+        const employeeNumber = $('#employeeNumber').val();
+        if (!employeeNumber) {
+            alert('Se requiere numero de empleado!');
+            return;
+        }
+
+        const cartItems = $('#cart-items li').map(function () {
+            const productId = this.id.split('-')[2];
+            const quantity = $(this).find('input').val();
+            return {productId, quantity};
+        }).get();
+
+        $.ajax({
+            url: '{% url "confirm_order" %}',
+            method: 'POST',
+            data: {
+                'employee_number': employeeNumber,
+                'order_items': JSON.stringify(cartItems),
+                'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+            },
+            success: function (response) {
+                // Show the Bootstrap modal on success
+                $('#confirmationMessage').text(response.message);
+                $('#confirmationModal').modal('show');
+                // Empty the cart items list
+                $('#cart-items').empty();
+                // Optionally, update the cart count in the UI if you have it
+                // $('#cart-count').text('0');
+            },
+            error: function () {
+                alert('Hubo un error al confirmar la orden.');
+            }
+        });
+    }
+</script>
+</body>
+</html>

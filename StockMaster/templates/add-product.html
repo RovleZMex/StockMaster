@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <head>
+        <style>
+            .custom-form {
+                border-radius: 10px;
+                padding: 20px;
+                border: gray solid 1px;
+            }</style>
+        <title>Añadir Productos</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    </head>
+    <body>
+
+    <section class="pt-5 pb-4">
+        <div class="container">
+            <h2>Registrar productos</h2>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#exampleModal">Agregar Nuevo Producto
+            </button>
+            <hr>
+        </div>
+    </section>
+
+    <!-- PRODUCT SECTION -->
+    <section>
+        <div class="container">
+            <form id="productForm">
+                {% csrf_token %}
+                <div id="productInputs" class="row g-3">
+                    <div class="col-md">
+                        <p class="lead">Producto</p>
+                        <input class="form-control product-input" list="datalistOptions0" id="exampleDataList0"
+                               placeholder="Buscar producto..." onchange="updateFirstRow(this);" name="productname">
+                        <datalist id="datalistOptions0">
+                            {% for product in products %}
+                                <option value="{{ product.name }} - {{ product.SKU }}" data-price="{{ product.price }}"
+                                        data-is-external="{{ product.isExternal }}" data-sku="{{ product.SKU }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="col-md">
+                        <p class="lead">Cant. de productos comprados</p>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md">
+                                        <select name="quantityType" class="form-select"
+                                                onchange="showAdditionalFields(this.value, '0')">
+                                            <option value="unidades" selected>Unidades</option>
+                                            <option value="caja">Caja</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md" id="unitsPerBoxField0" style="display: none;">
+                                        <input type="number" step="1" min="1" value="1" class="form-control"
+                                               id="unitsPerBoxInput" placeholder="Unidades por caja" name="unitsPerBox">
+                                        <small>uds. p. caja</small>
+                                    </div>
+                                    <div class="col-md">
+                                        <input type="number" step="1" min="1" value="1" class="form-control"
+                                               id="quantityInput" placeholder="Cantidad" name="quantity">
+                                        <small id="pack-quantityDesc0" style="display: none">cant. de cajas</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <p class="lead">Precio</p>
+                        <!-- price -->
+                        <input type="number" step="0.01" min="0" class="form-control" id="priceInput0"
+                               placeholder="Precio">
+                        <small id="packPrice0" style="display: none">precio p. caja</small>
+                    </div>
+                    <div class="col-md-2">
+                        <!-- isExternal -->
+                        <p class="lead">¿Se compró fuera?</p>
+                        <input type="checkbox" class="form-check-input" value="" id="externalCheckbox0">
+                        <label for="externalCheckbox0" class="form-check-label">Es externo</label>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Confirmar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Añadir Nuevo Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulario para añadir un nuevo producto -->
+                    <div class="custom-form bg-light">
+                        <h1>Añadir producto</h1>
+                        <form id="newProductForm" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="nombreProducto" class="form-label">Nombre de producto:</label>
+                                <input type="text" class="form-control" id="nombreProducto" name="nombreProducto">
+                            </div>
+                            <div class="mb-3">
+                                <label for="SKUProducto" class="form-label">SKU:</label>
+                                <input type="text" class="form-control" id="SKUProducto" name="SKUProducto">
+                            </div>
+                            <div class="mb-3">
+                                <label for="precioProducto" class="form-label">Precio</label>
+                                <input type="text" class="form-control" id="precioProducto" name="precioProducto">
+                            </div>
+                            <div class="mb-3">
+                                <label for="bajoUmbralProducto" class="form-label">Bajo stock a partir de:</label>
+                                <input type="number" min="0" class="form-control" id="bajoUmbralProducto"
+                                       name="bajoUmbralProducto">
+                            </div>
+                            <div class="mb-3">
+                                <label for="imagenProducto" class="form-label">Imagen:</label>
+                                <input name="imagenProducto" class="form-control" type="file" accept="image/*"
+                                       id="imagenProducto">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="categoriaProducto">Categoria:</label>
+                                <select class="form-select" id="categoriaProducto" name="categoriaProducto">
+                                    <option value="PLU">Plomería</option>
+                                    <option value="OFF">Oficina</option>
+                                    <option value="ELE">Eléctricos</option>
+                                    <option value="CLE">Limpieza</option>
+                                </select>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input name="compradoPorFuera" class="form-check-input" type="checkbox"
+                                       id="compradoPorFuera">
+                                <label class="form-check-label" for="compradoPorFuera">Comprado por fuera</label>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="addNewProduct(this)">Añadir Producto
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/jquery-2.0.0.min.js' %}"></script>
+    <script>
+        var counter = 1; // Counter for dynamic IDs
+
+        function addProductInput(element) {
+            if (checkEmptyRows()) {
+                return;
+            }
+            var container = document.getElementById('productInputs');
+            var newInputRow = document.createElement('div');
+            newInputRow.className = 'row g-3';
+            newInputRow.id = 'row-' + counter; // Assign an ID to the new row
+            newInputRow.innerHTML = `
+        <div class="col-md">
+            <input class="form-control product-input" list="datalistOptions0" id="exampleDataList0"
+                placeholder="Buscar producto..." onchange="updateDynamicRow(this, ${counter});" name="productname">
+            <datalist id="datalistOptions0">
+                {% for product in products %}
+                    <option value="{{ product.name }} - {{ product.SKU }}" data-price="{{ product.price }}"
+                        data-is-external="{{ product.isExternal }}" data-sku="{{ product.SKU }}">
+                {% endfor %}
+            </datalist>
+        </div>
+        <div class="col-md">
+            <div class="row">
+                <div class="col-md">
+                    <select name="quantityType" class="form-select"
+                        onchange="showAdditionalFields(this.value, ${counter})">
+                        <option value="unidades" selected>Unidades</option>
+                        <option value="caja">Caja</option>
+                    </select>
+                </div>
+                <div class="col-md" id="unitsPerBoxField${counter}" style="display: none;">
+                    <input type="number" step="1" min="1" value="1" class="form-control"
+                        id="unitsPerBoxInput${counter}" placeholder="Unidades por caja" name="unitsPerBox">
+                    <small>uds. p. caja</small>
+                </div>
+                <div class="col-md">
+                    <input type="number" step="1" min="1" value="1" class="form-control"
+                        id="quantityInput${counter}" placeholder="Cantidad" name="quantity">
+                    <small id="pack-quantityDesc${counter}" style="display: none;">cant. de cajas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <input type="number" step="0.01" min="0" class="form-control" id="priceInput${counter}"
+                placeholder="Precio">
+            <small id="packPrice${counter}" style="display: none">precio p. caja</small>
+        </div>
+        <div class="col-md-2">
+            <input type="checkbox" class="form-check-input" value="" id="externalCheckbox${counter}">
+            <label for="externalCheckbox${counter}" class="form-check-label">Es externo</label>
+            <button type="button" class="btn btn-danger" onclick="removeRow(${counter})"><i class="bi bi-trash"></i></button>
+        </div>
+    `;
+            container.appendChild(newInputRow);
+            counter++;
+        }
+
+
+        function removeRow(rowId) {
+            var row = document.getElementById('row-' + rowId);
+            row.parentNode.removeChild(row);
+        }
+
+        function updateFirstRow(element) {
+            var dataList = element.list;
+            var selectedOption;
+            for (var option of dataList.options) {
+                if (option.value === element.value) {
+                    selectedOption = option;
+                    break;
+                }
+            }
+            if (selectedOption) {
+                document.getElementById('priceInput0').value = selectedOption.getAttribute('data-price');
+                var isExternalValue = selectedOption.getAttribute('data-is-external');
+                document.getElementById('externalCheckbox0').checked = isExternalValue === 'true' || isExternalValue === 'True';
+                var skuText = document.createElement('small');
+                skuText.innerHTML = "SKU: " + selectedOption.getAttribute('data-sku');
+                let smallChildren = element.parentElement.getElementsByTagName("small")
+                // delete the current SKU (if any)
+                for (var i = 0; i < smallChildren.length; i++) {
+                    var smallChild = smallChildren[i];
+                    smallChild.remove()
+                }
+                element.parentElement.appendChild(skuText);
+            }
+            addProductInput(element);
+        }
+
+        function updateDynamicRow(element, rowNumber) {
+            var dataList = element.list;
+            var selectedOption;
+            for (var option of dataList.options) {
+                if (option.value === element.value) {
+                    selectedOption = option;
+                    break;
+                }
+            }
+            if (selectedOption) {
+                document.getElementById('priceInput' + rowNumber).value = selectedOption.getAttribute('data-price');
+                let isExternalValue = selectedOption.getAttribute('data-is-external');
+                document.getElementById('externalCheckbox' + rowNumber).checked = isExternalValue === 'true' || isExternalValue === 'True';
+                let skuText = document.createElement('small');
+                skuText.innerHTML = "SKU: " + selectedOption.getAttribute('data-sku');
+                let smallChildren = element.parentElement.getElementsByTagName("small")
+                for (var i = 0; i < smallChildren.length; i++) {
+                    var smallChild = smallChildren[i];
+                    smallChild.remove()
+                }
+                element.parentElement.appendChild(skuText);
+            }
+            addProductInput(element);
+        }
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Busca el token CSRF
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function checkEmptyRows() {
+            var inputs = document.getElementsByClassName("product-input");
+            var emptyRowCount = 0;
+
+            for (var i = 0; i < inputs.length; i++) {
+                var productName = inputs[i].value;
+                var quantity = inputs[i].parentNode.nextElementSibling.querySelector("input[name='quantity']").value;
+                var price = inputs[i].parentNode.nextElementSibling.nextElementSibling.querySelector("input[type='number']").value;
+
+                if (productName.trim() === '' || quantity.trim() === '' || price.trim() === '') {
+                    emptyRowCount++;
+                }
+            }
+
+            return emptyRowCount >= 1;
+        }
+
+
+        function addNewProduct(button) {
+            var csrftoken = getCookie('csrftoken');
+            var form_data = new FormData();
+            form_data.append('csrfmiddlewaretoken', csrftoken);
+            form_data.append('nombreProducto', document.getElementById('nombreProducto').value);
+            form_data.append('bajoUmbralProducto', document.getElementById('bajoUmbralProducto').value);
+            form_data.append('categoriaProducto', document.getElementById('categoriaProducto').value);
+            form_data.append('compradoPorFuera', document.getElementById('compradoPorFuera').checked);
+            form_data.append('price', document.getElementById('precioProducto').value);
+            form_data.append('SKU', document.getElementById('SKUProducto').value);
+            form_data.append('imagenProducto', document.getElementById('imagenProducto').files[0]);
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'add_product' %}",
+                data: form_data,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    var newProduct = response.newProduct;
+
+                    var newInputRow = document.createElement('div');
+                    newInputRow.className = 'row g-3';
+                    newInputRow.id = 'row-' + counter;
+                    newInputRow.innerHTML = `
+                    <div class="col-md">
+                        <input class="form-control product-input" value="${newProduct.name} - ${newProduct.sku}" data-price="${newProduct.price}" data-is-external="${newProduct.isExternal}">
+                        <small>${newProduct.sku}</small>
+                    </div>
+                    <div class="col-md">
+                        <div class="row">
+                            <div class="col-md">
+                                <select name="quantityType" class="form-select"
+                                        onchange="showAdditionalFields(this.value, ${counter})">
+                                    <option value="unidades" selected>Unidades</option>
+                                    <option value="caja">Caja</option>
+                                </select>
+                            </div>
+                            <div class="col-md" id="unitsPerBoxField${counter}" style="display: none;">
+                                <input type="number" step="1" min="1" value="1" class="form-control"
+                                       id="unitsPerBoxInput${counter}" placeholder="Unidades por caja" name="unitsPerBox">
+                                <small>uds. p. caja</small>
+                            </div>
+                            <div class="col-md">
+                                <input type="number" step="1" min="1" value="1" class="form-control"
+                                       id="quantityInput${counter}" placeholder="Cantidad" name="quantity">
+                                <small id="pack-quantityDesc${counter}" style="display: none">cant. de cajas</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" step="0.01" min="0" class="form-control" id="priceInput${counter}"
+                               value="${newProduct.price}">
+                        <small id="packPrice${counter}" style="display: none">precio p. caja</small>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="checkbox" id="externalCheckbox${counter}" class="form-check-input" value="" ${newProduct.isExternal ? 'checked' : ''}>
+                        <label class="form-check-label">Es externo</label>
+                        <button type="button" class="btn btn-danger" onclick="removeRow(${counter})"><i class="bi bi-trash"></i></button>
+                    </div>
+                `;
+                    var container = document.getElementById('productInputs');
+                    container.appendChild(newInputRow);
+
+                    $('#exampleModal').modal('hide');
+                    counter++;
+                },
+                error: function (error) {
+                    alert('Error al agregar el producto. Inténtalo de nuevo más tarde.');
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var productForm = document.getElementById("productForm");
+            productForm.addEventListener("submit", function (event) {
+                submitProductForm(event);
+            });
+        });
+
+        function submitProductForm(event) {
+            event.preventDefault();
+            var productsData = [];
+            var productInputs = document.getElementsByClassName("product-input");
+
+            for (var i = 0; i < productInputs.length; i++) {
+                var productData = {};
+                var productName = productInputs[i].value;
+                productData["productName"] = productName;
+                productData["quantityType"] = document.getElementsByName("quantityType")[i].value;
+                productData["quantity"] = document.getElementsByName("quantity")[i].value;
+                productData["price"] = document.getElementById("priceInput" + i).value;
+                productData["isExternal"] = document.getElementById("externalCheckbox" + i).checked;
+                if (productData["quantityType"] === "caja") {
+                    productData["unitsPerBox"] = document.getElementsByName("unitsPerBox")[i].value;
+                }
+                productsData.push(productData);
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'registerBuyOrder' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    productsData: JSON.stringify(productsData)
+                },
+                success: function (response) {
+                    window.location.href = "{% url 'inventory' %}"
+                },
+                error: function (error) {
+                    console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+                }
+            });
+        }
+
+
+    </script>
+    <script>
+        function showAdditionalFields(value, counter) {
+            var unitsPerBoxField = document.getElementById("unitsPerBoxField" + counter);
+            var quantityDesc = document.getElementById("pack-quantityDesc" + counter);
+            let packPrice = document.getElementById("packPrice" + counter);
+            if (value === "caja") {
+                unitsPerBoxField.style.display = "block";
+                quantityDesc.style.display = "block";
+                packPrice.style.display = "block";
+            } else {
+                unitsPerBoxField.style.display = "none";
+                quantityDesc.style.display = "none";
+                packPrice.style.display = "none";
+            }
+        }
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
+    </body>
+{% endblock content %}

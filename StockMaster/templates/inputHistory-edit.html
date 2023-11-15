@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block content %}
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            .custom-form {
+                border-radius: 10px;
+                padding: 20px;
+                border: gray solid 1px;
+            }
+
+            .middle-container {
+                width: 50%;
+                margin: auto;
+            }
+
+            .custom-narrow-input {
+                width: 100px;
+            }
+        </style>
+        <!-- Include Ajax library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <title>Editar orden</title>
+    </head>
+    <body>
+    <section class="p-5">
+        <div class="container middle-container">
+            <div class="custom-form bg-light">
+                <h1>Editar orden</h1>
+                <form action="{% url 'inputOrderEdit' order.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="date">Fecha:</label>
+                        <input type="date" class="form-control" id="date" name="date">
+                        <div class="form-text">Fecha actual: {{ order.date_created }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h3>Producto</h3>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>Cantidad</h4>
+                        </div>
+                    </div>
+                    <div id="productRows">
+                        {% for productA in order.inputorderitem_set.all %}
+                            <div class="mb-3 input-group">
+                                <input class="form-control" list="datalistOptions" id="product{{ forloop.counter }}"
+                                       name="product{{ forloop.counter }}"
+                                       value="{{ productA.product.name }}" required>
+                                <datalist id="datalistOptions">
+                                    {% for productB in allProducts %}
+                                        <option value="{{ productB.name }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                                <div class="col-md-2">
+                                    <input class="form-control" type="number" min="0" step="1"
+                                           value="{{ productA.quantity }}" name="quantity{{ forloop.counter }}"
+                                           id="quantity{{ forloop.counter }}"
+                                           required>
+                                </div>
+                                <button type="button" class="btn btn-danger" onclick="deleteRow(this)"
+                                        name="removeProduct{{ forloop.counter }}"><i class="bi bi-trash"></i></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="row justify-content-between">
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-success" onclick="addRow()"><i
+                                    class="bi bi-plus-lg"></i></button>
+                            <button type="submit" class="btn btn-primary">Confirmar</button>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button type="button" class="btn btn-danger" onclick="deleteOrder()">Eliminar Orden</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+        function deleteRow(element) {
+            let fila = element.closest('.mb-3.input-group');
+
+            // Verifica si hay más de una fila antes de permitir la eliminación
+            if (document.querySelectorAll('#productRows .mb-3.input-group').length > 1) {
+                fila.remove();
+
+                // Actualiza los índices de los elementos restantes
+                updateIndices();
+            }
+        }
+
+        function updateIndices() {
+            // Obtén todos los elementos con la clase 'mb-3.input-group'
+            let filas = document.querySelectorAll('#productRows .mb-3.input-group');
+
+            // Recorre cada elemento y actualiza su índice en nombre y atributos
+            filas.forEach(function (fila, index) {
+                let inputs = fila.querySelectorAll('input');
+                inputs.forEach(function (input) {
+                    let nombre = input.getAttribute('name');
+                    if (nombre) {
+                        // Actualiza el número en el nombre del campo con el nuevo índice
+                        input.setAttribute('name', nombre.replace(/\d+/, index + 1));
+                    }
+                });
+            });
+        }
+
+        function addRow() {
+            // Clona la última fila y obtén el contenedor de filas
+            let lastRow = document.querySelector('#productRows .mb-3.input-group:last-child');
+            let newFile = lastRow.cloneNode(true);
+
+            // Genera un nuevo índice para los campos de la nueva fila
+            let newIndex = document.querySelectorAll('#productRows .mb-3.input-group').length + 1;
+
+            // Cambia los nombres de los campos en la nueva fila
+            let inputs = newFile.querySelectorAll('input');
+            inputs.forEach(function (input) {
+                let name = input.getAttribute('name');
+                if (name) {
+                    // Reemplaza el número en el nombre del campo con el nuevo índice
+                    input.setAttribute('name', name.replace(/\d+/, newIndex));
+                    input.value = '';  // Limpia el valor del campo
+                }
+            });
+
+            // Agrega la nueva fila al contenedor de filas
+            document.querySelector('#productRows').appendChild(newFile);
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function deleteOrder() {
+            let option = confirm("¿Quiere eliminar la orden?")
+            if (option) {
+                let csrftoken = getCookie('csrftoken')
+                let id = "{{ order.id }}"
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'deleteOrder' %}",
+                    data: {
+                        'orderid': id,
+                        'csrfmiddlewaretoken': csrftoken,
+                    },
+                    success: function (response) {
+                        window.location.href = "{% url 'inputHistory' %}"
+                    },
+                    error: function (error) {
+                        console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+                    }
+                });
+            }
+        }
+    </script>
+
+    </body>
+    </html>
+{% endblock content %}

@@ -10,6 +10,7 @@ from Product.models import Product
 from Workers.models import Worker
 from datetime import datetime
 from django import forms
+from django.core.exceptions import ValidationError
 
 
 # Create your views here.
@@ -184,8 +185,13 @@ def deleteWorker(request, employeeNumber):
 class WorkerForm(forms.ModelForm):
     class Meta:
         model = Worker
-        fields = ['name', 'employeeNumber', 'workArea','employeePassword']
+        fields = ['name', 'employeeNumber', 'workArea', 'employeePassword']
 
+    def clean_employeeNumber(self):
+        employeeNumber = self.cleaned_data.get('employeeNumber')
+        if Worker.objects.filter(employeeNumber=employeeNumber).exists():
+            raise ValidationError("Este numero de empleado ya existe.")
+        return employeeNumber
 
 def addWorker(request):
     if request.method == 'POST':

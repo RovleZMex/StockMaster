@@ -13,8 +13,8 @@ from django.template.loader import get_template
 from django.views import View
 from xhtml2pdf import pisa
 
+from InputHistory.models import InputOrder
 from Product.models import Product
-from InputHistory.models import InputOrder, InputOrderItem
 
 
 #######
@@ -227,27 +227,33 @@ def TextExpense(request):
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        if int(request.POST.get("month")) != datetime.now().month or int(
-                request.POST.get("year")) != datetime.now().year:
+        if month != datetime.now().month or year != datetime.now().year:
             orders = GetOrderAsOfDate(year, month)
-        elif int(request.POST.get("month")) == datetime.now().month or int(
-                request.POST.get("year")) == datetime.now().year:
-            orders = InputOrder.objects.all()
+        elif month == datetime.now().month or year == datetime.now().year:
+            orders = GetOrderAsOfDate(year, month)
         else:
             orders = []
     else:
-        orders = InputOrder.objects.all()
         month = datetime.now().month
         year = datetime.now().year
-    print(orders)
+        orders = GetOrderAsOfDate(year, month)
 
     context = {
         'years': years,
         'orders': orders,
         'month': int(month),
         'year': int(year),
+        'totalOrders': len(orders),
+        'totalExpense': sum([order.GetTotal() for order in orders])
     }
     return render(request, 'report-expText.html', context)
+
+
+def getTotalValueOrder(order):
+    value = 0
+    for item in order:
+        value += item.getSubtotal()
+    return value
 
 
 def GetInventoryAsOfDate(dateA):
@@ -290,5 +296,8 @@ def MapCategory(value):
 
 
 def GetOrderAsOfDate(year, month):
-    return (InputOrder.objects.filter(date_created__month=month,
-                                      date_created__year=year))
+    orders = []
+    for order in InputOrder.objects.all().order_by('date_created'):
+        if order.date_created.month == month and order.date_created.year == year:
+            orders.append(order)
+    return orders

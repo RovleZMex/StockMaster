@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path("inventario-graficas/", views.ReportCharts, name="reportCharts"),
     path("inventario-textual/", views.TextInventory, name="textInventory"),
+    path("gastos-textual/", views.TextExpense, name="textExpense"),
     path("gastos-graficas/", views.ExpensesCharts, name="expensesCharts"),
     path('inventario-pdf/', views.ViewPDF.as_view(), name="viewPDF"),
     path("gspm/", views.GetStockMonth, name="getStockMonth"),

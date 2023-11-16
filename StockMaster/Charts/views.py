@@ -304,6 +304,35 @@ def TextInventory(request):
     return render(request, 'report-invText.html', context)
 
 
+@login_required(login_url='login')
+def TextExpense(request):
+    years = range(2023, datetime.now().year + 1)
+    month = None
+
+    if request.method == "POST":
+        year = int(request.POST.get("year"))
+        month = int(request.POST.get("month"))
+        if month != datetime.now().month or year != datetime.now().year:
+            orders = GetOrderAsOfDate(year, month)
+        elif month == datetime.now().month or year == datetime.now().year:
+            orders = GetOrderAsOfDate(year, month)
+        else:
+            orders = []
+    else:
+        month = datetime.now().month
+        year = datetime.now().year
+        orders = GetOrderAsOfDate(year, month)
+
+    context = {
+        'years': years,
+        'orders': orders,
+        'month': int(month),
+        'year': int(year),
+        'totalOrders': len(orders),
+        'totalExpense': sum([order.GetTotal() for order in orders])
+    }
+    return render(request, 'report-expText.html', context)
+
 def getExpensesPerCategory(orders):
     quantities = [0, 0, 0, 0]
     for order in orders:
@@ -371,3 +400,11 @@ def GetQuantPerCategory(inventory):
 def MapCategory(value):
     categories = ["Eléctricos", "Plomería", "Oficina", "Limpieza"]
     return categories[value]
+
+
+def GetOrderAsOfDate(year, month):
+    orders = []
+    for order in InputOrder.objects.all().order_by('date_created'):
+        if order.date_created.month == month and order.date_created.year == year:
+            orders.append(order)
+    return orders

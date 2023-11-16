@@ -23,7 +23,7 @@
             <form action="{% url 'verify_employee' %}" method="post" class="mt-4 mx-auto" style="width: 80%;">
                 {% csrf_token %}
                 <label for="employeeNumber">Numero de empleado</label>
-                <input type="text" id="employeeNumber" class="form-control mb-3" name="employee_number"
+                <input type="number" id="employeeNumber" class="form-control mb-3" name="employee_number"
                        placeholder="Ingresa tu numero de empleado">
                 <label for="employeeNumber">Contraseña</label>
                 <input type="password" id="password" class="form-control mb-3" name="password"

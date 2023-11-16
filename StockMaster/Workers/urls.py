@@ -9,5 +9,6 @@ urlpatterns = [
     path('confirm_order/', views.confirm_order, name='confirm_order'),
     path('product/<int:product_id>/', views.product_detail, name='product_detail'),
     path('verify_employee/', views.verify_employee, name='verify_employee'),
+    path('logout/', views.logout_worker, name='logout_worker'),
 ]
 

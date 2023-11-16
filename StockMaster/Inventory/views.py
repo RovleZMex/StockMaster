@@ -4,6 +4,7 @@ import json
 import unicodedata
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -248,23 +249,33 @@ def GetProductPriceData(request):
         year = int(request.POST.get("year"))
         productid = request.POST.get("productid")
         product = Product.objects.get(id=productid)
-        productHistory = product.history.filter(history_date__month=month,
-                                                history_date__year=year)
-        labels = []
+
         prices = []
-        for historicProduct in reversed(productHistory):
-            labels.append(historicProduct.history_date.strftime('%d'))
-            prices.append(historicProduct.price)
-
-        filteredLabels, filteredPrices = AddLastDate(labels, prices,
-                                                     month, year, product, "price")  # Get rid of repeated labels
-
-        filteredLabels, filteredPrices = FilterSameDates(filteredLabels, filteredPrices)  # Get rid of repeated labels
+        labels = []
+        if datetime.datetime.now().month == month:
+            daysRange = range(1, datetime.datetime.now().day + 1)
+        elif month > datetime.datetime.now().month or year > datetime.datetime.now().year:
+            daysRange = range(0)
+        else:
+            daysRange = range(1, calendar.monthrange(year, month)[1] + 1)
+        for day in daysRange:
+            tempDate = datetime.date(year, month, day)
+            labels.append(f"Día {day}")
+            try:
+                if datetime.datetime.now().day == day and datetime.datetime.now().month == month and datetime.datetime.now().year == year:
+                    prices.append(product.price)
+                else:
+                    prices.append(product.history.as_of(tempDate).price)
+            except ObjectDoesNotExist:
+                if len(prices) >= 1:
+                    prices.append(prices[-1])
+                else:
+                    prices.append(0)
 
         return JsonResponse({
             'success': True,
-            'data': json.dumps(filteredPrices),
-            'labels': ','.join(filteredLabels),
+            'data': json.dumps(prices),
+            'labels': ','.join(labels),
         })
 
 
@@ -285,23 +296,33 @@ def GetProductQuantityData(request):
         year = int(request.POST.get("year"))
         productid = request.POST.get("productid")
         product = Product.objects.get(id=productid)
-        productHistory = product.history.filter(history_date__month=month,
-                                                history_date__year=year)
         labels = []
         quantities = []
-        for historicProduct in reversed(productHistory):
-            labels.append(historicProduct.history_date.strftime('%d'))
-            quantities.append(historicProduct.quantity)
 
-        filteredLabels, filteredQuantities = AddLastDate(labels, quantities,
-                                                         month, year, product, "quantity")  # Add last day to the table
-        filteredLabels, filteredQuantities = FilterSameDates(filteredLabels,
-                                                             filteredQuantities)  # Get rid of repeated dates
+        if datetime.datetime.now().month == month:
+            daysRange = range(1, datetime.datetime.now().day + 1)
+        elif month > datetime.datetime.now().month or year > datetime.datetime.now().year:
+            daysRange = range(0)
+        else:
+            daysRange = range(1, calendar.monthrange(year, month)[1] + 1)
+        for day in daysRange:
+            tempDate = datetime.date(year, month, day)
+            labels.append(f"Día {day}")
+            try:
+                if datetime.datetime.now().day == day and datetime.datetime.now().month == month and datetime.datetime.now().year == year:
+                    quantities.append(product.quantity)
+                else:
+                    quantities.append(product.history.as_of(tempDate).quantity)
+            except ObjectDoesNotExist:
+                if len(quantities) >= 1:
+                    quantities.append(quantities[-1])
+                else:
+                    quantities.append(0)
 
         return JsonResponse({
             'success': True,
-            'data': json.dumps(filteredQuantities),
-            'labels': ','.join(filteredLabels),
+            'data': json.dumps(quantities),
+            'labels': ','.join(labels),
         })
     return JsonResponse({'error': 'Error, verifica los datos.'}, status=400)
 

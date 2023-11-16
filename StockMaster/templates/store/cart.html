@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"
+
     <!-- ... [Add necessary head content here] ... -->
     <title>Carrito</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -41,33 +43,34 @@
     <h1>Carrito</h1>
     <div>
         {% if cart_items %}
-            <ul class="list-unstyled" id="cart-items">
-                {% for item in cart_items %}
-                    <li class="cart-item" id="cart-item-{{ item.product.id }}">
-                        {{ item.product.name }} -
-                        <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1">
+        <ul class="list-unstyled" id="cart-items">
+            {% for item in cart_items %}
+            <li class="cart-item" id="cart-item-{{ item.product.id }}">
+                {{ item.product.name }} -
+                <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1">
 
-                        <button type="button" class="btn btn-remove ml-2"
-                                onclick="removeFromCart({{ item.product.id }})">Eliminar
-                        </button>
-                    </li>
+                <button type="button" class="btn btn-remove ml-2"
+                        onclick="removeFromCart({{ item.product.id }})">Eliminar
+                </button>
+            </li>
 
-                {% endfor %}
-            </ul>
-            <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
-            <form id="order-form">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="employeeNumber">Numero de empleado:</label>
-                    <input type="int" class="form-control" id="employeeNumber" name="employee_number" required>
-                </div>
-                <input type="hidden" id="orderItems" name="order_items">
-                <!-- Updated the button to only call the confirmOrder function -->
-                <button type="button" class="btn btn-confirm" onclick="confirmOrder()">Confirmar Orden</button>
-            </form>
+            {% endfor %}
+        </ul>
+        <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
+        <form id="order-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="int" class="form-control" id="employeeNumber" name="employee_number"
+                       value="{{ employee_number }}"
+                       {% if employee_number %} readonly {% endif %} required>
+            </div>
+            <input type="hidden" id="orderItems" name="order_items">
+            <!-- Updated the button to only call the confirmOrder function -->
+            <button type="button" class="btn btn-confirm" onclick="confirmOrder()">Confirmar Orden</button>
+        </form>
         {% else %}
-            <p>Your cart is empty.</p>
-            <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
+        <p>Your cart is empty.</p>
+        <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
 
         {% endif %}
     </div>

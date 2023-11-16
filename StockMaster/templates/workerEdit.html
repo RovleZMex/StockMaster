@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block content %}
+    <head>
+        <meta  name="viewport" charset="UTF-8">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+              crossorigin="anonymous">
+        <style>
+            .custom-form {
+                border-radius: 10px;
+                padding: 20px;
+                border: gray solid 1px;
+            }
+
+            .middle-container {
+                width: 50%;
+                margin: auto;
+            }
+        </style>
+        <title>Editar trabajador</title>
+    </head>
+    <body>
+    <section class="p-5">
+        <div class="container middle-container">
+            <div class="custom-form bg-light">
+                <h1>
+                    Editar trabajador
+                </h1>
+                <form action="{% url 'editWorker' worker.employeeNumber %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="nombreTrabajador" class="form-label">Nombre del trabajador:</label>
+                        <input type="text" class="form-control" id="nombreTrabajador" name="nombreTrabajador"
+                               value="{{ worker.name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="areaTrabajo" class="form-label">Área de trabajo:</label>
+                        <input type="text" class="form-control" id="areaTrabajo" name="areaTrabajo"
+                               value="{{ worker.workArea }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="employeeNumber" class="form-label">Número de trabajador:</label>
+                        <input type="number" class="form-control" id="employeeNumber" name="employeeNumber"
+                               value="{{ worker.employeeNumber }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="employeePassword" class="form-label">Contraseña del trabajador:</label>
+                        <input type="number" class="form-control" id="employeePassword" name="employeePassword"
+                               value="{{ worker.employeePassword }}">
+                    </div>
+                    <!-- Delete Worker button and form -->
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    <button type="button" class="btn btn-danger" onclick="showConfirmation()">
+                        Eliminar trabajador
+                    </button>
+                </form>
+
+                <form action="{% url 'deleteWorker' worker.employeeNumber %}" method="post" id="deleteWorkerForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="method" value="DELETE">
+                </form>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Script Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
+    </body>
+
+    <script>
+        function showConfirmation() {
+            if (confirm("¿Estás seguro de que quieres eliminar este trabajador?")) {
+                document.getElementById("deleteWorkerForm").submit();
+            }
+        }
+    </script>
+
+{% endblock content %}

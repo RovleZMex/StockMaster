@@ -21,6 +21,11 @@ class Worker(models.Model):
     str: The work area of the employee.
     """
 
+    employeePassword = models.CharField(max_length=255)
+    """
+    str: The password of the employee.
+    """
+
     def __str__(self):
         """
         Returns the string representation of the employee.

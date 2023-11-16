@@ -10,5 +10,8 @@ urlpatterns = [
     path('iniciar-sesion/', views.LoginPage, name="login"),
     path('cerrar-sesion/', views.LogoutPage, name="logout"),
     path('detalles-personal/<int:employeeNumber>', views.workerDetails, name="workerDetails"),
+    path('edit-worker/<int:employeeNumber>/', views.EditWorker, name='editWorker'),
+    path('delete-worker/<int:employeeNumber>/', views.deleteWorker, name='deleteWorker'),
+    path('add-worker/', views.addWorker, name='addWorker'),
     path('gopm/', views.GetWorkerOrdersMonth, name='getWorkerOrdersMonth')
 ]

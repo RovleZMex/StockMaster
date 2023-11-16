@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+{% block content %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <!-- Include Chart.js library -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Include Ajax library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <title>Gráficos gastos</title>
+    </head>
+    <body>
+    <section class="p-5">
+        <div class="container">
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
+                       role="button">Gráficos</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Inventario</a></li>
+                        <li><a class="dropdown-item" href="{% url 'expensesCharts' %}">Gastos</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button">Textual</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Inventario</a></li>
+                        <li><a class="dropdown-item" href="{% url 'textExpense' %}">Gastos</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <div class="container">
+        <h1>Informe Gastos</h1>
+    </div>
+
+    <section class="">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md">
+                    <h2>Gastos totales</h2>
+                    <form>
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="monthSelectStock1" onchange="updateCharts(1)">
+                                        <option value="1">Enero</option>
+                                        <option value="2">Febrero</option>
+                                        <option value="3">Marzo</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Mayo</option>
+                                        <option value="6">Junio</option>
+                                        <option value="7">Julio</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="yearSelectStock1" onchange="updateCharts(1)">
+                                        {% for year in years %}
+                                            <option value="{{ year }}">{{ year }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <p class="lead">Vs.</p>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="monthSelectStock2" onchange="updateCharts(2)">
+                                        <option value="1">Enero</option>
+                                        <option value="2">Febrero</option>
+                                        <option value="3">Marzo</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Mayo</option>
+                                        <option value="6">Junio</option>
+                                        <option value="7">Julio</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="yearSelectStock2" onchange="updateCharts(2)">
+                                        {% for year in years %}
+                                            <option value="{{ year }}">{{ year }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div style="width: 100%; max-width: 1200px; margin: 0 auto; max-height: 600px; height: 500px">
+                        <canvas id="stockVersusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="p-5">
+        <div class="container">
+            <!-- Gráficas comparativas -->
+            <div class="row text-center align-items-center m-4">
+                <div class="col-md d-flex flex-column align-items-center">
+                    <h2>Gastos por categoría</h2>
+                    <div style="width: 100%; max-width: 1200px; margin: 0 auto; max-height: 600px; height: 500px">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="p-5">
+        <div class="container">
+            <div class="row text-center align-items-center">
+                <div class="col-md d-flex flex-column align-items-center">
+                    <h2 id="percTitle1">Porcentaje por categoría</h2>
+                    <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
+                        <canvas id="percentageChart1"></canvas>
+                    </div>
+                </div>
+                <div class="col-md d-flex flex-column align-items-center">
+                    <h2 id="percTitle2">Porcentaje por categoría</h2>
+                    <div style="width: 100%; max-width: 600px; max-height: 600px; height: 500px">
+                        <canvas id="percentageChart2"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let stockVersusCanvas = document.getElementById('stockVersusChart').getContext('2d');
+
+        const data = {
+            labels: ['Paso 1', 'Paso 2', 'Paso 3'],
+            datasets: [
+                {
+                    label: '',
+                    data: [],
+                    borderColor: 'rgba(54, 162, 235, 0.2)',
+                    backgroundColor: 'rgba(54, 162, 235, 1)',
+
+                    yAxisID: 'y',
+                },
+                {
+                    label: '',
+                    data: [],
+                    borderColor: 'rgba(255, 99, 132, 0.2)',
+                    backgroundColor: 'rgba(255, 99, 132, 1)',
+                    yAxisID: 'y',
+                }
+            ]
+        };
+
+        let stockVersus = new Chart(stockVersusCanvas, {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                tension: 0,
+                stacked: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: false,
+                        position: 'right',
+
+                        // grid line settings
+                        grid: {
+                            drawOnChartArea: false, // only want the grid lines for one axis to show up
+                        },
+                    },
+                }
+            },
+        })
+
+        // Obtén el contexto del canvas
+        var ctx = document.getElementById('categoryChart').getContext('2d');
+
+        // Define los datos para las barras
+        var datos = {
+            labels: ['Eléctricos', 'Plomería', 'Oficina', 'Limpieza'],
+            datasets: [
+                {
+                    label: '',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.4, // Ajusta el ancho de las barras
+                    data: [] // Datos para la Barra 1
+                },
+                {
+                    label: '',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.4, // Ajusta el ancho de las barras
+                    data: [] // Datos para la Barra 2
+                }
+            ]
+        };
+
+        // Configura la gráfica de barras
+        var config = {
+            type: 'bar',
+            data: datos,
+            options: {
+
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    x: {
+                        stacked: false // No apila las barras horizontalmente
+                    },
+                    y: {
+                        stacked: false // No apila las barras verticalmente
+                    }
+                }
+            }
+        };
+
+        // Crea la instancia de la gráfica
+        var barGraph = new Chart(ctx, config);
+        let colors = ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)'];
+        let percentageCanvas = document.getElementById('percentageChart1').getContext('2d');
+        let percentageCanvas1 = document.getElementById('percentageChart2').getContext('2d');
+        let categories = ['Eléctricos', 'Plomería', 'Oficina', 'Limpieza']
+        const percentageInventory1 = new Chart(percentageCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: '%',
+                    data: [],
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.2', '1')),
+                    borderWidth: 1,
+                }],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            }
+        })
+        const percentageInventory2 = new Chart(percentageCanvas1, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: '%',
+                    data: [],
+                    backgroundColor: colors,
+                    borderColor: colors.map(color => color.replace('0.2', '1')),
+                    borderWidth: 1,
+                }],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            }
+        })
+
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+        function getExpensesData(index) {
+            let csrftoken = getCookie('csrftoken');
+            let month = document.getElementById("monthSelectStock" + index);
+            let year = document.getElementById("yearSelectStock" + index);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'getExpensesMonth' %}",
+                data: {
+                    "month": month.options[month.selectedIndex].value,
+                    "year": year.options[year.selectedIndex].value,
+                    'csrfmiddlewaretoken': csrftoken,
+                },
+                success: function (response) {
+                    if (index === 1) {
+                        stockVersus.data.datasets[0].data = JSON.parse(response.data)
+                        stockVersus.data.datasets[0].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+                        stockVersus.update()
+                    } else {
+                        stockVersus.data.datasets[1].data = JSON.parse(response.data)
+                        stockVersus.data.datasets[1].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+                        stockVersus.update()
+                    }
+                    stockVersus.data.labels = response.labels.split(',')
+
+                },
+                error: function (error) {
+                    console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+                }
+            });
+        }
+
+        function GetExpensesPercentageData(index) {
+            console.log("llamando....")
+            let csrftoken = getCookie('csrftoken');
+            let month = document.getElementById("monthSelectStock" + index);
+            let year = document.getElementById("yearSelectStock" + index);
+            let title = document.getElementById("percTitle" + index);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'getExpensesPercentages' %}",
+                data: {
+                    "month": month.options[month.selectedIndex].value,
+                    "year": year.options[year.selectedIndex].value,
+                    'csrfmiddlewaretoken': csrftoken,
+                },
+                success: function (response) {
+                    console.log("todo bien")
+                    console.log(JSON.parse(response.data))
+                    //update the current data with the new response
+                    if (index === 1) {
+                        percentageInventory1.data.datasets[0].data = JSON.parse(response.data)
+                        percentageInventory1.update()
+                    } else {
+                        percentageInventory2.data.datasets[0].data = JSON.parse(response.data)
+                        percentageInventory2.update()
+                    }
+                    title.innerHTML = "Porcentaje por categoría en " + month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+                },
+                error: function (error) {
+                    console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+                }
+            });
+        }
+
+        function getExpensesPerCategoryData(index) {
+            let csrftoken = getCookie('csrftoken');
+            let month = document.getElementById("monthSelectStock" + index);
+            let year = document.getElementById("yearSelectStock" + index);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'getExpensesPerCategory' %}",
+                data: {
+                    "month": month.options[month.selectedIndex].value,
+                    "year": year.options[year.selectedIndex].value,
+                    'csrfmiddlewaretoken': csrftoken,
+                },
+                success: function (response) {
+                    if (index === 1) {
+                        barGraph.data.datasets[0].data = JSON.parse(response.data)
+                        barGraph.data.datasets[0].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+
+                    } else {
+                        barGraph.data.datasets[1].data = JSON.parse(response.data)
+                        barGraph.data.datasets[1].label = month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+                    }
+                    barGraph.update()
+                },
+                error: function (error) {
+                    console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
+                }
+            });
+        }
+
+
+        function updateCharts(index) {
+            getExpensesData(index);
+            getExpensesPerCategoryData(index);
+            GetExpensesPercentageData(index);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            let today = new Date();
+            let currentMonth = today.getMonth() + 1; // Añadimos 1 porque los meses en JavaScript son base 0
+            let currentYear = today.getFullYear();
+
+            // Establecer los valores seleccionados por defecto
+            document.getElementById('monthSelectStock1').value = currentMonth;
+            document.getElementById('monthSelectStock2').value = currentMonth - 1;
+            document.getElementById('yearSelectStock1').value = currentYear;
+            document.getElementById('yearSelectStock2').value = currentYear;
+            updateCharts(1);
+            updateCharts(2);
+        });
+
+    </script>
+
+    </body>
+    </html>
+{% endblock content %}

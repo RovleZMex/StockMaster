@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Views &mdash; StockMaster 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Product Model" href="models.html" />
+    <link rel="prev" title="Welcome to StockMaster’s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            StockMaster
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inventory Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-Dashboard.views">Dashboard Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-OutputHistory.views">Orders Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-Charts.views">Graphs Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Product Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html#module-Workers.models">Worker Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html#module-InputHistory.models">Input Order Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html#module-OutputHistory.models">Output Order Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">StockMaster</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inventory Views</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/views.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-Inventory.views">
+<span id="inventory-views"></span><h1>Inventory Views<a class="headerlink" href="#module-Inventory.views" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.AddLastDate">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">AddLastDate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filteredLabels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filteredList</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#AddLastDate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.AddLastDate" title="Permalink to this definition"></a></dt>
+<dd><p>Add the last date to the lists of labels and filtered data.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>filteredLabels: List of labels.
+filteredList: List of filtered data.
+month: Current month.
+year: Current year.
+product: Product object.
+attribute: Attribute to be added.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Modified lists of labels and filtered data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.AddProduct">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">AddProduct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#AddProduct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.AddProduct" title="Permalink to this definition"></a></dt>
+<dd><p>Add a new product based on the form data.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>JSON response indicating the success or failure of the product addition.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.AddProducts">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">AddProducts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#AddProducts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.AddProducts" title="Permalink to this definition"></a></dt>
+<dd><p>Render the ‘add-product’ page and process the form data for adding products.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Rendered ‘add-product’ page.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.CreateOrderItem">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">CreateOrderItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">product_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#CreateOrderItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.CreateOrderItem" title="Permalink to this definition"></a></dt>
+<dd><p>Create an order item based on the product data.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>product_data: Dictionary containing product data.
+order: InputOrder object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.DeleteLeftFromSequence">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">DeleteLeftFromSequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#DeleteLeftFromSequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.DeleteLeftFromSequence" title="Permalink to this definition"></a></dt>
+<dd><p>Delete a sequence from the left side of a text.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>text: Text string.
+sequence: Sequence to be deleted.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Modified text string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.EditProduct">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">EditProduct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">productid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#EditProduct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.EditProduct" title="Permalink to this definition"></a></dt>
+<dd><p>Render the product edit page and process the form data for updating product information.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.
+productid: ID of the product to be edited.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Rendered product edit page.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.FilterInventory">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">FilterInventory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#FilterInventory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.FilterInventory" title="Permalink to this definition"></a></dt>
+<dd><p>Filter the products in the inventory based on different criteria.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Rendered HTML page with filtered products.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.FilterSameDates">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">FilterSameDates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">otherList</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#FilterSameDates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.FilterSameDates" title="Permalink to this definition"></a></dt>
+<dd><p>Filter out the same dates from the lists of labels and other data.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>labels: List of labels.
+otherList: List of other data.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Filtered lists of labels and other data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.GetProductPriceData">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">GetProductPriceData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#GetProductPriceData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.GetProductPriceData" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve product price data for a specific month and year.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>JSON response with the product price data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.GetProductQuantityData">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">GetProductQuantityData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#GetProductQuantityData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.GetProductQuantityData" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve product quantity data for a specific month and year.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>JSON response with the product quantity data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.HandleProductData">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">HandleProductData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#HandleProductData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.HandleProductData" title="Permalink to this definition"></a></dt>
+<dd><p>Handle the data for multiple products received from the frontend.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>JSON response indicating the success or failure of handling the product data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.Inventory">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">Inventory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#Inventory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.Inventory" title="Permalink to this definition"></a></dt>
+<dd><p>Render the inventory page with products filtered by the search query.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Rendered HTML page with filtered products.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.MapCategory">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">MapCategory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#MapCategory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.MapCategory" title="Permalink to this definition"></a></dt>
+<dd><p>Map a value to a specific category.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>value: Value to be mapped.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Mapped category.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.ProductDetails">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">ProductDetails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">productid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#ProductDetails"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.ProductDetails" title="Permalink to this definition"></a></dt>
+<dd><p>Renders the product details page for a specific product.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request (HttpRequest): The HTTP request.
+productid (int): The ID of the product.</p>
+</dd>
+<dt>Returns:</dt><dd><p>HttpResponse: The rendered product details page with information about the specified product.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.ProductGraph">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">ProductGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">productid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#ProductGraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.ProductGraph" title="Permalink to this definition"></a></dt>
+<dd><p>Render the product graph page with historical data of the product.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.
+productid: ID of the product.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Rendered product graph page.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.RemoveAccents">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">RemoveAccents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#RemoveAccents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.RemoveAccents" title="Permalink to this definition"></a></dt>
+<dd><p>Remove accents from a given string.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>input_str: Input string.</p>
+</dd>
+<dt>Returns:</dt><dd><p>String without accents.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.VerifyAndUpdate">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">VerifyAndUpdate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">product</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#VerifyAndUpdate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.VerifyAndUpdate" title="Permalink to this definition"></a></dt>
+<dd><p>Verify and update product information.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>product: Dictionary containing product information.</p>
+</dd>
+<dt>Returns:</dt><dd><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Inventory.views.VerifyProductForm">
+<span class="sig-prename descclassname"><span class="pre">Inventory.views.</span></span><span class="sig-name descname"><span class="pre">VerifyProductForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Inventory/views.html#VerifyProductForm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Inventory.views.VerifyProductForm" title="Permalink to this definition"></a></dt>
+<dd><p>Verify if the product form contains the required fields.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request: HTTP request object.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Boolean indicating whether the form is valid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-Dashboard.views">
+<span id="dashboard-views"></span><h1>Dashboard Views<a class="headerlink" href="#module-Dashboard.views" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="Dashboard.views.Dashboard">
+<span class="sig-prename descclassname"><span class="pre">Dashboard.views.</span></span><span class="sig-name descname"><span class="pre">Dashboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Dashboard/views.html#Dashboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Dashboard.views.Dashboard" title="Permalink to this definition"></a></dt>
+<dd><p>Displays the dashboard with various statistics and data about products, orders, and more.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>A rendered dashboard page with relevant statistics and data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Dashboard.views.LoginPage">
+<span class="sig-prename descclassname"><span class="pre">Dashboard.views.</span></span><span class="sig-name descname"><span class="pre">LoginPage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Dashboard/views.html#LoginPage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Dashboard.views.LoginPage" title="Permalink to this definition"></a></dt>
+<dd><p>Displays the login page or redirects to the dashboard if the user is already authenticated.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>A rendered login page or a redirection to the dashboard if the user is already logged in.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Dashboard.views.LogoutPage">
+<span class="sig-prename descclassname"><span class="pre">Dashboard.views.</span></span><span class="sig-name descname"><span class="pre">LogoutPage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Dashboard/views.html#LogoutPage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Dashboard.views.LogoutPage" title="Permalink to this definition"></a></dt>
+<dd><p>Logs out the user and redirects to the login page.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Redirection to the login page.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Dashboard.views.RemoveAccents">
+<span class="sig-prename descclassname"><span class="pre">Dashboard.views.</span></span><span class="sig-name descname"><span class="pre">RemoveAccents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Dashboard/views.html#RemoveAccents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Dashboard.views.RemoveAccents" title="Permalink to this definition"></a></dt>
+<dd><p>Removes accents from a string.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>input_str (str): The string from which to remove accents.</p>
+</dd>
+<dt>Returns:</dt><dd><p>str: The string without accents.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Dashboard.views.Workers">
+<span class="sig-prename descclassname"><span class="pre">Dashboard.views.</span></span><span class="sig-name descname"><span class="pre">Workers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Dashboard/views.html#Workers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Dashboard.views.Workers" title="Permalink to this definition"></a></dt>
+<dd><p>Displays a list of workers and provides a search functionality.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>A rendered workers page with a list of workers and search functionality.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-OutputHistory.views">
+<span id="orders-views"></span><h1>Orders Views<a class="headerlink" href="#module-OutputHistory.views" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="OutputHistory.views.InputHistory">
+<span class="sig-prename descclassname"><span class="pre">OutputHistory.views.</span></span><span class="sig-name descname"><span class="pre">InputHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/OutputHistory/views.html#InputHistory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#OutputHistory.views.InputHistory" title="Permalink to this definition"></a></dt>
+<dd><p>Displays the input history page with search and date range filtering.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>A rendered input history page with search and date range filtering.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="OutputHistory.views.OutputHistory">
+<span class="sig-prename descclassname"><span class="pre">OutputHistory.views.</span></span><span class="sig-name descname"><span class="pre">OutputHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/OutputHistory/views.html#OutputHistory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#OutputHistory.views.OutputHistory" title="Permalink to this definition"></a></dt>
+<dd><p>Displays the output history page with search and date range filtering.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>A rendered output history page with search and date range filtering.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="OutputHistory.views.RemoveAccents">
+<span class="sig-prename descclassname"><span class="pre">OutputHistory.views.</span></span><span class="sig-name descname"><span class="pre">RemoveAccents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/OutputHistory/views.html#RemoveAccents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#OutputHistory.views.RemoveAccents" title="Permalink to this definition"></a></dt>
+<dd><p>Removes accents from a string.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>input_str (str): The string from which to remove accents.</p>
+</dd>
+<dt>Returns:</dt><dd><p>str: The string without accents.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-Charts.views">
+<span id="graphs-views"></span><h1>Graphs Views<a class="headerlink" href="#module-Charts.views" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="Charts.views.GetStockMonth">
+<span class="sig-prename descclassname"><span class="pre">Charts.views.</span></span><span class="sig-name descname"><span class="pre">GetStockMonth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Charts/views.html#GetStockMonth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Charts.views.GetStockMonth" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieves the stock data for a specific month and year.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request (HttpRequest): The HTTP request.</p>
+</dd>
+<dt>Returns:</dt><dd><p>JsonResponse: The stock data for the specified month and year.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Charts.views.ReportCharts">
+<span class="sig-prename descclassname"><span class="pre">Charts.views.</span></span><span class="sig-name descname"><span class="pre">ReportCharts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Charts/views.html#ReportCharts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Charts.views.ReportCharts" title="Permalink to this definition"></a></dt>
+<dd><p>Renders the report charts page with data visualizations for product categories.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>request (HttpRequest): The HTTP request.</p>
+</dd>
+<dt>Returns:</dt><dd><p>HttpResponse: The rendered report charts page with data from the current month and year
+visualizations for product categories.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to StockMaster’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="models.html" class="btn btn-neutral float-right" title="Product Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, StockMaster.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

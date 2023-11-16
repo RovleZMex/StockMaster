@@ -79,7 +79,7 @@ def ExpensesCharts(request):
     context = {
         'years': range(2023, datetime.now().year + 1)
     }
-    return render(request, 'expenses-graph.html', context)
+    return render(request, 'report-expCharts.html', context)
 
 
 @login_required(login_url='login')

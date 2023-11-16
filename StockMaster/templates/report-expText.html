@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block content %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Informe Gastos</title>
+        <style>
+            .tableRoundedm {
+                border-radius: 10px;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+    <!-- Navbar tabs -->
+    <section class="p-5">
+        <div class="container">
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button">Gráficos</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Inventario</a></li>
+                        <li><a class="dropdown-item" href="#">Gastos</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
+                       role="button">Textual</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Inventario</a></li>
+                        <li><a class="dropdown-item" href="{% url 'textExpense' %}">Gastos</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Month & year select -->
+    <section class="">
+        <div class="container">
+        </div>
+        <div class="container text-center">
+
+            <form id="myForm" action="{% url 'textExpense' %}" method="post">
+                {% csrf_token %}
+                <div class="d-inline-block">
+                    <select class="form-select" id="monthSelect" name="month" onchange="">
+                        <option value="1" {% if month == 1 %} selected {% endif %}>Enero</option>
+                        <option value="2" {% if month == 2 %} selected {% endif %}>Febrero</option>
+                        <option value="3" {% if month == 3 %} selected {% endif %}>Marzo</option>
+                        <option value="4" {% if month == 4 %} selected {% endif %}>Abril</option>
+                        <option value="5" {% if month == 5 %} selected {% endif %}>Mayo</option>
+                        <option value="6" {% if month == 6 %} selected {% endif %}>Junio</option>
+                        <option value="7" {% if month == 7 %} selected {% endif %}>Julio</option>
+                        <option value="8" {% if month == 8 %} selected {% endif %}>Agosto</option>
+                        <option value="9" {% if month == 9 %} selected {% endif %}>Septiembre</option>
+                        <option value="10" {% if month == 10 %} selected {% endif %}>Octubre</option>
+                        <option value="11" {% if month == 11 %} selected {% endif %}>Noviembre</option>
+                        <option value="12" {% if month == 12 %} selected {% endif %}>Diciembre</option>
+                    </select>
+                </div>
+                <div class="d-inline-block">
+                    <select class="form-select" id="yearSelect" name="year" onchange="">
+                        {% for year in years %}
+                            <option value="{{ year }}" {% if forloop.counter1 == year %}
+                                    selected {% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                <a href="#" id="verPDF" class="btn btn-info" target="_blank">Ver reporte <i
+                        class="bi bi-filetype-pdf"></i></a>
+            </form>
+        </div>
+    </section>
+    <!-- Cards -->
+    <section class="pt-4 pb-2">
+        <div class="container d-flex flex-row justify-content-around">
+            <div class="card text-center align-items-center"
+                 style="width: 18rem; display: flex; flex-direction: column; justify-content: center;">
+                <h5 class="card-title mt-2"># de ordenes en el mes</h5>
+                <h1>{{ totalOrders }}</h1>
+            </div>
+            <div class="card text-center align-items-center"
+                 style="width: 18rem; display: flex; flex-direction: column; justify-content: center;">
+                <h5 class="card-title mt-2">Gastos totales del mes</h5>
+                <h1>${{ totalExpense }} M.N.</h1>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Main table -->
+    <section>
+        <div class="container">
+            {% for order in orders %}
+                <h3>Folio: #{{ order.id }} Fecha de creacion de la orden: {{ order.date_created.date }}</h3>
+                <table class="table mt-3 table-hover tableRoundedm">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>SKU</th>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for order_item in order.GetItems %}
+                        <tr>
+                            <td>{{ order_item.product.SKU }}</td>
+                            <td>{{ order_item.product.name }}</td>
+                            <td>{{ order_item.quantity }}</td>
+                            <td>$ {{ order_item.product.price }} M.N</td>
+                            <td>$ {{ order_item.getSubtotal }} M.N.</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="table-primary">
+                        <td colspan="5" align="center">Valor total de la órden: ${{ order.GetTotal }} M.N.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            {% endfor %}
+        </div>
+    </section>
+    <!-- Scripts -->
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+
+
+    </body>
+    </html>
+{% endblock content %}

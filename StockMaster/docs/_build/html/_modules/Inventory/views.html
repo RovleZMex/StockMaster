@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory.views &mdash; StockMaster 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            StockMaster
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html">Inventory Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html#module-Dashboard.views">Dashboard Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html#module-OutputHistory.views">Orders Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/views.html#module-Charts.views">Graphs Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html">Product Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html#module-Workers.models">Worker Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html#module-InputHistory.models">Input Order Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/models.html#module-OutputHistory.models">Output Order Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">StockMaster</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Inventory.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Inventory.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">calendar</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">unicodedata</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">ObjectDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">django.core.files.storage</span> <span class="kn">import</span> <span class="n">default_storage</span>
+<span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">JsonResponse</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">get_object_or_404</span><span class="p">,</span> <span class="n">redirect</span>
+
+<span class="kn">from</span> <span class="nn">InputHistory.models</span> <span class="kn">import</span> <span class="n">InputOrder</span><span class="p">,</span> <span class="n">InputOrderItem</span>
+<span class="kn">from</span> <span class="nn">Product.models</span> <span class="kn">import</span> <span class="n">Product</span>
+
+
+<div class="viewcode-block" id="Inventory"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.Inventory">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">Inventory</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Render the inventory page with products filtered by the search query.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Rendered HTML page with filtered products.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allProducts</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+
+    <span class="n">searchQuery</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="n">searchCondition</span> <span class="o">=</span> <span class="n">Q</span><span class="p">()</span>
+
+    <span class="n">searchQuery</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">searchQuery</span><span class="p">:</span>
+        <span class="n">searchCondition</span> <span class="o">=</span> <span class="n">searchCondition</span> <span class="o">&amp;</span> <span class="n">Q</span><span class="p">(</span><span class="n">name__icontains</span><span class="o">=</span><span class="n">searchQuery</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">SKU__icontains</span><span class="o">=</span><span class="n">searchQuery</span><span class="p">)</span>
+
+    <span class="n">filteredProducts</span> <span class="o">=</span> <span class="n">allProducts</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">searchCondition</span><span class="p">)</span>
+
+    <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">filteredProducts</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">products</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;inventory.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="n">products</span><span class="p">,</span> <span class="s1">&#39;searchQuery&#39;</span><span class="p">:</span> <span class="n">searchQuery</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="FilterInventory"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.FilterInventory">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">FilterInventory</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter the products in the inventory based on different criteria.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Rendered HTML page with filtered products.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">searchQuery</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;search&quot;</span><span class="p">)</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+    <span class="n">stock</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stock&quot;</span><span class="p">)</span>
+
+    <span class="n">allProducts</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">searchQuery</span><span class="p">:</span>
+        <span class="n">searchQuery_normalized</span> <span class="o">=</span> <span class="n">RemoveAccents</span><span class="p">(</span><span class="n">searchQuery</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">allProducts</span> <span class="o">=</span> <span class="n">allProducts</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">name__icontains</span><span class="o">=</span><span class="n">searchQuery_normalized</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">SKU__icontains</span><span class="o">=</span><span class="n">searchQuery_normalized</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">category</span><span class="p">:</span>
+        <span class="n">allProducts</span> <span class="o">=</span> <span class="n">allProducts</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">stock</span> <span class="o">==</span> <span class="s2">&quot;low-stock-inventory&quot;</span><span class="p">:</span>
+        <span class="n">lowStock</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">product</span> <span class="ow">in</span> <span class="n">allProducts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">product</span><span class="o">.</span><span class="n">isLowStock</span><span class="p">()</span> <span class="ow">and</span> <span class="n">product</span><span class="o">.</span><span class="n">quantity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lowStock</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product</span><span class="p">)</span>
+        <span class="n">allProducts</span> <span class="o">=</span> <span class="n">lowStock</span>
+    <span class="k">elif</span> <span class="n">stock</span> <span class="o">==</span> <span class="s2">&quot;good-stock-inventory&quot;</span><span class="p">:</span>
+        <span class="n">goodStock</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">product</span> <span class="ow">in</span> <span class="n">allProducts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">product</span><span class="o">.</span><span class="n">isLowStock</span><span class="p">():</span>
+                <span class="n">goodStock</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product</span><span class="p">)</span>
+        <span class="n">allProducts</span> <span class="o">=</span> <span class="n">goodStock</span>
+    <span class="k">elif</span> <span class="n">stock</span> <span class="o">==</span> <span class="s2">&quot;no-stock-inventory&quot;</span><span class="p">:</span>
+        <span class="n">noStock</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">product</span> <span class="ow">in</span> <span class="n">allProducts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">product</span><span class="o">.</span><span class="n">quantity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">noStock</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product</span><span class="p">)</span>
+        <span class="n">allProducts</span> <span class="o">=</span> <span class="n">noStock</span>
+    <span class="n">paginator</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">allProducts</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">)</span>
+    <span class="n">products</span> <span class="o">=</span> <span class="n">paginator</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;inventory.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="n">products</span><span class="p">,</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="AddProducts"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.AddProducts">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">AddProducts</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Render the &#39;add-product&#39; page and process the form data for adding products.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Rendered &#39;add-product&#39; page.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allProducts</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s2">&quot;productname&quot;</span><span class="p">))</span>  <span class="c1"># GETS THE LIST OF PRODUCTS</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s2">&quot;quantity&quot;</span><span class="p">))</span>  <span class="c1"># GETS THE LIST OF QUANTITIES</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="n">allProducts</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;add-product.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EditProduct"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.EditProduct">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">EditProduct</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">productid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Render the product edit page and process the form data for updating product information.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+<span class="sd">        productid: ID of the product to be edited.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Rendered product edit page.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Product</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">productid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nombreProducto&quot;</span><span class="p">)</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cantidadProducto&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">product</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">[</span><span class="s1">&#39;imagenProducto&#39;</span><span class="p">]</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">MapCategory</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;categoriaProducto&quot;</span><span class="p">))</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">isExternal</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;compradoPorFuera&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;on&#39;</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bajoUmbralProducto&quot;</span><span class="p">)</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">price</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;productPrice&quot;</span><span class="p">)</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;productDetails&#39;</span><span class="p">,</span> <span class="n">product</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;product&#39;</span><span class="p">:</span> <span class="n">product</span><span class="p">,</span>
+               <span class="s1">&#39;ind&#39;</span><span class="p">:</span> <span class="n">productid</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;product-edit.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProductGraph"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.ProductGraph">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">ProductGraph</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">productid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Render the product graph page with historical data of the product.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+<span class="sd">        productid: ID of the product.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Rendered product graph page.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Product</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">productid</span><span class="p">)</span>
+
+    <span class="n">year</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">year</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;years&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="n">year</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;product&#39;</span><span class="p">:</span> <span class="n">product</span><span class="p">,</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([]),</span>
+        <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;placeholder&#39;</span><span class="p">]),</span>
+        <span class="s1">&#39;priceData&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([]),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;product-graph.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProductDetails"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.ProductDetails">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">ProductDetails</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">productid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renders the product details page for a specific product.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): The HTTP request.</span>
+<span class="sd">        productid (int): The ID of the product.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: The rendered product details page with information about the specified product.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Product</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">productid</span><span class="p">)</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;product&#39;</span><span class="p">:</span> <span class="n">product</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;product-details.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GetProductPriceData"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.GetProductPriceData">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">GetProductPriceData</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve product price data for a specific month and year.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        JSON response with the product price data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;month&quot;</span><span class="p">))</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">))</span>
+        <span class="n">productid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;productid&quot;</span><span class="p">)</span>
+        <span class="n">product</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">productid</span><span class="p">)</span>
+
+        <span class="n">filteredPrices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">filteredLabels</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="n">month</span><span class="p">:</span>
+            <span class="n">daysRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">day</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">month</span> <span class="ow">or</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">year</span><span class="p">:</span>
+            <span class="n">daysRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">daysRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">calendar</span><span class="o">.</span><span class="n">monthrange</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">daysRange</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Día </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">filteredPrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">as_of</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">price</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ObjectDoesNotExist</span><span class="p">:</span>
+                <span class="n">filteredPrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">filteredPrices</span><span class="p">),</span>
+            <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filteredLabels</span><span class="p">),</span>
+        <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="GetProductQuantityData"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.GetProductQuantityData">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">GetProductQuantityData</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve product quantity data for a specific month and year.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        JSON response with the product quantity data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;month&quot;</span><span class="p">))</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">))</span>
+        <span class="n">productid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;productid&quot;</span><span class="p">)</span>
+        <span class="n">product</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">productid</span><span class="p">)</span>
+
+        <span class="n">filteredQuantities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">filteredLabels</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="n">month</span><span class="p">:</span>
+            <span class="n">daysRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">day</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">month</span> <span class="ow">or</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">year</span><span class="p">:</span>
+            <span class="n">daysRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">daysRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">calendar</span><span class="o">.</span><span class="n">monthrange</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">daysRange</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Día </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">filteredQuantities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">as_of</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ObjectDoesNotExist</span><span class="p">:</span>
+                <span class="n">filteredQuantities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">filteredQuantities</span><span class="p">),</span>
+            <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filteredLabels</span><span class="p">),</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Error, verifica los datos.&#39;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AddProduct"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.AddProduct">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">AddProduct</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a new product based on the form data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        JSON response indicating the success or failure of the product addition.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">VerifyProductForm</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nombreProducto&#39;</span><span class="p">)</span>
+            <span class="n">quantity</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bajoUmbralProducto&#39;</span><span class="p">)</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;categoriaProducto&#39;</span><span class="p">)</span>
+            <span class="n">SKU</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SKU&#39;</span><span class="p">)</span>
+            <span class="n">price</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+            <span class="n">is_external</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;compradoPorFuera&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+            <span class="n">new_product</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">quantity</span><span class="o">=</span><span class="n">quantity</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+                <span class="n">isExternal</span><span class="o">=</span><span class="n">is_external</span><span class="p">,</span>
+                <span class="n">SKU</span><span class="o">=</span><span class="n">SKU</span><span class="p">,</span>
+                <span class="n">price</span><span class="o">=</span><span class="n">price</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;imagenProducto&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">:</span>
+                <span class="n">imagen</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">[</span><span class="s1">&#39;imagenProducto&#39;</span><span class="p">]</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">default_storage</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">imagen</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">imagen</span><span class="p">)</span>
+                <span class="n">new_product</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">file_name</span>
+                <span class="n">new_product</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;newProduct&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">new_product</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="n">new_product</span><span class="o">.</span><span class="n">price</span><span class="p">,</span>
+                    <span class="s1">&#39;isExternal&#39;</span><span class="p">:</span> <span class="n">new_product</span><span class="o">.</span><span class="n">isExternal</span><span class="p">,</span>
+                    <span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="n">new_product</span><span class="o">.</span><span class="n">SKU</span>
+                <span class="p">}</span>
+            <span class="p">})</span>
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Error, verifica los datos.&#39;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HandleProductData"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.HandleProductData">[docs]</a><span class="nd">@login_required</span><span class="p">(</span><span class="n">login_url</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">HandleProductData</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle the data for multiple products received from the frontend.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        JSON response indicating the success or failure of handling the product data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">products_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;productsData&#39;</span><span class="p">)</span>  <span class="c1"># Aquí se obtienen los datos de los productos del frontend</span>
+
+        <span class="n">products_data_list</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">products_data</span><span class="p">)</span>
+
+        <span class="n">newOrder</span> <span class="o">=</span> <span class="n">InputOrder</span><span class="p">()</span>
+        <span class="n">newOrder</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">product_data</span> <span class="ow">in</span> <span class="n">products_data_list</span><span class="p">:</span>
+            <span class="n">VerifyAndUpdate</span><span class="p">(</span><span class="n">product_data</span><span class="p">)</span>
+            <span class="n">CreateOrderItem</span><span class="p">(</span><span class="n">product_data</span><span class="p">,</span> <span class="n">newOrder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Datos de productos recibidos con éxito&#39;</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Error al procesar la solicitud&#39;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VerifyProductForm"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.VerifyProductForm">[docs]</a><span class="k">def</span> <span class="nf">VerifyProductForm</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verify if the product form contains the required fields.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: HTTP request object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Boolean indicating whether the form is valid.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;nombreProducto&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;price&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;SKU&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="VerifyAndUpdate"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.VerifyAndUpdate">[docs]</a><span class="k">def</span> <span class="nf">VerifyAndUpdate</span><span class="p">(</span><span class="n">product</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verify and update product information.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        product: Dictionary containing product information.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">product</span><span class="p">[</span><span class="s2">&quot;productName&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">name1</span> <span class="o">=</span> <span class="n">DeleteLeftFromSequence</span><span class="p">(</span><span class="n">product</span><span class="p">[</span><span class="s2">&quot;productName&quot;</span><span class="p">],</span> <span class="s2">&quot; - &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">dbProduct</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SKU</span><span class="o">=</span><span class="n">name1</span><span class="p">)</span>
+    <span class="n">dbProduct</span><span class="o">.</span><span class="n">isExternal</span> <span class="o">=</span> <span class="n">product</span><span class="p">[</span><span class="s1">&#39;isExternal&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">product</span><span class="p">[</span><span class="s1">&#39;quantityType&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;unidades&quot;</span><span class="p">:</span>
+        <span class="n">dbProduct</span><span class="o">.</span><span class="n">quantity</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">product</span><span class="p">[</span><span class="s1">&#39;quantity&#39;</span><span class="p">])</span>
+        <span class="n">dbProduct</span><span class="o">.</span><span class="n">price</span> <span class="o">=</span> <span class="n">product</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dbProduct</span><span class="o">.</span><span class="n">quantity</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">product</span><span class="p">[</span><span class="s1">&#39;quantity&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">product</span><span class="p">[</span><span class="s1">&#39;unitsPerBox&#39;</span><span class="p">])</span>
+        <span class="n">dbProduct</span><span class="o">.</span><span class="n">price</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">product</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">product</span><span class="p">[</span><span class="s1">&#39;unitsPerBox&#39;</span><span class="p">])</span>
+    <span class="n">dbProduct</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CreateOrderItem"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.CreateOrderItem">[docs]</a><span class="k">def</span> <span class="nf">CreateOrderItem</span><span class="p">(</span><span class="n">product_data</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create an order item based on the product data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        product_data: Dictionary containing product data.</span>
+<span class="sd">        order: InputOrder object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">product_data</span><span class="p">[</span><span class="s2">&quot;productName&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SKU</span><span class="o">=</span><span class="n">DeleteLeftFromSequence</span><span class="p">(</span><span class="n">product_data</span><span class="p">[</span><span class="s2">&quot;productName&quot;</span><span class="p">],</span> <span class="s2">&quot; - &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">product_data</span><span class="p">[</span><span class="s1">&#39;quantityType&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;unidades&quot;</span><span class="p">:</span>
+        <span class="n">quantity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">product_data</span><span class="p">[</span><span class="s1">&#39;quantity&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">quantity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">product_data</span><span class="p">[</span><span class="s1">&#39;quantity&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">product_data</span><span class="p">[</span><span class="s1">&#39;unitsPerBox&#39;</span><span class="p">])</span>
+    <span class="n">InputOrderItem</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">product</span><span class="p">,</span>
+        <span class="n">quantity</span><span class="o">=</span><span class="n">quantity</span><span class="p">,</span>
+        <span class="n">inputOrder</span><span class="o">=</span><span class="n">order</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DeleteLeftFromSequence"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.DeleteLeftFromSequence">[docs]</a><span class="k">def</span> <span class="nf">DeleteLeftFromSequence</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete a sequence from the left side of a text.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text: Text string.</span>
+<span class="sd">        sequence: Sequence to be deleted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Modified text string.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">text</span><span class="p">[(</span><span class="n">index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)):]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">text</span></div>
+
+
+<div class="viewcode-block" id="RemoveAccents"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.RemoveAccents">[docs]</a><span class="k">def</span> <span class="nf">RemoveAccents</span><span class="p">(</span><span class="n">input_str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove accents from a given string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_str: Input string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        String without accents.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nfkd_form</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;NFKD&#39;</span><span class="p">,</span> <span class="n">input_str</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">u</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">nfkd_form</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">combining</span><span class="p">(</span><span class="n">c</span><span class="p">)])</span></div>
+
+
+<div class="viewcode-block" id="FilterSameDates"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.FilterSameDates">[docs]</a><span class="k">def</span> <span class="nf">FilterSameDates</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">otherList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter out the same dates from the lists of labels and other data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        labels: List of labels.</span>
+<span class="sd">        otherList: List of other data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Filtered lists of labels and other data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filteredLabels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">filteredPrices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">filteredPrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">otherList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">filteredPrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">otherList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filteredLabels</span> <span class="o">=</span> <span class="n">labels</span>
+        <span class="n">filteredPrices</span> <span class="o">=</span> <span class="n">otherList</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filteredLabels</span><span class="p">,</span> <span class="n">filteredPrices</span></div>
+
+
+<div class="viewcode-block" id="AddLastDate"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.AddLastDate">[docs]</a><span class="k">def</span> <span class="nf">AddLastDate</span><span class="p">(</span><span class="n">filteredLabels</span><span class="p">,</span> <span class="n">filteredList</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add the last date to the lists of labels and filtered data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filteredLabels: List of labels.</span>
+<span class="sd">        filteredList: List of filtered data.</span>
+<span class="sd">        month: Current month.</span>
+<span class="sd">        year: Current year.</span>
+<span class="sd">        product: Product object.</span>
+<span class="sd">        attribute: Attribute to be added.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Modified lists of labels and filtered data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filteredLabels</span> <span class="o">=</span> <span class="n">filteredLabels</span>
+    <span class="n">filteredList</span> <span class="o">=</span> <span class="n">filteredList</span>
+    <span class="k">if</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="n">month</span><span class="p">:</span>
+        <span class="n">stringDay</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stringDay</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;0</span><span class="si">{</span><span class="n">stringDay</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stringDay</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s2">&quot;quantity&quot;</span><span class="p">:</span>
+            <span class="n">filteredList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s2">&quot;price&quot;</span><span class="p">:</span>
+            <span class="n">filteredList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product</span><span class="o">.</span><span class="n">price</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stringDay</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">calendar</span><span class="o">.</span><span class="n">monthrange</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stringDay</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;0</span><span class="si">{</span><span class="n">stringDay</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filteredLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stringDay</span><span class="p">)</span>
+        <span class="n">lastDateOfMonth</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">calendar</span><span class="o">.</span><span class="n">monthrange</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lastProduct</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">as_of</span><span class="p">(</span><span class="n">lastDateOfMonth</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s2">&quot;quantity&quot;</span><span class="p">:</span>
+                <span class="n">filteredList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lastProduct</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s2">&quot;price&quot;</span><span class="p">:</span>
+                <span class="n">filteredList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lastProduct</span><span class="o">.</span><span class="n">price</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Product</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="n">filteredLabels</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">filteredList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">filteredLabels</span><span class="p">,</span> <span class="n">filteredList</span></div>
+
+
+<div class="viewcode-block" id="MapCategory"><a class="viewcode-back" href="../../modules/views.html#Inventory.views.MapCategory">[docs]</a><span class="k">def</span> <span class="nf">MapCategory</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Map a value to a specific category.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Value to be mapped.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Mapped category.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">categories</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="s1">&#39;OFF&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="s1">&#39;CLE&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="s1">&#39;ELE&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="s1">&#39;PLU&#39;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">categories</span><span class="p">[</span><span class="n">value</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, StockMaster.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

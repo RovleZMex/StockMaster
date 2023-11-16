@@ -1,0 +1,19 @@
+# Fdb version 4
+["pdflatex"] 1699392500 "stockmaster.tex" "stockmaster.pdf" "stockmaster" 1699392513 2
+  "/Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/inputenc.sty" 1686341992 5048 4a74b0804469fbfae7849704c4687a07 ""
+  "/Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/report.cls" 1686341992 23203 eb8fb57cc7a1166aa455e38e2f887972 ""
+  "/Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/size10.clo" 1686341992 8448 74078c4a887f2cdcd57c3ec111622740 ""
+  "/Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/base/textcomp.sty" 1686341992 2894 3ac7bdb70dd9b75530be2ade2842c355 ""
+  "/Users/santiagorobles/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty" 1688845681 220504 169e62639b625d84e162873f334fc3b1 ""
+  "/Users/santiagorobles/Library/TinyTeX/texmf-dist/web2c/texmf.cnf" 1681165822 40967 d940221f8762fd5848760382d97d1226 ""
+  "/Users/santiagorobles/Library/TinyTeX/texmf-var/web2c/pdftex/pdflatex.fmt" 1696516200 6774472 dc6e4840a10b2ff797e696c70f68403c ""
+  "/Users/santiagorobles/Library/TinyTeX/texmf.cnf" 1695403614 708 85fd07691b6294ba94c59dbc62380410 ""
+  "cmap.sty" 0 -1 0 ""
+  "sphinxmanual.cls" 1631433173 4241 7b0d7a37df7b5715fb0dbd585c52ecdb ""
+  "stockmaster.aux" 1699392500 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "stockmaster.tex" 1699392500 45756 78be2e95fbf86aec3264fc96ed9c943c ""
+  (generated)
+  "stockmaster.aux"
+  "stockmaster.log"
+  "stockmaster.pdf"
+  (rewritten before read)

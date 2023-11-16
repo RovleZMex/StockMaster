@@ -88,6 +88,11 @@
     </section>
 
     <script>
+        function updateGraphs(){
+            GetPriceData();
+            GetStockData();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             let today = new Date();
             let currentMonth = today.getMonth() + 1; // Añadimos 1 porque los meses en JavaScript son base 0
@@ -98,7 +103,7 @@
             document.getElementById('yearSelectStock').value = currentYear;
             document.getElementById('monthSelectPrice').value = currentMonth;
             document.getElementById('yearSelectPrice').value = currentYear;
-
+            updateGraphs();
         });
 
         const stockGraph = document.getElementById('stockGraph').getContext('2d');
@@ -111,11 +116,11 @@
                 labels: labels,
                 datasets: [{
                     label: 'Stock',
-                    data: data, // Data for the graph
+                    data: [], // Data for the graph
                     backgroundColor: 'rgba(54, 162, 235, 0.2)', // background color
                     borderColor: 'rgba(54, 162, 235, 1)', // Border color
                     borderWidth: 2, // Border width
-                    tension: 0.1,
+                    tension: 0,
                     fill: false,
                 }]
             },
@@ -139,11 +144,11 @@
                 labels: labels,
                 datasets: [{
                     label: 'Stock',
-                    data: priceData, // Data for the graph
+                    data: [], // Data for the graph
                     backgroundColor: 'rgba(54, 162, 235, 0.2)', // background color
                     borderColor: 'rgba(54, 162, 235, 1)', // Border color
                     borderWidth: 2, // Border width
-                    tension: 0.1,
+                    tension: 0,
                     fill: false,
                 }]
             },

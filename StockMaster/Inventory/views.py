@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from django.shortcuts import render, get_object_or_404, redirect
 
 from InputHistory.models import InputOrder, InputOrderItem
@@ -146,12 +146,28 @@ def EditProduct(request, productid):
         product.threshold = request.POST.get("bajoUmbralProducto")
         product.price = request.POST.get("productPrice")
         product.save()
-        return redirect('productDetails', product.id)
 
     context = {'product': product,
                'ind': productid}
 
     return render(request, 'product-edit.html', context)
+
+@login_required(login_url='login')
+def deleteProduct(request, product_id):
+    """
+    Deletes item from database.
+
+    Args:
+        request: HTTP request object.
+        product_id: ID of the product.
+
+    Returns:
+        Redirects to the inventory url after deleting item
+    """
+    if request.method == 'POST' and request.POST.get('method') == 'DELETE':
+        product = get_object_or_404(Product, id=product_id)
+        product.delete()
+        return redirect('inventory')
 
 
 @login_required(login_url='login')

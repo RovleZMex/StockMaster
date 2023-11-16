@@ -14,6 +14,7 @@ from django.views import View
 from xhtml2pdf import pisa
 
 from Product.models import Product
+from InputHistory.models import InputOrder, InputOrderItem
 
 
 #######
@@ -218,6 +219,37 @@ def TextInventory(request):
     return render(request, 'report-invText.html', context)
 
 
+@login_required(login_url='login')
+def TextExpense(request):
+    years = range(2023, datetime.now().year + 1)
+    month = None
+
+    if request.method == "POST":
+        year = int(request.POST.get("year"))
+        month = int(request.POST.get("month"))
+        if int(request.POST.get("month")) != datetime.now().month or int(
+                request.POST.get("year")) != datetime.now().year:
+            orders = GetOrderAsOfDate(year, month)
+        elif int(request.POST.get("month")) == datetime.now().month or int(
+                request.POST.get("year")) == datetime.now().year:
+            orders = InputOrder.objects.all()
+        else:
+            orders = []
+    else:
+        orders = InputOrder.objects.all()
+        month = datetime.now().month
+        year = datetime.now().year
+    print(orders)
+
+    context = {
+        'years': years,
+        'orders': orders,
+        'month': int(month),
+        'year': int(year),
+    }
+    return render(request, 'report-expText.html', context)
+
+
 def GetInventoryAsOfDate(dateA):
     inventory = []
     if dateA <= datetime.now().date() or dateA.month == datetime.now().month:
@@ -255,3 +287,8 @@ def GetQuantPerCategory(inventory):
 def MapCategory(value):
     categories = ["Eléctricos", "Plomería", "Oficina", "Limpieza"]
     return categories[value]
+
+
+def GetOrderAsOfDate(year, month):
+    return (InputOrder.objects.filter(date_created__month=month,
+                                      date_created__year=year))

@@ -74,6 +74,66 @@ class ViewPDF(View):
             return HttpResponse(pdf, content_type='application/pdf')
 
 
+class ViewExpPDF(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, "error.html", {"message": "Por favor genera un nuevo PDF"})
+
+    def post(self, request, *args, **kwargs):
+        month = int(request.POST.get("month"))
+        year = int(request.POST.get("year"))
+        if int(request.POST.get("month")) != datetime.now().month or int(
+                request.POST.get("year")) != datetime.now().year:
+            orders = GetOrderAsOfDate(year, month)
+            toDate = date(year, month, calendar.monthrange(year, month)[1])
+        elif int(request.POST.get("month")) == datetime.now().month or int(
+                request.POST.get("year")) == datetime.now().year:
+            orders = GetOrderAsOfDate(year, month)
+            toDate = datetime.now().date()
+        else:
+            orders = []
+            toDate = datetime.now().date()
+        fromDate = date(year, month, 1)
+        percentages = getExpensesPercentagesPerCategory(orders)
+        catQuantities = getExpensesPerCategory(orders)
+        tempProducts = []
+
+        class TempProduct:
+            def __init__(self, product, sku, quantity=0, total=0):
+                self.sku = sku
+                self.name = product.name
+                self.quantity = quantity
+                self.total = total
+
+            def __eq__(self, other):
+                """Overrides the default implementation"""
+                if isinstance(other, TempProduct):
+                    return self.name == other.name
+                return False
+
+        for order in orders:
+            for item in order.inputorderitem_set.all():
+                tempProduct = TempProduct(item.product, item.product.SKU)
+                if tempProduct in tempProducts:
+                    tempProducts[tempProducts.index(tempProduct)].quantity += item.quantity
+                    tempProducts[tempProducts.index(tempProduct)].total += item.getSubtotal()
+                else:
+                    tempProduct.quantity = item.quantity
+                    tempProduct.total = item.getSubtotal()
+                    tempProducts.append(tempProduct)
+        context = {
+            'orders': orders,
+            'date': datetime.now().date(),
+            'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
+            'fromDate': fromDate,
+            'toDate': toDate,
+            'percentages': percentages,
+            'catQuantities': catQuantities,
+            'products': tempProducts,
+        }
+        pdf = render_to_pdf('expensesTextTemplate.html', contextDict=context)
+        return HttpResponse(pdf, content_type='application/pdf')
+
+
 @login_required(login_url="login")
 def ExpensesCharts(request):
     context = {
@@ -179,12 +239,10 @@ def GetExpensesPerCategoryMonth(request):
 @login_required(login_url='login')
 def GetExpensesPercentages(request):
     if request.method == "POST":
-        print("POOOSSTINNGGG")
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
         orders = getOrdersInMonthAndYear(month, year)
         percentages = getExpensesPercentagesPerCategory(orders)
-        print(f"Porcentajes: {percentages}")
         return JsonResponse({
             'success': True,
             'data': json.dumps(percentages)
@@ -333,6 +391,7 @@ def TextExpense(request):
     }
     return render(request, 'report-expText.html', context)
 
+
 def getExpensesPerCategory(orders):
     quantities = [0, 0, 0, 0]
     for order in orders:
@@ -370,7 +429,6 @@ def getExpensesPercentagesPerCategory(orders):
         percentages = [round((x * 100) / sum(quantities), 2) for x in quantities]
     else:
         percentages = [0, 0, 0, 0]
-    print(f"AAAAAAAAAAAA --- {percentages}")
     return percentages
 
 
@@ -404,7 +462,7 @@ def MapCategory(value):
 
 def GetOrderAsOfDate(year, month):
     orders = []
-    for order in InputOrder.objects.all().order_by('date_created'):
+    for order in InputOrder.objects.all().order_by('-date_created'):
         if order.date_created.month == month and order.date_created.year == year:
             orders.append(order)
     return orders

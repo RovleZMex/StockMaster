@@ -143,11 +143,18 @@ def ModifyOutputOrders(request, orderid):
         # Update existing product quantities and handle deletions
         for product_item in order.GetItems():
             quantity_key = f"quantityProduct_{product_item.product.id}"
-            product_item.quantity = form_data.get(quantity_key, 0)  # Use 0 as the default value
+            new_quantity = int(form_data.get(quantity_key, 0))
+            old_quantity = product_item.quantity
+
+            # Subtract from available product quantity
+            product_item.product.quantity -= (new_quantity - old_quantity)
+            product_item.product.save()  # This line updates the product quantity
+
+            product_item.quantity = new_quantity
             product_item.save()
 
             # Handle product deletions
-            if int(form_data.get(quantity_key, 0)) == 0:
+            if new_quantity == 0:
                 product_item.delete()
 
         # Add new products to the order
@@ -166,24 +173,36 @@ def ModifyOutputOrders(request, orderid):
                     if existing_item:
                         existing_item.quantity += int(quantity)
                         existing_item.save()
+                        existing_product.quantity -= int(quantity)
+                        existing_product.save()  # Update existing product quantity in the inventory
                     else:
                         OutputOrderItem.objects.create(
                             product=existing_product, quantity=quantity, outputOrder=order
                         )
+                        existing_product.quantity -= int(quantity)
+                        existing_product.save()  # Update existing product quantity in the inventory
                 else:
                     # Add new product to the order
                     new_product = Product.objects.create(name=name)
                     OutputOrderItem.objects.create(
                         product=new_product, quantity=quantity, outputOrder=order
                     )
+                    new_product.quantity -= int(quantity)
+                    new_product.save()  # Update new product quantity in the inventory
 
         return redirect('outputDetails', orderid)
+
+    # Max quantity calculation
+    max_quantities = []
+    for product_item in order.GetItems():
+        max_quantity = product_item.product.quantity + product_item.quantity
+        max_quantities.append(max_quantity)
 
     context = {
         "order": order,
         "id": orderid,
         "workers": workers,
-        "products": order.GetItems(),  # Make sure to retrieve existing products
+        "products": zip(order.GetItems(), max_quantities),  # Make sure to retrieve existing products
         "all_products": all_products,
     }
     return render(request, "outputHistory-edit.html", context)
@@ -220,7 +239,7 @@ def inputOrderEdit(request, orderid):
         order = InputOrder.objects.get(id=orderid)
         if request.POST.get("date") != '':
             date = request.POST["date"] + "-00:00:00"
-            order.date_created = datetime.strptime(date,'%Y-%m-%d-%H:%M:%S')
+            order.date_created = datetime.strptime(date, '%Y-%m-%d-%H:%M:%S')
             order.save()
         # Delete current items in the order
         for item in order.inputorderitem_set.all():

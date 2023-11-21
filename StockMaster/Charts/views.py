@@ -370,86 +370,60 @@ def TextInventory(request):
 @login_required(login_url='login')
 def TextExpense(request):
     years = range(2023, datetime.now().year + 1)
-    month = None
-
-    if request.method == "POST":
-        year = int(request.POST.get("year"))
-        month = int(request.POST.get("month"))
-        if int(request.POST.get("month")) != datetime.now().month or int(
-                request.POST.get("year")) != datetime.now().year:
-            products = GetInventoryAsOfDate(date(year, month, calendar.monthrange(year, month)[1]))
-        elif int(request.POST.get("month")) == datetime.now().month or int(
-                request.POST.get("year")) == datetime.now().year:
-            products = Product.objects.all()
-        else:
-            products = []
-    else:
-        products = Product.objects.all()
-        month = datetime.now().month
-        year = datetime.now().year
 
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
         if month != datetime.now().month or year != datetime.now().year:
             orders = GetOrderAsOfDate(year, month)
+            products = GetInventoryAsOfDate(date(year, month, calendar.monthrange(year, month)[1]))
         elif month == datetime.now().month or year == datetime.now().year:
             orders = GetOrderAsOfDate(year, month)
+            products = Product.objects.all()
         else:
             orders = []
     else:
         month = datetime.now().month
         year = datetime.now().year
         orders = GetOrderAsOfDate(year, month)
+        products = Product.objects.all()
 
-        # valorProductos = []
-        #
-        # for product in products:
-        #     lista = product.inputorderitem_set.all()
-        #     totalCostoItem = 0
-        #     for item in lista:
-        #         item.inputOrder.date_created ? mes
-        #         y
-        #         año
-        #         totalCostoItem += item.getSubtotal()
-        #     valorProductos.append(totalCostoItem)
+    valorProductos = {}
+    totalProductos = 0  # Variable para almacenar la cantidad total de productos
+    print(products)
+    for product in products:
+        lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
+                                                  inputOrder__date_created__month=month)
+        totalCostoItem = 0
+        totalProductosItem = 0  # Variable para almacenar la cantidad total de productos por producto
 
-        valorProductos = {}
-        totalProductos = 0  # Variable para almacenar la cantidad total de productos
+        for item in lista:
+            totalCostoItem += item.getSubtotal()
+            totalProductosItem += item.quantity  # Asumiendo que hay un campo quantity en tu modelo de item
 
-        for product in products:
-            lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
-                                                      inputOrder__date_created__month=month)
-            totalCostoItem = 0
-            totalProductosItem = 0  # Variable para almacenar la cantidad total de productos por producto
+        if totalCostoItem > 0:
+            valorProductos[product.name] = {
+                'cantidad_total_productos': totalProductosItem,
+                'costo_total': totalCostoItem,
+            }
+            totalProductos += totalProductosItem  # Sumar la cantidad total de productos
 
-            for item in lista:
-                totalCostoItem += item.getSubtotal()
-                totalProductosItem += item.quantity  # Asumiendo que hay un campo quantity en tu modelo de item
+    # Ordenar el diccionario por el valor de los costos totales de mayor a menor
+    valorProductosOrdenado = dict(
+        sorted(valorProductos.items(), key=lambda item: item[1]['costo_total'], reverse=True))
 
-            if totalCostoItem > 0:
-                valorProductos[product.name] = {
-                    'cantidad_total_productos': totalProductosItem,
-                    'costo_total': totalCostoItem,
-                }
-                totalProductos += totalProductosItem  # Sumar la cantidad total de productos
+    # Resto de tu lógica para renderizar la plantilla con el contexto...
 
-        # Ordenar el diccionario por el valor de los costos totales de mayor a menor
-        valorProductosOrdenado = dict(
-            sorted(valorProductos.items(), key=lambda item: item[1]['costo_total'], reverse=True))
-
-        # Resto de tu lógica para renderizar la plantilla con el contexto...
-
-        context = {
-            'years': years,
-            'orders': orders,
-            'month': int(month),
-            'year': int(year),
-            'totalOrders': len(orders),
-            'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
-            'valorProductosOrdenado': valorProductosOrdenado,
-            'totalProductos': totalProductos,
-        }
+    context = {
+        'years': years,
+        'orders': orders,
+        'month': int(month),
+        'year': int(year),
+        'totalOrders': len(orders),
+        'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
+        'valorProductosOrdenado': valorProductosOrdenado,
+        'totalProductos': totalProductos,
+    }
     return render(request, 'report-expText.html', context)
 
 

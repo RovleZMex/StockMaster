@@ -33,7 +33,7 @@ class InputOrder(models.Model):
         total = 0
         for item in self.GetItems():
             total += item.quantity * item.product.price
-        return round(total, 3)
+        return round(total, 2)
 
     def __str__(self):
         """

@@ -18,19 +18,19 @@
         <div class="container">
             <ul class="nav nav-tabs">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
-                       role="button">Gráficos</a>
+                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
+                       role="button">Gastos</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Inventario</a></li>
-                        <li><a class="dropdown-item" href="#">Gastos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'textExpense' %}">Textual</a></li>
+                        <li><a class="dropdown-item" href="{% url 'expensesCharts' %}">Gráficos</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
-                       role="button">Textual</a>
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button">Inventario</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Inventario</a></li>
-                        <li><a class="dropdown-item" href="{% url 'textExpense' %}">Gastos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Textual</a></li>
+                        <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Gráficos</a></li>
                     </ul>
                 </li>
             </ul>
@@ -143,6 +143,33 @@
             }
             return cookieValue;
         }
+
+        $(document).ready(function () {
+            // Manejar clic en el enlace "Ver PDF"
+            $("#verPDF").click(function (e) {
+                e.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+
+                // Obtener los valores seleccionados de los select
+                var monthValue = $("#monthSelect").val();
+                var yearValue = $("#yearSelect").val();
+
+                // Obtener el token CSRF
+                var csrfToken = $("input[name=csrfmiddlewaretoken]").val();
+
+                // Crear un formulario temporal y agregar los valores de los select y el token CSRF
+                var tempForm = $("<form>")
+                    .attr("method", "post")
+                    .attr("action", "{% url 'viewExpPDF' %}")
+                    .attr("target", "_blank")
+                    .append($('<input type="hidden" name="month" value="' + monthValue + '">'))
+                    .append($('<input type="hidden" name="year" value="' + yearValue + '">'))
+                    .append($('<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">'));
+
+                // Agregar el formulario temporal al cuerpo del documento y enviarlo
+                $("body").append(tempForm);
+                tempForm.submit();
+            });
+        });
 
     </script>
 

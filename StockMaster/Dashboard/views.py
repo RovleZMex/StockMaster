@@ -121,7 +121,7 @@ def Workers(request):
 def workerDetails(request, employeeNumber):
     worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
 
-    output_orders = worker.outputorder_set.all()
+    output_orders = worker.outputorder_set.all().order_by("-date_created")
 
     context = {
         'years': range(2023, datetime.now().year + 1),

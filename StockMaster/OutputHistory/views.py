@@ -41,7 +41,7 @@ def OutputHistory(request):
         end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
         outputOrders = outputOrders.filter(date_created__range=[start_date_obj, end_date_obj])
 
-    paginator = Paginator(outputOrders, 5)
+    paginator = Paginator(outputOrders.order_by("-date_created"), 10)
     pageNumber = request.GET.get("page")
     page_obj = paginator.get_page(pageNumber)
 
@@ -76,7 +76,7 @@ def InputHistory(request):
         end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
         inputOrders = inputOrders.filter(date_created__range=[start_date_obj, end_date_obj])
 
-    paginator = Paginator(inputOrders, 5)
+    paginator = Paginator(inputOrders.order_by("-date_created"), 10)
     pageNumber = request.GET.get("page")
     page_obj = paginator.get_page(pageNumber)
 

@@ -37,6 +37,10 @@
         </div>
     </section>
 
+        <div class="container">
+        <h1>Informe Gastos</h1>
+    </div>
+
     <!-- Month & year select -->
     <section class="">
         <div class="container">
@@ -93,10 +97,10 @@
 
 
     <!-- Main table -->
-    <section>
+    <section class="p-5">
         <div class="container">
             {% for order in orders %}
-                <h3>Folio: #{{ order.id }} Fecha de creacion de la orden: {{ order.date_created.date }}</h3>
+                <h3 class="pt-4">Folio: #{{ order.id }} Fecha de creacion de la orden: {{ order.date_created.date }}</h3>
                 <table class="table mt-3 table-hover tableRoundedm">
                     <thead class="table-dark">
                     <tr>

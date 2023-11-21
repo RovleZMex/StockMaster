@@ -58,6 +58,8 @@ class ViewPDF(View):
                     catValues[2] += product.getTotalValue()
                 elif product.category == "CLE":
                     catValues[3] += product.getTotalValue()
+            for i in range(len(catValues)):
+                catValues[i] = round(catValues[i], 2)
 
             context = {
                 'products': products,
@@ -122,6 +124,7 @@ class ViewExpPDF(View):
                     tempProducts.append(tempProduct)
         context = {
             'orders': orders,
+            'orderQuant': len(orders),
             'date': datetime.now().date(),
             'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
             'fromDate': fromDate,
@@ -390,7 +393,6 @@ def TextExpense(request):
 
     valorProductos = {}
     totalProductos = 0  # Variable para almacenar la cantidad total de productos
-    print(products)
     for product in products:
         lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
                                                   inputOrder__date_created__month=month)

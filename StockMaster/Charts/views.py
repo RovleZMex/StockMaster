@@ -276,33 +276,38 @@ def GetExpensesMonth(request):
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        if datetime.now().month == month:
-            daysRange = range(1, datetime.now().day + 1)
-        elif month > datetime.now().month or year > datetime.now().year:
-            daysRange = range(0)
-        else:
-            daysRange = range(1, calendar.monthrange(year, month)[1] + 1)
         orders = getOrdersInMonthAndYear(month, year).order_by("date_created")
-        expenses = []
-        labels = []
-        expIndex = 0
-        for i in daysRange:
-            tempDate = date(year, month, i)
-            labels.append(f"Día {i}")
-            if expIndex < len(orders) and orders[expIndex].date_created.date() == tempDate:
-                try:
-                    expenses.append(expenses[i - 2] + orders[expIndex].GetTotal())
-                    expIndex += 1
-                except IndexError:
-                    expenses.append(orders[expIndex].GetTotal())
-                    expIndex += 1
-            elif len(expenses) == 0:
-                expenses.append(0)
-            else:
-                expenses.append(expenses[-1])
+        print(orders)
+
+        # Obtener todas las fechas del mes
+        allDates = [datetime(year, month, day).date() for day in range(1, calendar.monthrange(year, month)[1] + 1)]
+
+        # Inicializar el diccionario de totales
+        expenses = {dictDate: 0 for dictDate in allDates}
+
+        cumulativeTotal = 0
+        for order in orders:
+            temp_date = order.date_created.date()
+            cumulativeTotal += order.GetTotal()
+            expenses[temp_date] = cumulativeTotal
+
+        # Fill missing days with existing data
+        for i in range(1, len(allDates)):
+            if expenses[allDates[i]] == 0:
+                # If total is 0, set total as closest value
+                j = i - 1
+                while j >= 0 and expenses[allDates[j]] == 0:
+                    j -= 1
+                if j >= 0:
+                    expenses[allDates[i]] = expenses[allDates[j]]
+
+        # Create labels and totals for sending to frontend
+        labels = [f"Día {dictDate.day}" for dictDate in allDates]
+        totals = [expenses[dictDate] for dictDate in allDates]
+
         return JsonResponse({
             'success': True,
-            'data': json.dumps(expenses),
+            'data': json.dumps(totals),
             'labels': ','.join(labels)
         })
     return JsonResponse({

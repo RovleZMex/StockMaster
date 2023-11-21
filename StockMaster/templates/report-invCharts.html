@@ -19,19 +19,20 @@
         <div class="container">
             <ul class="nav nav-tabs">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
-                       role="button">Gráficos</a>
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button">Gastos</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Inventario</a></li>
-                        <li><a class="dropdown-item" href="{% url 'expensesCharts' %}">Gastos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'textExpense' %}">Textual</a></li>
+                        <li><a class="dropdown-item" href="{% url 'expensesCharts' %}">Gráficos</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
-                       role="button">Textual</a>
+                    <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#"
+                       role="button">Inventario</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Inventario</a></li>
-                        <li><a class="dropdown-item" href="{% url 'textExpense' %}">Gastos</a></li>                    </ul>
+                        <li><a class="dropdown-item" href="{% url 'textInventory' %}">Textual</a></li>
+                        <li><a class="dropdown-item" href="{% url 'reportCharts' %}">Gráficos</a></li>
+                    </ul>
                 </li>
             </ul>
         </div>
@@ -351,7 +352,7 @@
                         percentageInventory1.data.datasets[0].data = JSON.parse(response.data)
                         percentageInventory1.update()
                     }
-                    title.innerHTML = "Porcentaje por categoría en " + month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
+                    title.innerHTML = "Porcentaje de inventario por categoría en " + month.options[month.selectedIndex].text + " " + year.options[year.selectedIndex].text
                 },
                 error: function (error) {
                     console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');

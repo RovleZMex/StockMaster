@@ -70,14 +70,15 @@
                     <!-- Template -->
                     <div id="productList">
                         <!-- Existing Products -->
-                        {% for product_item in products %}
+                        {% for product_item, max_quantity in products %}
                             <div class="product-item" id="product_{{ product_item.product.id }}">
                                 <div class="mb-3 input-group">
                                     <input type="text" class="form-control" name="newProductName[]"
                                            list="datalistProducts" placeholder="Nombre del producto"
                                            value="{{ product_item.product.name }}" readonly>
                                     <div class="col-md-2">
-                                        <input type="number" min="0" class="form-control"
+                                        <input type="number" min="0" max="{{ max_quantity }}"
+                                               class="form-control"
                                                name="newProductQuantity[]"
                                                placeholder="Cantidad"
                                                value="{{ product_item.quantity }}">

@@ -125,6 +125,34 @@
             {% endfor %}
         </div>
     </section>
+
+
+    <!-- Main table -->
+    <section>
+        <div class="container">
+            <h3>Costos totales por producto</h3>
+            <table class="table mt-3 table-hover tableRoundedm">
+                <thead class="table-dark">
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Costo Total</th> <!-- Agregado para mostrar el costo total -->
+                </tr>
+                </thead>
+                <tbody>
+                {% for product, info in valorProductosOrdenado.items %}
+                    <tr>
+                        <td>{{ product }}</td>
+                        <td>{{ info.cantidad_total_productos }}</td>
+                        <td>${{ info.costo_total }} M.N.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
     <!-- Scripts -->
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>

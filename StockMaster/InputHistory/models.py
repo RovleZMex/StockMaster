@@ -12,7 +12,8 @@ class InputOrder(models.Model):
     """DateTimeField: The date and time when the order was created."""
 
     specialNotes = models.TextField(max_length=600, blank=True)
-    """str: Special notes related to the input order."""
+
+    isExternal = models.BooleanField(default=False)
 
     def GetItems(self):
         """

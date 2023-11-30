@@ -13,7 +13,9 @@
         </div>
         <div class="row g-4 text-center">
             <div class="col-md text-center">
+                {% if product.image %}
                 <img src="{{ product.image.url }}" style="width: 100%" alt="">
+                {% endif %}
             </div>
             <div class="col-md tex-center">
                 <h4>Detalles del producto</h4>

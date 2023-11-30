@@ -84,13 +84,13 @@
         <div class="container d-flex flex-row justify-content-around">
             <div class="card text-center align-items-center"
                  style="width: 18rem; display: flex; flex-direction: column; justify-content: center;">
-                <h5 class="card-title mt-2"># de ordenes en el mes</h5>
+                <h5 class="card-title mt-2"># de órdenes en el mes</h5>
                 <h1>{{ totalOrders }}</h1>
             </div>
             <div class="card text-center align-items-center"
                  style="width: 18rem; display: flex; flex-direction: column; justify-content: center;">
                 <h5 class="card-title mt-2">Gastos totales del mes</h5>
-                <h1>${{ totalExpense }} M.N.</h1>
+                <h1>${{ totalExpense|floatformat:"2g" }} M.N.</h1>
             </div>
         </div>
     </section>
@@ -117,12 +117,12 @@
                             <td>{{ order_item.product.SKU }}</td>
                             <td>{{ order_item.product.name }}</td>
                             <td>{{ order_item.quantity }}</td>
-                            <td>$ {{ order_item.product.price }} M.N</td>
-                            <td>$ {{ order_item.getSubtotal }} M.N.</td>
+                            <td>$ {{ order_item.product.GetFormattedPrice }} M.N</td>
+                            <td>$ {{ order_item.getSubtotal|floatformat:"2g" }} M.N.</td>
                         </tr>
                     {% endfor %}
                     <tr class="table-primary">
-                        <td colspan="5" align="center">Valor total de la órden: ${{ order.GetTotal }} M.N.</td>
+                        <td colspan="5" align="center">Valor total de la orden: ${{ order.GetTotal|floatformat:"2g" }} M.N.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -148,7 +148,7 @@
                     <tr>
                         <td>{{ product }}</td>
                         <td>{{ info.cantidad_total_productos }}</td>
-                        <td>${{ info.costo_total }} M.N.</td>
+                        <td>${{ info.costo_total|floatformat:"2g" }} M.N.</td>
                     </tr>
                 {% endfor %}
                 </tbody>

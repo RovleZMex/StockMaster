@@ -126,7 +126,7 @@ class ViewExpPDF(View):
             'orders': orders,
             'orderQuant': len(orders),
             'date': datetime.now().date(),
-            'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
+            'totalExpense': f"{round(sum([order.GetTotal() for order in orders]), 2):.2f}",
             'fromDate': fromDate,
             'toDate': toDate,
             'percentages': percentages,

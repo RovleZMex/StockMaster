@@ -37,7 +37,7 @@
 <h1>Reporte de gastos</h1>
 <p>Fecha: {{ date }}</p>
 <p>Cantidad total de órdenes: {{ orderQuant }}</p>
-<p>Total de gastos en el mes: ${{ totalExpense }}</p>
+<p>Total de gastos en el mes: ${{ totalExpense|floatformat:"2g" }}</p>
 <p>Rango de gastos: {{ fromDate }} - {{ toDate }} </p>
 {% if orders %}
     <hr>
@@ -95,13 +95,13 @@
                     <td>{{ item.product.SKU }}</td>
                     <td>{{ item.product.name }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>${{ item.product.price }} M.N.</td>
-                    <td>${{ item.getSubtotal }} M.N.</td>
+                    <td>${{ item.product.price|floatformat:"2g" }} M.N.</td>
+                    <td>${{ item.getSubtotal|floatformat:"2g" }} M.N.</td>
                 </tr>
                 <!-- Puedes copiar y pegar esta fila para agregar más gastos -->
             {% endfor %}
             <tr>
-                <td align="center" colspan="5">Total de la orden: ${{ order.GetTotal }} M.N.</td>
+                <td align="center" colspan="5">Total de la orden: ${{ order.GetTotal|floatformat:"2g" }} M.N.</td>
             </tr>
             </tbody>
         </table>
@@ -123,7 +123,7 @@
                 <td>{{ product.sku }}</td>
                 <td>{{ product.name }}</td>
                 <td>{{ product.quantity }}</td>
-                <td>${{ product.total }} M.N.</td>
+                <td>${{ product.total|floatformat:"2g" }} M.N.</td>
             </tr>
         {% endfor %}
         </tbody>

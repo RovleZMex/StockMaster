@@ -74,12 +74,6 @@
                                placeholder="Precio">
                         <small id="packPrice0" style="display: none">precio p. caja</small>
                     </div>
-                    <div class="col-md-2">
-                        <!-- isExternal -->
-                        <p class="lead">¿Se compró fuera?</p>
-                        <input type="checkbox" class="form-check-input" value="" id="externalCheckbox0">
-                        <label for="externalCheckbox0" class="form-check-label">Es externo</label>
-                    </div>
                 </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">Confirmar
@@ -134,11 +128,6 @@
                                     <option value="CLE">Limpieza</option>
                                 </select>
                             </div>
-                            <div class="form-check mb-3">
-                                <input name="compradoPorFuera" class="form-check-input" type="checkbox"
-                                       id="compradoPorFuera">
-                                <label class="form-check-label" for="compradoPorFuera">Comprado por fuera</label>
-                            </div>
                             <button type="button" class="btn btn-primary" onclick="addNewProduct(this)">Añadir Producto
                             </button>
                         </form>
@@ -152,6 +141,9 @@
     </div>
 
     <script src="{% static 'js/jquery-2.0.0.min.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
     <script>
         var counter = 1; // Counter for dynamic IDs
 
@@ -162,7 +154,8 @@
             var container = document.getElementById('productInputs');
             var newInputRow = document.createElement('div');
             newInputRow.className = 'row g-3';
-            newInputRow.id = 'row-' + counter; // Assign an ID to the new row
+            newInputRow.id = newInputRow.id = 'row-' + counter + '-' + Date.now(); // Ensures unique IDs
+            // Assign an ID to the new row
             newInputRow.innerHTML = `
         <div class="col-md">
             <input class="form-control product-input" list="datalistOptions0" id="exampleDataList0"
@@ -227,8 +220,6 @@
             }
             if (selectedOption) {
                 document.getElementById('priceInput0').value = selectedOption.getAttribute('data-price');
-                var isExternalValue = selectedOption.getAttribute('data-is-external');
-                document.getElementById('externalCheckbox0').checked = isExternalValue === 'true' || isExternalValue === 'True';
                 var skuText = document.createElement('small');
                 skuText.innerHTML = "SKU: " + selectedOption.getAttribute('data-sku');
                 let smallChildren = element.parentElement.getElementsByTagName("small")
@@ -253,8 +244,6 @@
             }
             if (selectedOption) {
                 document.getElementById('priceInput' + rowNumber).value = selectedOption.getAttribute('data-price');
-                let isExternalValue = selectedOption.getAttribute('data-is-external');
-                document.getElementById('externalCheckbox' + rowNumber).checked = isExternalValue === 'true' || isExternalValue === 'True';
                 let skuText = document.createElement('small');
                 skuText.innerHTML = "SKU: " + selectedOption.getAttribute('data-sku');
                 let smallChildren = element.parentElement.getElementsByTagName("small")
@@ -308,7 +297,6 @@
             form_data.append('nombreProducto', document.getElementById('nombreProducto').value);
             form_data.append('bajoUmbralProducto', document.getElementById('bajoUmbralProducto').value);
             form_data.append('categoriaProducto', document.getElementById('categoriaProducto').value);
-            form_data.append('compradoPorFuera', document.getElementById('compradoPorFuera').checked);
             form_data.append('price', document.getElementById('precioProducto').value);
             form_data.append('SKU', document.getElementById('SKUProducto').value);
             form_data.append('imagenProducto', document.getElementById('imagenProducto').files[0]);
@@ -324,10 +312,10 @@
 
                     var newInputRow = document.createElement('div');
                     newInputRow.className = 'row g-3';
-                    newInputRow.id = 'row-' + counter;
+                    newInputRow.id = 'row-' + counter + '-' + Date.now(); // Ensures unique IDs
                     newInputRow.innerHTML = `
                     <div class="col-md">
-                        <input class="form-control product-input" value="${newProduct.name} - ${newProduct.sku}" data-price="${newProduct.price}" data-is-external="${newProduct.isExternal}">
+            <input type="text" class="form-control product-input"  value="${newProduct.name} - ${newProduct.sku}" name="productname" readonly>
                         <small>${newProduct.sku}</small>
                     </div>
                     <div class="col-md">
@@ -356,16 +344,14 @@
                                value="${newProduct.price}">
                         <small id="packPrice${counter}" style="display: none">precio p. caja</small>
                     </div>
-                    <div class="col-md-2">
-                        <input type="checkbox" id="externalCheckbox${counter}" class="form-check-input" value="" ${newProduct.isExternal ? 'checked' : ''}>
-                        <label class="form-check-label">Es externo</label>
-                        <button type="button" class="btn btn-danger" onclick="removeRow(${counter})"><i class="bi bi-trash"></i></button>
-                    </div>
                 `;
                     var container = document.getElementById('productInputs');
                     container.appendChild(newInputRow);
 
                     $('#exampleModal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+
                     counter++;
                 },
                 error: function (error) {
@@ -393,7 +379,6 @@
                 productData["quantityType"] = document.getElementsByName("quantityType")[i].value;
                 productData["quantity"] = document.getElementsByName("quantity")[i].value;
                 productData["price"] = document.getElementById("priceInput" + i).value;
-                productData["isExternal"] = document.getElementById("externalCheckbox" + i).checked;
                 if (productData["quantityType"] === "caja") {
                     productData["unitsPerBox"] = document.getElementsByName("unitsPerBox")[i].value;
                 }
@@ -433,11 +418,6 @@
                 packPrice.style.display = "none";
             }
         }
-
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-            crossorigin="anonymous"></script>
     </body>
 {% endblock content %}

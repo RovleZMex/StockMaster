@@ -184,6 +184,10 @@
                         display: true,
                         position: 'left',
                         beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Left Axis Title'
+                        }
                     },
                     y1: {
                         type: 'linear',
@@ -194,10 +198,31 @@
                         grid: {
                             drawOnChartArea: false, // only want the grid lines for one axis to show up
                         },
+                        title: {
+                            display: true,
+                            text: 'Right Axis Title'
+                        }
                     },
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                var label = context.dataset.label || '';
+
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += '$' + context.parsed.y + ' M.N.';
+
+                                return label;
+                            }
+                        }
+                    }
                 }
             },
-        })
+        });
+
 
         // Obtén el contexto del canvas
         var ctx = document.getElementById('categoryChart').getContext('2d');

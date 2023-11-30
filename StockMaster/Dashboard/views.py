@@ -70,8 +70,8 @@ def Dashboard(request):
                     Product.objects.filter(category='OFF').count(),
                     Product.objects.filter(category='CLE').count()]
 
-    lastInputOrders = InputOrder.objects.all()[:5]
-    lastOutputOrders = OutputOrder.objects.all()[:5]
+    lastInputOrders = InputOrder.objects.all().order_by('-date_created')[:5]
+    lastOutputOrders = OutputOrder.objects.all().order_by('-date_created')[:5]
 
     context = {'allProducts': allProducts.count(),
                'goodStockProducts': allProducts.count() - noStockProducts - lowStockProducts,

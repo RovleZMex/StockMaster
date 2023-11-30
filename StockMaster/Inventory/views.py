@@ -10,6 +10,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponseServerError
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 
 from InputHistory.models import InputOrder, InputOrderItem
 from Product.models import Product
@@ -146,6 +147,8 @@ def EditProduct(request, productid):
         product.threshold = request.POST.get("bajoUmbralProducto")
         product.price = request.POST.get("productPrice")
         product.save()
+        url_producto = reverse('productDetails', args=[productid])
+        return redirect(url_producto)
 
     context = {'product': product,
                'ind': productid}
@@ -347,7 +350,7 @@ def AddProduct(request):
             category = request.POST.get('categoriaProducto')
             SKU = request.POST.get('SKU')
             price = float(request.POST.get('price'))
-            is_external = True if request.POST.get('compradoPorFuera') == 'true' else False
+            is_external = False
             new_product = Product.objects.create(
                 name=name,
                 quantity=quantity,
@@ -391,7 +394,7 @@ def HandleProductData(request):
         products_data = request.POST.get('productsData')  # Aquí se obtienen los datos de los productos del frontend
 
         products_data_list = json.loads(products_data)
-
+        print(products_data_list)
         newOrder = InputOrder()
         newOrder.save()
         for product_data in products_data_list:
@@ -435,7 +438,6 @@ def VerifyAndUpdate(product):
         return
     name1 = DeleteLeftFromSequence(product["productName"], " - ").strip()
     dbProduct = Product.objects.get(SKU=name1)
-    dbProduct.isExternal = product['isExternal']
     if product['quantityType'] == "unidades":
         dbProduct.quantity += int(product['quantity'])
         dbProduct.price = product['price']

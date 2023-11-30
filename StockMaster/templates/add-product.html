@@ -74,15 +74,15 @@
                                placeholder="Precio">
                         <small id="packPrice0" style="display: none">precio p. caja</small>
                     </div>
-                    <div class="mt-3">
-                        <div class="col-md-2">
-                            <!-- isExternal -->
-                            <p class="lead">¿Es orden externa?</p>
-                            <input type="checkbox" class="form-check-input" value="" id="externalCheckbox0">
-                            <label for="externalCheckbox0" class="form-check-label">Es externo</label>
-                        </div>
-                    </div>
 
+                </div>
+                <div class="mt-3">
+                    <div class="col-md-2">
+                        <!-- isExternal -->
+                        <p class="lead">¿Es orden externa?</p>
+                        <input type="checkbox" class="form-check-input" value="" id="externalCheckbox0">
+                        <label for="externalCheckbox0" class="form-check-label">Es externo</label>
+                    </div>
                 </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">Confirmar
@@ -136,11 +136,6 @@
                                     <option value="ELE">Eléctricos</option>
                                     <option value="CLE">Limpieza</option>
                                 </select>
-                            </div>
-                            <div class="form-check mb-3">
-                                <input name="compradoPorFuera" class="form-check-input" type="checkbox"
-                                       id="compradoPorFuera">
-                                <label class="form-check-label" for="compradoPorFuera">Comprado por fuera</label>
                             </div>
                             <button type="button" class="btn btn-primary" onclick="addNewProduct(this)">Añadir Producto
                             </button>
@@ -311,7 +306,7 @@
             form_data.append('nombreProducto', document.getElementById('nombreProducto').value);
             form_data.append('bajoUmbralProducto', document.getElementById('bajoUmbralProducto').value);
             form_data.append('categoriaProducto', document.getElementById('categoriaProducto').value);
-            form_data.append('compradoPorFuera', document.getElementById('compradoPorFuera').checked);
+            form_data.append('compradoPorFuera', "");
             form_data.append('price', document.getElementById('precioProducto').value);
             form_data.append('SKU', document.getElementById('SKUProducto').value);
             form_data.append('imagenProducto', document.getElementById('imagenProducto').files[0]);
@@ -358,11 +353,6 @@
                         <input type="number" step="0.01" min="0" class="form-control" id="priceInput${counter}"
                                value="${newProduct.price}">
                         <small id="packPrice${counter}" style="display: none">precio p. caja</small>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="checkbox" id="externalCheckbox${counter}" class="form-check-input" value="" ${newProduct.isExternal ? 'checked' : ''}>
-                        <label class="form-check-label">Es externo</label>
-                        <button type="button" class="btn btn-danger" onclick="removeRow(${counter})"><i class="bi bi-trash"></i></button>
                     </div>
                 `;
                     var container = document.getElementById('productInputs');

@@ -60,6 +60,7 @@
                                         <th>Cantidad de Productos</th>
                                         <th>Precio Total</th>
                                         <th>Fecha/Hora</th>
+                                        <th>Es externo</th>
                                     </tr>
                                     </thead>
                                     <tbody id="inventory-table">
@@ -70,6 +71,12 @@
                                             <td>{{ order.GetItems.count }}</td>
                                             <td>${{ order.GetTotal }} M.N.</td>
                                             <td>{{ order.date_created }}</td>
+                                            <td>
+                                                <input class="form-check-input" type="checkbox" value=""
+                                                       id="flexCheckCheckedDisabled" checked disabled>
+                                                <label class="form-check-label" for="flexCheckCheckedDisabled">
+                                                </label>
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                     </tbody>

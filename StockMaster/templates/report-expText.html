@@ -37,7 +37,7 @@
         </div>
     </section>
 
-        <div class="container">
+    <div class="container">
         <h1>Informe Gastos</h1>
     </div>
 
@@ -73,12 +73,20 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="d-inline-block">
+                    <select class="form-select" id="externalSelect" name="external" onchange="">
+                        <option value="all">Sin filtro</option>
+                        <option value="external">Externos</option>
+                        <option value="internal">Internos</option>
+                    </select>
+                </div>
                 <button type="submit" class="btn btn-primary">Buscar</button>
                 <a href="#" id="verPDF" class="btn btn-info" target="_blank">Ver reporte <i
                         class="bi bi-filetype-pdf"></i></a>
             </form>
         </div>
     </section>
+
     <!-- Cards -->
     <section class="pt-4 pb-2">
         <div class="container d-flex flex-row justify-content-around">
@@ -100,7 +108,8 @@
     <section class="p-5">
         <div class="container">
             {% for order in orders %}
-                <h3 class="pt-4">Folio: #{{ order.id }} Fecha de creacion de la orden: {{ order.date_created.date }}</h3>
+                <h3 class="pt-4">Folio: #{{ order.id }} Fecha de creacion de la
+                    orden: {{ order.date_created.date }}</h3>
                 <table class="table mt-3 table-hover tableRoundedm">
                     <thead class="table-dark">
                     <tr>

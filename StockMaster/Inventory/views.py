@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponseServerError
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -154,6 +154,7 @@ def EditProduct(request, productid):
                'ind': productid}
 
     return render(request, 'product-edit.html', context)
+
 
 @login_required(login_url='login')
 def deleteProduct(request, product_id):
@@ -392,10 +393,9 @@ def HandleProductData(request):
     """
     if request.method == 'POST':
         products_data = request.POST.get('productsData')  # Aquí se obtienen los datos de los productos del frontend
-
+        isExternal = request.POST.get('isExternal')
         products_data_list = json.loads(products_data)
-        print(products_data_list)
-        newOrder = InputOrder()
+        newOrder = InputOrder(isExternal=True if isExternal == "true" else False)
         newOrder.save()
         for product_data in products_data_list:
             VerifyAndUpdate(product_data)

@@ -83,13 +83,14 @@ class ViewExpPDF(View):
     def post(self, request, *args, **kwargs):
         month = int(request.POST.get("month"))
         year = int(request.POST.get("year"))
+        order_type = request.POST.get("external")
         if int(request.POST.get("month")) != datetime.now().month or int(
                 request.POST.get("year")) != datetime.now().year:
-            orders = GetOrderAsOfDate(year, month)
+            orders = GetOrderAsOfDate(year, month, order_type)
             toDate = date(year, month, calendar.monthrange(year, month)[1])
         elif int(request.POST.get("month")) == datetime.now().month or int(
                 request.POST.get("year")) == datetime.now().year:
-            orders = GetOrderAsOfDate(year, month)
+            orders = GetOrderAsOfDate(year, month, order_type)
             toDate = datetime.now().date()
         else:
             orders = []
@@ -132,6 +133,7 @@ class ViewExpPDF(View):
             'percentages': percentages,
             'catQuantities': catQuantities,
             'products': tempProducts,
+            'order_type': order_type,
         }
         pdf = render_to_pdf('expensesTextTemplate.html', contextDict=context)
         return HttpResponse(pdf, content_type='application/pdf')
@@ -228,7 +230,8 @@ def GetExpensesPerCategoryMonth(request):
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        orders = getOrdersInMonthAndYear(month, year)
+        order_type = request.POST.get("external")
+        orders = GetOrderAsOfDate(year, month, order_type)
         quantities = getExpensesPerCategory(orders)
         return JsonResponse({
             'success': True,
@@ -244,7 +247,8 @@ def GetExpensesPercentages(request):
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        orders = getOrdersInMonthAndYear(month, year)
+        order_type = request.POST.get("external")
+        orders = GetOrderAsOfDate(year, month, order_type)
         percentages = getExpensesPercentagesPerCategory(orders)
         return JsonResponse({
             'success': True,
@@ -279,7 +283,11 @@ def GetExpensesMonth(request):
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        orders = getOrdersInMonthAndYear(month, year).order_by("date_created")
+        order_type = request.POST.get("external")
+        orders = getOrdersInMonthAndYear(month, year)
+        if order_type != "all":
+            orders = orders.filter(isExternal=True if order_type == "external" else False)
+        print(month)
         print(orders)
 
         # Obtener todas las fechas del mes
@@ -373,29 +381,39 @@ def TextInventory(request):
 @login_required(login_url='login')
 def TextExpense(request):
     years = range(2023, datetime.now().year + 1)
-
+    order_type = 'all'
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
+        order_type = request.POST.get('external')
         if month != datetime.now().month or year != datetime.now().year:
-            orders = GetOrderAsOfDate(year, month)
-            products = GetInventoryAsOfDate(date(year, month, calendar.monthrange(year, month)[1]))
+            orders = GetOrderAsOfDate(year, month, order_type)
+            order_ids = [order.id for order in orders]
+            products = Product.objects.filter(inputorderitem__inputOrder__id__in=order_ids).distinct()
         elif month == datetime.now().month or year == datetime.now().year:
-            orders = GetOrderAsOfDate(year, month)
-            products = Product.objects.all()
+            orders = GetOrderAsOfDate(year, month, order_type)
+            products = Product.objects.filter(
+                inputorderitem__inputOrder__id__in=[order.id for order in orders]).distinct()
         else:
             orders = []
     else:
         month = datetime.now().month
         year = datetime.now().year
         orders = GetOrderAsOfDate(year, month)
-        products = Product.objects.all()
+        products = Product.objects.filter(
+            inputorderitem__inputOrder__id__in=[order.id for order in orders]).distinct()
 
     valorProductos = {}
     totalProductos = 0  # Variable para almacenar la cantidad total de productos
+    isExternal = True if order_type == "external" else False
     for product in products:
-        lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
-                                                  inputOrder__date_created__month=month)
+        if order_type == 'all':
+            lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
+                                                      inputOrder__date_created__month=month, )
+        else:
+            lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
+                                                      inputOrder__date_created__month=month,
+                                                      inputOrder__isExternal=isExternal, )
         totalCostoItem = 0
         totalProductosItem = 0  # Variable para almacenar la cantidad total de productos por producto
 
@@ -425,6 +443,7 @@ def TextExpense(request):
         'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
         'valorProductosOrdenado': valorProductosOrdenado,
         'totalProductos': totalProductos,
+        'order_type': order_type,
     }
     return render(request, 'report-expText.html', context)
 
@@ -497,9 +516,15 @@ def MapCategory(value):
     return categories[value]
 
 
-def GetOrderAsOfDate(year, month):
+def GetOrderAsOfDate(year, month, order_type='all'):
     orders = []
-    for order in InputOrder.objects.all().order_by('-date_created'):
+    if order_type == 'all':
+        orderObjects = InputOrder.objects.all().order_by('-date_created')
+    elif order_type == 'external':
+        orderObjects = InputOrder.objects.filter(isExternal=True).order_by('-date_created')
+    else:
+        orderObjects = InputOrder.objects.filter(isExternal=False).order_by('-date_created')
+    for order in orderObjects:
         if order.date_created.month == month and order.date_created.year == year:
             orders.append(order)
     return orders

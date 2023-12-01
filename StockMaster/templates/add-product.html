@@ -75,6 +75,10 @@
                         <small id="packPrice0" style="display: none">precio p. caja</small>
                     </div>
                 </div>
+                <div class="mt-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="external" name="external">
+                    <label class="form-check-label" for="exampleCheck1">¿Orden externa?</label>
+                </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">Confirmar
                     </button>
@@ -371,7 +375,7 @@
             event.preventDefault();
             var productsData = [];
             var productInputs = document.getElementsByClassName("product-input");
-
+            let isExternal = document.getElementById('external').checked;
             for (var i = 0; i < productInputs.length; i++) {
                 var productData = {};
                 var productName = productInputs[i].value;
@@ -390,7 +394,8 @@
                 url: "{% url 'registerBuyOrder' %}",
                 data: {
                     csrfmiddlewaretoken: '{{ csrf_token }}',
-                    productsData: JSON.stringify(productsData)
+                    productsData: JSON.stringify(productsData),
+                    isExternal: isExternal,
                 },
                 success: function (response) {
                     window.location.href = "{% url 'inventory' %}"

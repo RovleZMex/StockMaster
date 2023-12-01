@@ -1,19 +1,17 @@
 import unicodedata
 from datetime import datetime, timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-
 from django.http import JsonResponse
-
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
+
 from InputHistory.models import InputOrder, InputOrderItem
 from OutputHistory.models import OutputOrder
-from Product.models import Product
 from Workers.models import Worker
 from .models import Product, OutputOrderItem
-from django.http import JsonResponse
 
 
 @login_required(login_url='login')
@@ -62,7 +60,7 @@ def InputHistory(request):
     searchQuery = request.GET.get("search")
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
-
+    order_type = request.GET.get('order_type')
     inputOrders = InputOrder.objects.all()
 
     if searchQuery:
@@ -75,6 +73,9 @@ def InputHistory(request):
         start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
         inputOrders = inputOrders.filter(date_created__range=[start_date_obj, end_date_obj])
+
+    if order_type != "all":
+        inputOrders = inputOrders.filter(isExternal=True if order_type == "external" else False)
 
     paginator = Paginator(inputOrders.order_by("-date_created"), 10)
     pageNumber = request.GET.get("page")
@@ -237,6 +238,9 @@ def inputOrderDetails(request, orderid):
 def inputOrderEdit(request, orderid):
     if request.method == 'POST':
         order = InputOrder.objects.get(id=orderid)
+        isExternal = request.POST.get("external")
+
+        order.isExternal = True if isExternal == "on" else False
         if request.POST.get("date") != '':
             date = request.POST["date"] + "-00:00:00"
             order.date_created = datetime.strptime(date, '%Y-%m-%d-%H:%M:%S')

@@ -75,9 +75,11 @@
                 </div>
                 <div class="d-inline-block">
                     <select class="form-select" id="externalSelect" name="external" onchange="">
-                        <option value="all">Sin filtro</option>
-                        <option value="external">Externos</option>
-                        <option value="internal">Internos</option>
+                        <option value="all" {% if order_type == 'all' %} selected {% endif %}>Sin filtro</option>
+                        <option value="external" {% if order_type == 'external' %} selected {% endif %}>Externos
+                        </option>
+                        <option value="internal" {% if order_type == 'internal' %} selected {% endif %}>Internos
+                        </option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary">Buscar</button>
@@ -131,7 +133,9 @@
                         </tr>
                     {% endfor %}
                     <tr class="table-primary">
-                        <td colspan="5" align="center">Valor total de la orden: ${{ order.GetTotal|floatformat:"2g" }} M.N.</td>
+                        <td colspan="5" align="center">Valor total de la orden: ${{ order.GetTotal|floatformat:"2g" }}
+                            M.N.
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -193,6 +197,7 @@
                 // Obtener los valores seleccionados de los select
                 var monthValue = $("#monthSelect").val();
                 var yearValue = $("#yearSelect").val();
+                let externalValue = $("#externalSelect").val();
 
                 // Obtener el token CSRF
                 var csrfToken = $("input[name=csrfmiddlewaretoken]").val();
@@ -204,6 +209,7 @@
                     .attr("target", "_blank")
                     .append($('<input type="hidden" name="month" value="' + monthValue + '">'))
                     .append($('<input type="hidden" name="year" value="' + yearValue + '">'))
+                    .append($('<input type="hidden" name="external" value="' + externalValue + '">'))
                     .append($('<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">'));
 
                 // Agregar el formulario temporal al cuerpo del documento y enviarlo

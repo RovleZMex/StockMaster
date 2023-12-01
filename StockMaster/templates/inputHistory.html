@@ -43,13 +43,12 @@
                                    style="max-width: 30%; margin-right: 10px;" placeholder="Fecha de inicio">
                             <input id="endDateInput" type="date" class="form-control"
                                    style="max-width: 30%; margin-right: 10px;" placeholder="Fecha de fin" min="">
-                            <button id="searchButton" class="btn btn-primary">Buscar</button>
-                            
-                            <select name="filter" id="filterSelect" onchange="" class="form-select">
+                            <select name="filter" id="filterSelect" name="filter" onchange="" class="form-select">
                                 <option value="all">Sin filtro</option>
                                 <option value="external">Externos</option>
-                                <option value="external">Internos</option>
+                                <option value="internal">Internos</option>
                             </select>
+                            <button id="searchButton" class="btn btn-primary">Buscar</button>
                         </div>
                         <div class="container mt-4">
                             <div class="table-responsive">
@@ -73,7 +72,8 @@
                                             <td>{{ order.date_created }}</td>
                                             <td>
                                                 <input class="form-check-input" type="checkbox" value=""
-                                                       id="flexCheckCheckedDisabled" checked disabled>
+                                                       id="flexCheckCheckedDisabled" {% if order.isExternal %}
+                                                       checked {% endif %} disabled>
                                                 <label class="form-check-label" for="flexCheckCheckedDisabled">
                                                 </label>
                                             </td>
@@ -140,7 +140,9 @@
             const searchText = searchInput.value.toLowerCase();
             const startDate = startDateInput.value;
             const endDate = endDateInput.value;
-            const queryString = `?search=${searchText}&start_date=${startDate}&end_date=${endDate}`;
+            let filterObj = document.getElementById('filterSelect');
+            let filter = filterObj.options[filterObj.selectedIndex].value;
+            const queryString = `?search=${searchText}&start_date=${startDate}&end_date=${endDate}&order_type=${filter}`;
             window.location.href = queryString;
         }
 

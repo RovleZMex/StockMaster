@@ -38,13 +38,6 @@
         <div class="d-inline-block">
             <h1>Informe Gastos</h1>
         </div>
-        <div class="d-inline-block">
-            <select class="form-select" id="externalSelect" name="external" onchange="">
-                <option value="all">Sin filtro</option>
-                <option value="external">Externos</option>
-                <option value="internal">Internos</option>
-            </select>
-        </div>
     </div>
 
     <section class="">
@@ -81,7 +74,14 @@
                                 </div>
                             </div>
                             <div class="col-md-2">
-                                <p class="lead">Vs.</p>
+                                <div class="d-inline-block">
+                                    <select class="form-select" id="externalSelect" name="external"
+                                            onchange="filterChange()">
+                                        <option value="all">Sin filtro</option>
+                                        <option value="external">Externos</option>
+                                        <option value="internal">Internos</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-5">
                                 <div class="d-inline-block">
@@ -222,7 +222,10 @@
                                 if (label) {
                                     label += ': ';
                                 }
-                                label += '$' + context.parsed.y + ' M.N.';
+                                label += '$' + context.parsed.y.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }) + ' M.N.';
 
                                 return label;
                             }
@@ -275,8 +278,28 @@
                     y: {
                         stacked: false // No apila las barras verticalmente
                     }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                var label = context.dataset.label || '';
+
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += '$' + context.parsed.y.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }) + ' M.N.';
+
+                                return label;
+                            }
+                        }
+                    }
                 }
             }
+
         };
 
         // Crea la instancia de la gráfica
@@ -341,12 +364,14 @@
             let csrftoken = getCookie('csrftoken');
             let month = document.getElementById("monthSelectStock" + index);
             let year = document.getElementById("yearSelectStock" + index);
+            let filter = document.getElementById('externalSelect');
             $.ajax({
                 type: "POST",
                 url: "{% url 'getExpensesMonth' %}",
                 data: {
                     "month": month.options[month.selectedIndex].value,
                     "year": year.options[year.selectedIndex].value,
+                    "external": filter.options[filter.selectedIndex].value,
                     'csrfmiddlewaretoken': csrftoken,
                 },
                 success: function (response) {
@@ -374,12 +399,14 @@
             let month = document.getElementById("monthSelectStock" + index);
             let year = document.getElementById("yearSelectStock" + index);
             let title = document.getElementById("percTitle" + index);
+            let filter = document.getElementById('externalSelect');
             $.ajax({
                 type: "POST",
                 url: "{% url 'getExpensesPercentages' %}",
                 data: {
                     "month": month.options[month.selectedIndex].value,
                     "year": year.options[year.selectedIndex].value,
+                    "external": filter.options[filter.selectedIndex].value,
                     'csrfmiddlewaretoken': csrftoken,
                 },
                 success: function (response) {
@@ -405,12 +432,14 @@
             let csrftoken = getCookie('csrftoken');
             let month = document.getElementById("monthSelectStock" + index);
             let year = document.getElementById("yearSelectStock" + index);
+            let filter = document.getElementById('externalSelect');
             $.ajax({
                 type: "POST",
                 url: "{% url 'getExpensesPerCategory' %}",
                 data: {
                     "month": month.options[month.selectedIndex].value,
                     "year": year.options[year.selectedIndex].value,
+                    "external": filter.options[filter.selectedIndex].value,
                     'csrfmiddlewaretoken': csrftoken,
                 },
                 success: function (response) {
@@ -428,6 +457,11 @@
                     console.error('Error al enviar los datos de los productos. Inténtalo de nuevo más tarde.');
                 }
             });
+        }
+
+        function filterChange() {
+            updateCharts(1);
+            updateCharts(2);
         }
 
 

@@ -36,6 +36,11 @@
 <body>
 <h1>Reporte de gastos</h1>
 <p>Fecha: {{ date }}</p>
+<p>Tipos de órdenes:
+    {% if order_type == "all" %} Internas/Externas {% endif %}
+    {% if order_type == "external" %} Externas {% endif %}
+    {% if order_type == "internal" %} Internas {% endif %}
+</p>
 <p>Cantidad total de órdenes: {{ orderQuant }}</p>
 <p>Total de gastos en el mes: ${{ totalExpense|floatformat:"2g" }}</p>
 <p>Rango de gastos: {{ fromDate }} - {{ toDate }} </p>

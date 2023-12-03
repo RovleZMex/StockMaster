@@ -132,14 +132,17 @@
                                     </thead>
                                     <tbody id="inventory-table">
                                     {% for product in products %}
-                                        <tr class="table-row clickableRow{% if product.quantity == 0 %} table-danger {% elif product.isLowStock %} table-warning {% endif %}" data-href="{% url 'productDetails' product.id %}">
+                                        <tr class="table-row clickableRow{% if product.quantity == 0 %} table-danger {% elif product.isLowStock %} table-warning {% endif %}"
+                                            data-href="{% url 'productDetails' product.id %}">
                                             <td>{{ product.SKU }}</td>
                                             <td>{{ product.name }}</td>
                                             <td>{{ product.quantity }}</td>
                                             {% if product.image %}
                                                 <td><img src="{{ product.image.url }}" alt="" width="200"></td>
                                             {% else %}
-                                                <td></td>
+                                                <td>
+                                                    <div class="img-placeholder">No hay imagen disponible</div>
+                                                </td>
                                             {% endif %}
                                         </tr>
                                     {% endfor %}

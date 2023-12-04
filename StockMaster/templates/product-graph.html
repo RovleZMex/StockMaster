@@ -20,7 +20,7 @@
                     <p class="lead">{{ product.name }}</p>
                     <p class="lead">SKU: {{ product.SKU }}</p>
                     <p class="lead">Precio: ${{ product.price }} M.N.</p>
-                    <p class="lead">Stock: {{ product.quantity }}</p>
+                    <p class="lead">Existencia: {{ product.quantity }}</p>
                 </div>
                 <div class="col-md text-center">
                     <img style="width: 300px" src="{{ product.image.url }}" alt="">
@@ -28,7 +28,7 @@
             </div>
             <div class="row m-4">
                 <div class="col-md">
-                    <h3>Stock</h3>
+                    <h3>Existencia</h3>
                     <form class="d-flex">
                         {% csrf_token %}
                         <select class="form-select me-2" id="monthSelectStock" onchange="GetStockData()">
@@ -115,7 +115,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Stock',
+                    label: 'Existencia',
                     data: [], // Data for the graph
                     backgroundColor: 'rgba(54, 162, 235, 0.2)', // background color
                     borderColor: 'rgba(54, 162, 235, 1)', // Border color
@@ -143,7 +143,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Stock',
+                    label: 'Precio',
                     data: [], // Data for the graph
                     backgroundColor: 'rgba(54, 162, 235, 0.2)', // background color
                     borderColor: 'rgba(54, 162, 235, 1)', // Border color

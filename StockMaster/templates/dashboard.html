@@ -65,7 +65,7 @@
                                 <i class="bi bi-check-square"></i>
                             </div>
                             <h3 class="card-title mb-3">
-                                Buen Stock
+                                Buena existencia
                             </h3>
                             <h1 class="card-text pb-3">{{ goodStockProducts }}</h1>
                         </div>
@@ -78,7 +78,7 @@
                                 <i class="bi bi-exclamation-triangle"></i>
                             </div>
                             <h3 class="card-title mb-3">
-                                Bajo stock
+                                Baja existencia
                             </h3>
                             <h1 class="card-text pb-3">{{ lowStockProducts }}</h1>
                         </div>
@@ -92,7 +92,7 @@
                                 <i class="bi bi-exclamation-octagon"></i>
                             </div>
                             <h3 class="card-title mb-3">
-                                Sin stock
+                                Sin existencias
                             </h3>
                             <h1 class="card-text pb-3">{{ noStockProducts }}</h1>
                         </div>
@@ -146,7 +146,7 @@
                             </thead>
                             <tbody>
                             {% for order in lastInputOrders %}
-                                <tr class="table-row clickableRow" data-href="{% url 'outputDetails' order.id %}">
+                                <tr class="table-row clickableRow" data-href="{% url 'inputDetails' order.id %}">
                                     <td>{{ order.id }}</td>
                                     <td>{{ order.GetItems.count }}</td>
                                     <td>${{ order.GetTotal }} M.N.</td>

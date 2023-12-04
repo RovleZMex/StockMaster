@@ -29,7 +29,7 @@
                 {% else %}
                     <input type="checkbox" id="isExternalCheckbox" disabled>
                 {% endif %}
-                <p class="lead pt-3">Bajo stock a partir de: {{ product.threshold }}</p>
+                <p class="lead pt-3">Baja existencia a partir de: {{ product.threshold }}</p>
 
                 <a href="{% url 'editProduct' product.id %}" class="btn btn-primary">Editar detalles</a>
                 <a href="{% url 'productGraph' product.id %}" class="btn btn-secondary">Ver informes</a>

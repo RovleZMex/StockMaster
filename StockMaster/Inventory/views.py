@@ -437,13 +437,14 @@ def VerifyAndUpdate(product):
     if product["productName"] == "":
         return
     name1 = DeleteLeftFromSequence(product["productName"], " - ").strip()
+    print(name1)
     dbProduct = Product.objects.get(SKU=name1)
     if product['quantityType'] == "unidades":
         dbProduct.quantity += int(product['quantity'])
         dbProduct.price = product['price']
     else:
         dbProduct.quantity += int(product['quantity']) * int(product['unitsPerBox'])
-        dbProduct.price = int(product['price']) / int(product['unitsPerBox'])
+        dbProduct.price = float(product['price']) / int(product['unitsPerBox'])
     dbProduct.save()
 
 

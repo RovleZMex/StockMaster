@@ -41,7 +41,7 @@
                     <div class="col-md">
                         <h1>Inventario Actual</h1>
                         <div class="container mt-6">
-                            <a href="{% url 'addProducts' %}" class="btn btn-success">Añadir productos</a>
+                            <a href="{% url 'addProducts' %}" class="btn btn-success"><i class="bi bi-bag"></i> Registrar nota de compra</a>
                             <div class="row g-2 pt-3">
                                 <div class="col-md-2">
                                     <div class="dropdown">
@@ -80,9 +80,9 @@
                                         <button class="btn btn-secondary dropdown-toggle custom-bg-color"
                                                 id="stock-dropdown"
                                                 type="button" data-bs-toggle="dropdown">
-                                            {% if request.GET.stock == 'good-stock-inventory' %} Buen stock
-                                            {% elif request.GET.stock == 'low-stock-inventory' %} Bajo stock
-                                            {% elif request.GET.stock == 'no-stock-inventory' %} No stock
+                                            {% if request.GET.stock == 'good-stock-inventory' %} Buena existencia
+                                            {% elif request.GET.stock == 'low-stock-inventory' %} Baja existencia
+                                            {% elif request.GET.stock == 'no-stock-inventory' %} Sin existencias
                                             {% else %}Todos los productos
                                             {% endif %}
                                         </button>
@@ -91,14 +91,11 @@
                                             <li><a class="dropdown-item" href="{% url 'inventory' %}">Todos los
                                                 productos</a></li>
                                             <li><a class="dropdown-item"
-                                                   href="{% url 'filtered' %}?stock=good-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Buen
-                                                stock</a></li>
+                                                   href="{% url 'filtered' %}?stock=good-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Buena existencia</a></li>
                                             <li><a class="dropdown-item"
-                                                   href="{% url 'filtered' %}?stock=low-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Bajo
-                                                stock</a></li>
+                                                   href="{% url 'filtered' %}?stock=low-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Baja existencia</a></li>
                                             <li><a class="dropdown-item"
-                                                   href="{% url 'filtered' %}?stock=no-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">No
-                                                stock</a></li>
+                                                   href="{% url 'filtered' %}?stock=no-stock-inventory{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Sin existencias</a></li>
                                         </ul>
                                     </div>
 

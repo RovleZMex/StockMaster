@@ -215,6 +215,8 @@ def deleteOrderOutput(request):
     if request.method == "POST":
         id = int(request.POST["orderid"])
         order = OutputOrder.objects.get(id=id)
+        order.delete()
+        return redirect('outputHistory')
 
 
 @login_required(login_url='login')

@@ -63,6 +63,7 @@ class ViewPDF(View):
 
             context = {
                 'products': products,
+                'totalProducts': sum([product.quantity for product in products]),
                 'totalValue': totalValue,
                 'date': datetime.now().date(),
                 'fromDate': fromDate,

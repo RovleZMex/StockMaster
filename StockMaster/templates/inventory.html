@@ -120,18 +120,17 @@
 
                         <div class="container mt-4">
                             <div class="table-responsive">
-
-                                <table class="table mt-3 table-hover tableRoundedm">
-                                    <thead class="table-dark">
-                                    <tr>
-                                        <th>SKU</th>
-                                        <th>Nombre</th>
-                                        <th>Cantidad</th>
-                                        <th>Imagen</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="inventory-table">
-                                    {% if products %}
+                                {% if products %}
+                                    <table class="table mt-3 table-hover tableRoundedm">
+                                        <thead class="table-dark">
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nombre</th>
+                                            <th>Cantidad</th>
+                                            <th>Imagen</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="inventory-table">
                                         {% for product in products %}
                                             <tr class="table-row clickableRow{% if product.quantity == 0 %} table-danger {% elif product.isLowStock %} table-warning {% endif %}"
                                                 data-href="{% url 'productDetails' product.id %}">
@@ -147,14 +146,17 @@
                                                 {% endif %}
                                             </tr>
                                         {% endfor %}
-                                    {% else %}
-                                        <tr>
-                                            <td colspan="4" class="text-center">No se encontraron productos.</td>
-                                        </tr>
-                                    {% endif %}
-                                    </tbody>
-
-                                </table>
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <div class="card text-bg-warning mx-auto" style="max-width: 18rem;">
+                                        <div class="card-header"></div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">No se encontraron datos</h5>
+                                            <p class="card-text">No hay entradas para los criterios de búsqueda.</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

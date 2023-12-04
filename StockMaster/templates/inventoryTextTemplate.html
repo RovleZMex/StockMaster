@@ -36,8 +36,8 @@
 <body>
 <h1>Reporte de Inventario</h1>
 <p>Fecha: {{ date }}</p>
-<p>Cantidad total de productos: {{ products.count }}</p>
-<p>Valor total del inventario: ${{ totalValue }} M.N.</p>
+<p>Existencia total de productos: {{ totalProducts }}</p>
+<p>Valor total del inventario: ${{ totalValue|floatformat:"2g" }} M.N.</p>
 <p>Rango de inventario: {{ fromDate }} - {{ toDate }}</p>
 <hr>
 <h2>Categorías</h2>
@@ -55,25 +55,25 @@
         <td>{{ categories.0 }}</td>
         <td>{{ quantities.0 }}</td>
         <td>{{ percentages.0 }}%</td>
-        <td>${{ catValues.0 }} M.N.</td>
+        <td>${{ catValues.0|floatformat:"2g" }} M.N.</td>
     </tr>
     <tr>
         <td>{{ categories.1 }}</td>
         <td>{{ quantities.1 }}</td>
         <td>{{ percentages.1 }}%</td>
-        <td>${{ catValues.1 }} M.N.</td>
+        <td>${{ catValues.1|floatformat:"2g" }} M.N.</td>
     </tr>
     <tr>
         <td>{{ categories.2 }}</td>
         <td>{{ quantities.2 }}</td>
         <td>{{ percentages.2 }}%</td>
-        <td>${{ catValues.2 }} M.N.</td>
+        <td>${{ catValues.2|floatformat:"2g" }} M.N.</td>
     </tr>
     <tr>
         <td>{{ categories.3 }}</td>
         <td>{{ quantities.3 }}</td>
         <td>{{ percentages.3 }}%</td>
-        <td>${{ catValues.3 }} M.N.</td>
+        <td>${{ catValues.3|floatformat:"2g" }} M.N.</td>
     </tr>
     </tbody>
 </table>
@@ -96,8 +96,8 @@
             <td>{{ product.SKU }}</td>
             <td>{{ product.name }}</td>
             <td>{{ product.quantity }}</td>
-            <td>${{ product.price }}</td>
-            <td>${{ product.getTotalValue }}</td>
+            <td>${{ product.price|floatformat:"2g" }} M.N.</td>
+            <td>${{ product.getTotalValue|floatformat:"2g" }} M.N.</td>
         </tr>
     {% endfor %}
     <!-- Puedes copiar y pegar esta fila para agregar más productos -->

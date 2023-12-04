@@ -67,8 +67,7 @@ def InputHistory(request):
     if searchQuery:
         search_query_normalized = RemoveAccents(searchQuery).lower()
         inputOrders = inputOrders.filter(
-            Q(id__icontains=search_query_normalized) |
-            Q(worker__name__icontains=search_query_normalized)
+            Q(id__icontains=search_query_normalized)
         )
 
     if start_date and end_date:

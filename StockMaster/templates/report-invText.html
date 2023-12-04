@@ -91,7 +91,7 @@
                 <div class="card text-center align-items-center"
                      style="width: 18rem; display: flex; flex-direction: column; justify-content: center;">
                     <h5 class="card-title mt-2">Valor total del inventario</h5>
-                    <h1>${{ totalPrice }} M.N.</h1>
+                    <h1>${{ totalPrice|floatformat:"2g" }} M.N.</h1>
                 </div>
             </div>
         </section>
@@ -108,7 +108,7 @@
                             <th>Nombre</th>
                             <th>Cantidad Disponible</th>
                             <th>Precio Unitario</th>
-                            <th>Precio total</th>
+                            <th>Precio Total</th>
                         </tr>
                         </thead>
                         <tbody id="inventory-table">
@@ -118,8 +118,8 @@
                                 <td>{{ product.SKU }}</td>
                                 <td>{{ product.name }}</td>
                                 <td>{{ product.quantity }}</td>
-                                <td>${{ product.price }}</td>
-                                <td>${{ product.getTotalValue }}</td>
+                                <td>${{ product.price|floatformat:"2g" }}</td>
+                                <td>${{ product.getTotalValue|floatformat:"2g" }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -148,7 +148,7 @@
                                 <td>{{ category.0 }}</td>
                                 <td>{{ category.1 }}</td>
                                 <td>{{ category.2 }}%</td>
-                                <td>{{ category.3 }}</td>
+                                <td>${{ category.3|floatformat:"2g" }} M.N.</td>
                             </tr>
                         {% endfor %}
                         </tbody>

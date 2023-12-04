@@ -48,27 +48,38 @@
                             <button id="searchButton" class="btn btn-primary">Buscar</button>
                         </div>
                         <div class="container mt-4">
-                            <div class="table-responsive">
-                                <table class="table mt-3 table-hover tableRoundedm">
-                                    <thead class="table-dark">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Personal</th>
-                                        <th>Cantidad de Productos</th>
-                                        <th>Fecha/Hora</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="inventory-table">
-                                    {% for order in page_obj %}
-                                        <tr class="table-row clickableRow" data-href="{% url 'outputDetails' order.id %}">
-                                            <td>#{{ order.id }}</td>
-                                            <td>{{ order.worker.name }}</td>
-                                            <td>{{ order.GetItems.count }}</td>
-                                            <td>{{ order.date_created }}</td>
+                            {% if page_obj %}
+                                <div class="table-responsive">
+                                    <table class="table mt-3 table-hover tableRoundedm">
+                                        <thead class="table-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Personal</th>
+                                            <th>Cantidad de Productos</th>
+                                            <th>Fecha/Hora</th>
                                         </tr>
-                                    {% endfor %}
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody id="inventory-table">
+                                        {% for order in page_obj %}
+                                            <tr class="table-row clickableRow"
+                                                data-href="{% url 'outputDetails' order.id %}">
+                                                <td>#{{ order.id }}</td>
+                                                <td>{{ order.worker.name }}</td>
+                                                <td>{{ order.GetItems.count }}</td>
+                                                <td>{{ order.date_created }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="card text-bg-warning mx-auto" style="max-width: 18rem;">
+                                    <div class="card-header"></div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">No se encontraron entradas</h5>
+                                        <p class="card-text">No hay entradas para esta combinación de mes y año.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

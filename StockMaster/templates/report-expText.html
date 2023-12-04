@@ -109,65 +109,77 @@
     <!-- Main table -->
     <section class="p-5">
         <div class="container">
-            {% for order in orders %}
-                <h3 class="pt-4">Folio: #{{ order.id }} Fecha de creacion de la
-                    orden: {{ order.date_created.date }}</h3>
-                <table class="table mt-3 table-hover tableRoundedm">
-                    <thead class="table-dark">
-                    <tr>
-                        <th>SKU</th>
-                        <th>Nombre</th>
-                        <th>Cantidad</th>
-                        <th>Precio Unitario</th>
-                        <th>Subtotal</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for order_item in order.GetItems %}
+            {% if orders %}
+                {% for order in orders %}
+                    <h3 class="pt-4">Folio: #{{ order.id }} Fecha de creación de la
+                        orden: {{ order.date_created.date }}</h3>
+                    <table class="table mt-3 table-hover tableRoundedm">
+                        <thead class="table-dark">
                         <tr>
-                            <td>{{ order_item.product.SKU }}</td>
-                            <td>{{ order_item.product.name }}</td>
-                            <td>{{ order_item.quantity }}</td>
-                            <td>$ {{ order_item.product.GetFormattedPrice }} M.N</td>
-                            <td>$ {{ order_item.getSubtotal|floatformat:"2g" }} M.N.</td>
+                            <th>SKU</th>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
                         </tr>
-                    {% endfor %}
-                    <tr class="table-primary">
-                        <td colspan="5" align="center">Valor total de la orden: ${{ order.GetTotal|floatformat:"2g" }}
-                            M.N.
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            {% endfor %}
-        </div>
+                        </thead>
+                        <tbody>
+                        {% for order_item in order.GetItems %}
+                            <tr>
+                                <td>{{ order_item.product.SKU }}</td>
+                                <td>{{ order_item.product.name }}</td>
+                                <td>{{ order_item.quantity }}</td>
+                                <td>$ {{ order_item.product.GetFormattedPrice }} M.N</td>
+                                <td>$ {{ order_item.getSubtotal|floatformat:"2g" }} M.N.</td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="table-primary">
+                            <td colspan="5" align="center">Valor total de la orden:
+                                ${{ order.GetTotal|floatformat:"2g" }}
+                                M.N.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                {% endfor %}
+            {% else %}
+                <div class="card text-bg-warning mx-auto" style="max-width: 18rem;">
+                <div class="card-header"></div>
+                <div class="card-body">
+                    <h5 class="card-title">No se encontraron entradas</h5>
+                    <p class="card-text">No hay entradas para esta combinación de mes y año.</p>
+                </div>
+            {% endif %}
+            </div>
     </section>
 
 
     <!-- Main table -->
-    <section>
-        <div class="container">
-            <h3>Costos totales por producto</h3>
-            <table class="table mt-3 table-hover tableRoundedm">
-                <thead class="table-dark">
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Costo Total</th> <!-- Agregado para mostrar el costo total -->
-                </tr>
-                </thead>
-                <tbody>
-                {% for product, info in valorProductosOrdenado.items %}
+    {% if orders %}
+        <section>
+            <div class="container">
+                <h3>Costos totales por producto</h3>
+                <table class="table mt-3 table-hover tableRoundedm">
+                    <thead class="table-dark">
                     <tr>
-                        <td>{{ product }}</td>
-                        <td>{{ info.cantidad_total_productos }}</td>
-                        <td>${{ info.costo_total|floatformat:"2g" }} M.N.</td>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Costo Total</th> <!-- Agregado para mostrar el costo total -->
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
+                    </thead>
+                    <tbody>
+                    {% for product, info in valorProductosOrdenado.items %}
+                        <tr>
+                            <td>{{ product }}</td>
+                            <td>{{ info.cantidad_total_productos }}</td>
+                            <td>${{ info.costo_total|floatformat:"2g" }} M.N.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
 
 
     <!-- Scripts -->

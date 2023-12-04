@@ -120,7 +120,7 @@
 
                         <div class="container mt-4">
                             <div class="table-responsive">
-
+                                {% if products %}
                                 <table class="table mt-3 table-hover tableRoundedm">
                                     <thead class="table-dark">
                                     <tr>
@@ -145,9 +145,32 @@
                                                 </td>
                                             {% endif %}
                                         </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody id="inventory-table">
+                                        {% for product in products %}
+                                            <tr class="table-row clickableRow{% if product.quantity == 0 %} table-danger {% elif product.isLowStock %} table-warning {% endif %}"
+                                                data-href="{% url 'productDetails' product.id %}">
+                                                <td>{{ product.SKU }}</td>
+                                                <td>{{ product.name }}</td>
+                                                <td>{{ product.quantity }}</td>
+                                                {% if product.image %}
+                                                    <td><img src="{{ product.image.url }}" alt="" width="200"></td>
+                                                {% else %}
+                                                    <td></td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <div class="card text-bg-warning mx-auto" style="max-width: 18rem;">
+                                        <div class="card-header"></div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">No se encontraron entradas</h5>
+                                            <p class="card-text">No hay entradas para esta combinación de mes y año.</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

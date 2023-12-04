@@ -158,7 +158,7 @@
             var container = document.getElementById('productInputs');
             var newInputRow = document.createElement('div');
             newInputRow.className = 'row g-3';
-            newInputRow.id = newInputRow.id = 'row-' + counter + '-' + Date.now(); // Ensures unique IDs
+            newInputRow.id = newInputRow.id = 'row-' + counter; // Ensures unique IDs
             // Assign an ID to the new row
             newInputRow.innerHTML = `
         <div class="col-md">
@@ -211,6 +211,43 @@
         function removeRow(rowId) {
             var row = document.getElementById('row-' + rowId);
             row.parentNode.removeChild(row);
+
+            // Actualizar índices de las filas restantes
+            var rows = document.getElementById('productInputs').getElementsByClassName('row g-3');
+            for (var i = 0; i < rows.length; i++) {
+                rows[i].id = 'row-' + i;
+                updateDynamicRowIndices(rows[i], i);
+            }
+        }
+
+        function updateDynamicRowIndices(row, index) {
+            var inputs = row.getElementsByClassName('product-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var inputId = inputs[i].id;
+                inputs[i].id = inputId.substring(0, inputId.length - 1) + index; // Actualizar ID del input
+                inputs[i].setAttribute('onchange', 'updateDynamicRow(this, ' + index + ');'); // Actualizar la función onchange
+            }
+
+            var select = row.querySelector('select[name="quantityType"]');
+            select.setAttribute('onchange', 'showAdditionalFields(this.value, ' + index + ');'); // Actualizar la función onchange del select
+
+            var unitsPerBoxField = row.querySelector('#unitsPerBoxField' + index);
+            unitsPerBoxField.id = 'unitsPerBoxField' + index;
+
+            var unitsPerBoxInput = row.querySelector('#unitsPerBoxInput' + index);
+            unitsPerBoxInput.id = 'unitsPerBoxInput' + index;
+
+            var quantityInput = row.querySelector('#quantityInput' + index);
+            quantityInput.id = 'quantityInput' + index;
+
+            var priceInput = row.querySelector('#priceInput' + index);
+            priceInput.id = 'priceInput' + index;
+
+            var externalCheckbox = row.querySelector('#externalCheckbox' + index);
+            externalCheckbox.id = 'externalCheckbox' + index;
+
+            var removeButton = row.querySelector('.btn-danger');
+            removeButton.setAttribute('onclick', 'removeRow(' + index + ');'); // Actualizar la función onclick del botón de eliminación
         }
 
         function updateFirstRow(element) {

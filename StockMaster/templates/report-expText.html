@@ -129,8 +129,8 @@
                                 <td>{{ order_item.product.SKU }}</td>
                                 <td>{{ order_item.product.name }}</td>
                                 <td>{{ order_item.quantity }}</td>
-                                <td>$ {{ order_item.product.GetFormattedPrice }} M.N</td>
-                                <td>$ {{ order_item.getSubtotal|floatformat:"2g" }} M.N.</td>
+                                <td>${{ order_item.getProductAsOfDate.price|floatformat:"2g" }} M.N.</td>
+                                <td>${{ order_item.getSubtotal|floatformat:"2g" }} M.N.</td>
                             </tr>
                         {% endfor %}
                         <tr class="table-primary">

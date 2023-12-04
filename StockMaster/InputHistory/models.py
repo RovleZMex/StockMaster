@@ -33,7 +33,7 @@ class InputOrder(models.Model):
         """
         total = 0
         for item in self.GetItems():
-            total += item.quantity * item.product.price
+            total += item.quantity * item.getProductAsOfDate().price
         return round(total, 2)
 
     def __str__(self):
@@ -60,8 +60,13 @@ class InputOrderItem(models.Model):
     inputOrder = models.ForeignKey(InputOrder, on_delete=models.CASCADE)
     """ForeignKey: The input order associated with the item."""
 
+    date_created = models.DateTimeField(auto_now_add=True, blank=True,)
+
+    def getProductAsOfDate(self):
+        return self.product.history.as_of(self.date_created)
+
     def getSubtotal(self):
-        return round(self.quantity * self.product.price, 2)
+        return round(self.quantity * self.getProductAsOfDate().price, 2)
 
     def __str__(self):
         """

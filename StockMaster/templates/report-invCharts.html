@@ -234,10 +234,20 @@
 
                 scales: {
                     x: {
-                        stacked: false // No apila las barras horizontalmente
+                        stacked: false, // No apila las barras horizontalmente
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Categoría'
+                        }
                     },
                     y: {
-                        stacked: false // No apila las barras verticalmente
+                        stacked: false, // No apila las barras verticalmente
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Existencia total'
+                        }
                     }
                 }
             }
@@ -284,11 +294,22 @@
                 tension: 0,
                 stacked: false,
                 scales: {
+                    x: { // Agregado para el eje x
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Día del mes'
+                        }
+                    },
                     y: {
                         type: 'linear',
                         display: true,
                         position: 'left',
                         beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Existencia total'
+                        }
                     },
                     y1: {
                         type: 'linear',

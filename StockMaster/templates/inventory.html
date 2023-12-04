@@ -121,13 +121,29 @@
                         <div class="container mt-4">
                             <div class="table-responsive">
                                 {% if products %}
-                                    <table class="table mt-3 table-hover tableRoundedm">
-                                        <thead class="table-dark">
-                                        <tr>
-                                            <th>SKU</th>
-                                            <th>Nombre</th>
-                                            <th>Cantidad</th>
-                                            <th>Imagen</th>
+                                <table class="table mt-3 table-hover tableRoundedm">
+                                    <thead class="table-dark">
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Nombre</th>
+                                        <th>Cantidad</th>
+                                        <th>Imagen</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="inventory-table">
+                                    {% for product in products %}
+                                        <tr class="table-row clickableRow{% if product.quantity == 0 %} table-danger {% elif product.isLowStock %} table-warning {% endif %}"
+                                            data-href="{% url 'productDetails' product.id %}">
+                                            <td>{{ product.SKU }}</td>
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.quantity }}</td>
+                                            {% if product.image %}
+                                                <td><img src="{{ product.image.url }}" alt="" width="200"></td>
+                                            {% else %}
+                                                <td>
+                                                    <div class="img-placeholder">No hay imagen disponible</div>
+                                                </td>
+                                            {% endif %}
                                         </tr>
                                         </thead>
                                         <tbody id="inventory-table">

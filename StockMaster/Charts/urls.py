@@ -8,6 +8,7 @@ urlpatterns = [
     path("gastos-textual/", views.TextExpense, name="textExpense"),
     path("gastos-graficas/", views.ExpensesCharts, name="expensesCharts"),
     path('inventario-pdf/', views.ViewPDF.as_view(), name="viewPDF"),
+    path('gastos-pdf/', views.ViewExpPDF.as_view(), name="viewExpPDF"),
     path("gspm/", views.GetStockMonth, name="getStockMonth"),
     path("gcpm/", views.GetCategoriesMonth, name="getCategoriesMonth"),
     path("gppm/", views.GetPercentagesMonth, name="getPercentagesPerCategory"),

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 import json
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -56,6 +56,12 @@ def verify_employee(request):
             return redirect('verify_employee')
 
     return render(request, 'verify_employee.html')
+
+def logout_worker(request):
+    # This will clear the session
+    request.session.flush()
+    # Redirect to the login page or any other page
+    return redirect('verify_employee')  # Replace 'verify_employee' with the name of your login view
 
 
 def add_to_cart(request, product_id):
@@ -130,29 +136,39 @@ def confirm_order(request):
     order_items_json = request.POST.get('order_items')
     order_items = json.loads(order_items_json)
 
-    # Retrieve the worker by employee number
     worker = get_object_or_404(Worker, employeeNumber=employee_number)
 
-    # Start a database transaction
     with transaction.atomic():
-        # Create a new OutputOrder
         output_order = OutputOrder(worker=worker)
         output_order.save()
 
-        # Create OutputOrderItem instances for each item in the order
         for item in order_items:
             product = get_object_or_404(Product, id=item['productId'])
-            quantity = item['quantity']
+            quantity = int(item['quantity'])
+
+            # Check if enough inventory (quantity) is available
+            if product.quantity < quantity:
+                return HttpResponseBadRequest(f'No hay suficientes disponibles para {product.name}')
+
+            # Update the inventory quantity
+            product.quantity -= quantity
+            product.save()
+
             OutputOrderItem.objects.create(
                 product=product,
                 quantity=quantity,
                 outputOrder=output_order
             )
 
-            # Clear the cart from the session
         if 'cart' in request.session:
             del request.session['cart']
-    return JsonResponse({'message': 'Orden confirmada!'})
+
+        # After confirming the order, log out the user
+    request.session.flush()  # Clears the session data
+
+    # Optionally, return a response that triggers a client-side redirection
+    return JsonResponse({'message': 'Orden confirmada!', 'logged_out': True})
+
 
 
 def product_detail(request, product_id):

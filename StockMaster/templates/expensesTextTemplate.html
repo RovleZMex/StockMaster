@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Gastos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h1, p {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Reporte de gastos</h1>
+<p>Fecha: {{ date }}</p>
+<p>Tipos de órdenes:
+    {% if order_type == "all" %} Internas/Externas {% endif %}
+    {% if order_type == "external" %} Externas {% endif %}
+    {% if order_type == "internal" %} Internas {% endif %}
+</p>
+<p>Cantidad total de órdenes: {{ orderQuant }}</p>
+<p>Total de gastos en el mes: ${{ totalExpense|floatformat:"2g" }}</p>
+<p>Rango de gastos: {{ fromDate }} - {{ toDate }} </p>
+{% if orders %}
+    <hr>
+    <h2>Categorías</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Categoría</th>
+            <th>Gasto</th>
+            <th>Porcentaje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Eléctricos</td>
+            <td>${{ catQuantities.0 }} M.N.</td>
+            <td>{{ percentages.0 }}%</td>
+        </tr>
+        <tr>
+            <td>Plomería</td>
+            <td>${{ catQuantities.1 }} M.N.</td>
+            <td>{{ percentages.1 }}%</td>
+        </tr>
+        <tr>
+            <td>Oficina</td>
+            <td>${{ catQuantities.2 }} M.N.</td>
+            <td>{{ percentages.2 }}%</td>
+        </tr>
+        <tr>
+            <td>Limpieza</td>
+            <td>${{ catQuantities.3 }} M.N.</td>
+            <td>{{ percentages.3 }}%</td>
+        </tr>
+        </tbody>
+    </table>
+    <hr>
+    <h2>Desglose de órdenes</h2>
+    {% for order in orders %}
+        <h2>Orden #{{ order.id }}</h2>
+        <h3>Fecha {{ order.date_created.date }}</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Nombre</th>
+                <th>Cantidad</th>
+                <th>Precio unitario</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in order.inputorderitem_set.all %}
+                <!-- Aquí puedes agregar las filas con los datos de los gastos -->
+                <tr>
+                    <td>{{ item.product.SKU }}</td>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.product.price|floatformat:"2g" }} M.N.</td>
+                    <td>${{ item.getSubtotal|floatformat:"2g" }} M.N.</td>
+                </tr>
+                <!-- Puedes copiar y pegar esta fila para agregar más gastos -->
+            {% endfor %}
+            <tr>
+                <td align="center" colspan="5">Total de la orden: ${{ order.GetTotal|floatformat:"2g" }} M.N.</td>
+            </tr>
+            </tbody>
+        </table>
+    {% endfor %}
+    <hr>
+    <h2>Desglose de productos</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>SKU</th>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+            <th>Gasto total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.sku }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>${{ product.total|floatformat:"2g" }} M.N.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <h2>No se encontraron entradas para este mes y año</h2>
+{% endif %}
+</body>
+</html>

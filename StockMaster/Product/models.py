@@ -70,6 +70,9 @@ class Product(models.Model):
         """
         return self.quantity <= self.threshold
 
+    def GetFormattedPrice(self):
+        return f"{self.price:.2f}"
+
     def __str__(self):
         """
         Returns the string representation of the product.

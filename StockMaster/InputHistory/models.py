@@ -12,7 +12,8 @@ class InputOrder(models.Model):
     """DateTimeField: The date and time when the order was created."""
 
     specialNotes = models.TextField(max_length=600, blank=True)
-    """str: Special notes related to the input order."""
+
+    isExternal = models.BooleanField(default=False)
 
     def GetItems(self):
         """
@@ -33,7 +34,7 @@ class InputOrder(models.Model):
         total = 0
         for item in self.GetItems():
             total += item.quantity * item.product.price
-        return round(total, 3)
+        return round(total, 2)
 
     def __str__(self):
         """

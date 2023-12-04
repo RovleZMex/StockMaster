@@ -72,6 +72,7 @@
                 class="bi bi-cart"></i></a>
     </div>
 </section>
+
 <div class="product-count position-fixed top-0 end-0 p-3">
     <span><b>{{ product_count }}</b> Productos Encontrados</span>
 </div>
@@ -83,7 +84,15 @@
         <div class="row">
             <aside class="col-md-3">
                 <div class="card">
+
                     <div class="list-group list-group-flush">
+                        <!-- Logout Button -->
+                        <a href="{% url 'logout_worker' %}"
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="return confirmLogout()">
+                            <span>Cerrar sesión</span>
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+
                         <a href="{% url 'view_cart' %}" class="list-group-item list-group-item-action"><i
                                 class="bi bi-cart"></i> Ver Carrito</a>
                     </div>
@@ -119,7 +128,7 @@
                                         <a href="{% url 'product_detail' product.id %}"><img
                                                 src="{{ product.image.url }}" class="product-image" alt="Product Image"></a>
                                     {% else %}
-                                        <div class="img-placeholder">No Image</div>
+                                        <div class="img-placeholder">No hay imagen disponible</div>
                                     {% endif %}
                                 </div>
                                 <div class="card-body">
@@ -166,7 +175,16 @@
     function normalizeString(str) {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     }
+
+
 </script>
+
+<script>
+    function confirmLogout() {
+        return confirm('Seguro que quieres cerrar sesion ');
+    }
+</script>
+
 
 </body>
 </html>

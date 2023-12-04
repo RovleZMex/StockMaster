@@ -58,9 +58,12 @@ class ViewPDF(View):
                     catValues[2] += product.getTotalValue()
                 elif product.category == "CLE":
                     catValues[3] += product.getTotalValue()
+            for i in range(len(catValues)):
+                catValues[i] = round(catValues[i], 2)
 
             context = {
                 'products': products,
+                'totalProducts': sum([product.quantity for product in products]),
                 'totalValue': totalValue,
                 'date': datetime.now().date(),
                 'fromDate': fromDate,
@@ -72,6 +75,69 @@ class ViewPDF(View):
             }
             pdf = render_to_pdf('inventoryTextTemplate.html', contextDict=context)
             return HttpResponse(pdf, content_type='application/pdf')
+
+
+class ViewExpPDF(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, "error.html", {"message": "Por favor genera un nuevo PDF"})
+
+    def post(self, request, *args, **kwargs):
+        month = int(request.POST.get("month"))
+        year = int(request.POST.get("year"))
+        order_type = request.POST.get("external")
+        if int(request.POST.get("month")) != datetime.now().month or int(
+                request.POST.get("year")) != datetime.now().year:
+            orders = GetOrderAsOfDate(year, month, order_type)
+            toDate = date(year, month, calendar.monthrange(year, month)[1])
+        elif int(request.POST.get("month")) == datetime.now().month or int(
+                request.POST.get("year")) == datetime.now().year:
+            orders = GetOrderAsOfDate(year, month, order_type)
+            toDate = datetime.now().date()
+        else:
+            orders = []
+            toDate = datetime.now().date()
+        fromDate = date(year, month, 1)
+        percentages = getExpensesPercentagesPerCategory(orders)
+        catQuantities = getExpensesPerCategory(orders)
+        tempProducts = []
+
+        class TempProduct:
+            def __init__(self, product, sku, quantity=0, total=0):
+                self.sku = sku
+                self.name = product.name
+                self.quantity = quantity
+                self.total = total
+
+            def __eq__(self, other):
+                """Overrides the default implementation"""
+                if isinstance(other, TempProduct):
+                    return self.name == other.name
+                return False
+
+        for order in orders:
+            for item in order.inputorderitem_set.all():
+                tempProduct = TempProduct(item.product, item.product.SKU)
+                if tempProduct in tempProducts:
+                    tempProducts[tempProducts.index(tempProduct)].quantity += item.quantity
+                    tempProducts[tempProducts.index(tempProduct)].total += item.getSubtotal()
+                else:
+                    tempProduct.quantity = item.quantity
+                    tempProduct.total = item.getSubtotal()
+                    tempProducts.append(tempProduct)
+        context = {
+            'orders': orders,
+            'orderQuant': len(orders),
+            'date': datetime.now().date(),
+            'totalExpense': f"{round(sum([order.GetTotal() for order in orders]), 2):.2f}",
+            'fromDate': fromDate,
+            'toDate': toDate,
+            'percentages': percentages,
+            'catQuantities': catQuantities,
+            'products': tempProducts,
+            'order_type': order_type,
+        }
+        pdf = render_to_pdf('expensesTextTemplate.html', contextDict=context)
+        return HttpResponse(pdf, content_type='application/pdf')
 
 
 @login_required(login_url="login")
@@ -165,7 +231,8 @@ def GetExpensesPerCategoryMonth(request):
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        orders = getOrdersInMonthAndYear(month, year)
+        order_type = request.POST.get("external")
+        orders = GetOrderAsOfDate(year, month, order_type)
         quantities = getExpensesPerCategory(orders)
         return JsonResponse({
             'success': True,
@@ -179,12 +246,11 @@ def GetExpensesPerCategoryMonth(request):
 @login_required(login_url='login')
 def GetExpensesPercentages(request):
     if request.method == "POST":
-        print("POOOSSTINNGGG")
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        orders = getOrdersInMonthAndYear(month, year)
+        order_type = request.POST.get("external")
+        orders = GetOrderAsOfDate(year, month, order_type)
         percentages = getExpensesPercentagesPerCategory(orders)
-        print(f"Porcentajes: {percentages}")
         return JsonResponse({
             'success': True,
             'data': json.dumps(percentages)
@@ -218,33 +284,42 @@ def GetExpensesMonth(request):
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
-        if datetime.now().month == month:
-            daysRange = range(1, datetime.now().day + 1)
-        elif month > datetime.now().month or year > datetime.now().year:
-            daysRange = range(0)
-        else:
-            daysRange = range(1, calendar.monthrange(year, month)[1] + 1)
-        orders = getOrdersInMonthAndYear(month, year).order_by("date_created")
-        expenses = []
-        labels = []
-        expIndex = 0
-        for i in daysRange:
-            tempDate = date(year, month, i)
-            labels.append(f"Día {i}")
-            if expIndex < len(orders) and orders[expIndex].date_created.date() == tempDate:
-                try:
-                    expenses.append(expenses[i - 2] + orders[expIndex].GetTotal())
-                    expIndex += 1
-                except IndexError:
-                    expenses.append(orders[expIndex].GetTotal())
-                    expIndex += 1
-            elif len(expenses) == 0:
-                expenses.append(0)
-            else:
-                expenses.append(expenses[-1])
+        order_type = request.POST.get("external")
+        orders = getOrdersInMonthAndYear(month, year)
+        if order_type != "all":
+            orders = orders.filter(isExternal=True if order_type == "external" else False)
+        print(month)
+        print(orders)
+
+        # Obtener todas las fechas del mes
+        allDates = [datetime(year, month, day).date() for day in range(1, calendar.monthrange(year, month)[1] + 1)]
+
+        # Inicializar el diccionario de totales
+        expenses = {dictDate: 0 for dictDate in allDates}
+
+        cumulativeTotal = 0
+        for order in orders:
+            temp_date = order.date_created.date()
+            cumulativeTotal += order.GetTotal()
+            expenses[temp_date] = cumulativeTotal
+
+        # Fill missing days with existing data
+        for i in range(1, len(allDates)):
+            if expenses[allDates[i]] == 0:
+                # If total is 0, set total as closest value
+                j = i - 1
+                while j >= 0 and expenses[allDates[j]] == 0:
+                    j -= 1
+                if j >= 0:
+                    expenses[allDates[i]] = expenses[allDates[j]]
+
+        # Create labels and totals for sending to frontend
+        labels = [f"Día {dictDate.day}" for dictDate in allDates]
+        totals = [expenses[dictDate] for dictDate in allDates]
+
         return JsonResponse({
             'success': True,
-            'data': json.dumps(expenses),
+            'data': json.dumps(totals),
             'labels': ','.join(labels)
         })
     return JsonResponse({
@@ -307,21 +382,58 @@ def TextInventory(request):
 @login_required(login_url='login')
 def TextExpense(request):
     years = range(2023, datetime.now().year + 1)
-    month = None
-
+    order_type = 'all'
     if request.method == "POST":
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
+        order_type = request.POST.get('external')
         if month != datetime.now().month or year != datetime.now().year:
-            orders = GetOrderAsOfDate(year, month)
+            orders = GetOrderAsOfDate(year, month, order_type)
+            order_ids = [order.id for order in orders]
+            products = Product.objects.filter(inputorderitem__inputOrder__id__in=order_ids).distinct()
         elif month == datetime.now().month or year == datetime.now().year:
-            orders = GetOrderAsOfDate(year, month)
+            orders = GetOrderAsOfDate(year, month, order_type)
+            products = Product.objects.filter(
+                inputorderitem__inputOrder__id__in=[order.id for order in orders]).distinct()
         else:
             orders = []
     else:
         month = datetime.now().month
         year = datetime.now().year
         orders = GetOrderAsOfDate(year, month)
+        products = Product.objects.filter(
+            inputorderitem__inputOrder__id__in=[order.id for order in orders]).distinct()
+
+    valorProductos = {}
+    totalProductos = 0  # Variable para almacenar la cantidad total de productos
+    isExternal = True if order_type == "external" else False
+    for product in products:
+        if order_type == 'all':
+            lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
+                                                      inputOrder__date_created__month=month, )
+        else:
+            lista = product.inputorderitem_set.filter(inputOrder__date_created__year=year,
+                                                      inputOrder__date_created__month=month,
+                                                      inputOrder__isExternal=isExternal, )
+        totalCostoItem = 0
+        totalProductosItem = 0  # Variable para almacenar la cantidad total de productos por producto
+
+        for item in lista:
+            totalCostoItem += item.getSubtotal()
+            totalProductosItem += item.quantity  # Asumiendo que hay un campo quantity en tu modelo de item
+
+        if totalCostoItem > 0:
+            valorProductos[product.name] = {
+                'cantidad_total_productos': totalProductosItem,
+                'costo_total': totalCostoItem,
+            }
+            totalProductos += totalProductosItem  # Sumar la cantidad total de productos
+
+    # Ordenar el diccionario por el valor de los costos totales de mayor a menor
+    valorProductosOrdenado = dict(
+        sorted(valorProductos.items(), key=lambda item: item[1]['costo_total'], reverse=True))
+
+    # Resto de tu lógica para renderizar la plantilla con el contexto...
 
     context = {
         'years': years,
@@ -329,9 +441,13 @@ def TextExpense(request):
         'month': int(month),
         'year': int(year),
         'totalOrders': len(orders),
-        'totalExpense': sum([order.GetTotal() for order in orders])
+        'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
+        'valorProductosOrdenado': valorProductosOrdenado,
+        'totalProductos': totalProductos,
+        'order_type': order_type,
     }
     return render(request, 'report-expText.html', context)
+
 
 def getExpensesPerCategory(orders):
     quantities = [0, 0, 0, 0]
@@ -370,7 +486,6 @@ def getExpensesPercentagesPerCategory(orders):
         percentages = [round((x * 100) / sum(quantities), 2) for x in quantities]
     else:
         percentages = [0, 0, 0, 0]
-    print(f"AAAAAAAAAAAA --- {percentages}")
     return percentages
 
 
@@ -402,9 +517,15 @@ def MapCategory(value):
     return categories[value]
 
 
-def GetOrderAsOfDate(year, month):
+def GetOrderAsOfDate(year, month, order_type='all'):
     orders = []
-    for order in InputOrder.objects.all().order_by('date_created'):
+    if order_type == 'all':
+        orderObjects = InputOrder.objects.all().order_by('-date_created')
+    elif order_type == 'external':
+        orderObjects = InputOrder.objects.filter(isExternal=True).order_by('-date_created')
+    else:
+        orderObjects = InputOrder.objects.filter(isExternal=False).order_by('-date_created')
+    for order in orderObjects:
         if order.date_created.month == month and order.date_created.year == year:
             orders.append(order)
     return orders

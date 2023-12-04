@@ -70,8 +70,8 @@ def Dashboard(request):
                     Product.objects.filter(category='OFF').count(),
                     Product.objects.filter(category='CLE').count()]
 
-    lastInputOrders = InputOrder.objects.all()[:5]
-    lastOutputOrders = OutputOrder.objects.all()[:5]
+    lastInputOrders = InputOrder.objects.all().order_by('-date_created')[:5]
+    lastOutputOrders = OutputOrder.objects.all().order_by('-date_created')[:5]
 
     context = {'allProducts': allProducts.count(),
                'goodStockProducts': allProducts.count() - noStockProducts - lowStockProducts,
@@ -121,7 +121,7 @@ def Workers(request):
 def workerDetails(request, employeeNumber):
     worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
 
-    output_orders = worker.outputorder_set.all()
+    output_orders = worker.outputorder_set.all().order_by("-date_created")
 
     context = {
         'years': range(2023, datetime.now().year + 1),

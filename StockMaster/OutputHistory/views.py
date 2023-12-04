@@ -215,8 +215,16 @@ def deleteOrderOutput(request):
     if request.method == "POST":
         id = int(request.POST["orderid"])
         order = OutputOrder.objects.get(id=id)
+        for item in order.outputorderitem_set.all():
+            item.product.quantity += item.quantity
+            item.product.save()
         order.delete()
-        return redirect('outputHistory')
+        return JsonResponse({
+            'success': True,
+        })
+    return JsonResponse({
+        'success': False,
+    })
 
 
 @login_required(login_url='login')

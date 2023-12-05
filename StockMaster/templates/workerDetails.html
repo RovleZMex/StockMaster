@@ -128,7 +128,7 @@
                                                         {% endfor %}
                                                     </ul>
                                                 </td>
-                                                <td>${{ output_order.GetTotal }}</td>
+                                                <td>${{ output_order.GetTotal|floatformat:"2g" }} M.N.</td>
                                             </tr>
                                         {% endfor %}
                                         </tbody>

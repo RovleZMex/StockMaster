@@ -19,7 +19,7 @@
                     <h3>Producto</h3>
                     <p class="lead">{{ product.name }}</p>
                     <p class="lead">SKU: {{ product.SKU }}</p>
-                    <p class="lead">Precio: ${{ product.price }} M.N.</p>
+                    <p class="lead">Precio: ${{ product.price|floatformat:"2g" }} M.N.</p>
                     <p class="lead">Existencia: {{ product.quantity }}</p>
                 </div>
                 <div class="col-md text-center">
@@ -135,7 +135,7 @@
                             display: true,
                             text: 'Existencia'
                         },
-                        ticks:{
+                        ticks: {
                             precision: 0,
                         }
                     },
@@ -147,6 +147,7 @@
                         }
                     },
                 },
+
             }
         });
 
@@ -186,6 +187,25 @@
                             text: 'Día del mes'
                         }
                     },
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                var label = context.dataset.label || '';
+
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += '$' + context.parsed.y.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }) + ' M.N.';
+
+                                return label;
+                            }
+                        }
+                    }
                 },
             }
         });

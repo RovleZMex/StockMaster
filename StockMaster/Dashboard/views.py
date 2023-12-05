@@ -102,10 +102,10 @@ def Workers(request):
         for worker in worker_list:
             if search_query_normalized in RemoveAccents(worker.name).lower():
                 filtered_workers.append(worker)
-        paginator = Paginator(filtered_workers, 5)  # Muestra 10 trabajadores por página
+        paginator = Paginator(filtered_workers, 10)  # Muestra 10 trabajadores por página
     else:
         worker_list = Worker.objects.all()
-        paginator = Paginator(worker_list, 5)  # Muestra 10 trabajadores por página
+        paginator = Paginator(worker_list, 10)  # Muestra 10 trabajadores por página
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)

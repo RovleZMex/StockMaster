@@ -197,11 +197,6 @@
                 placeholder="Precio">
             <small id="packPrice${counter}" style="display: none">precio p. caja</small>
         </div>
-        <div class="col-md-2">
-            <input type="checkbox" class="form-check-input" value="" id="externalCheckbox${counter}">
-            <label for="externalCheckbox${counter}" class="form-check-label">Es externo</label>
-            <button type="button" class="btn btn-danger" onclick="removeRow(${counter})"><i class="bi bi-trash"></i></button>
-        </div>
     `;
             container.appendChild(newInputRow);
             counter++;
@@ -242,9 +237,6 @@
 
             var priceInput = row.querySelector('#priceInput' + index);
             priceInput.id = 'priceInput' + index;
-
-            var externalCheckbox = row.querySelector('#externalCheckbox' + index);
-            externalCheckbox.id = 'externalCheckbox' + index;
 
             var removeButton = row.querySelector('.btn-danger');
             removeButton.setAttribute('onclick', 'removeRow(' + index + ');'); // Actualizar la función onclick del botón de eliminación

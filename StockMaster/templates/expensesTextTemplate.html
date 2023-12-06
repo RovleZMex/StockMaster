@@ -42,7 +42,7 @@
     {% if order_type == "internal" %} Internas {% endif %}
 </p>
 <p>Cantidad total de órdenes: {{ orderQuant }}</p>
-<p>Total de gastos en el mes: ${{ totalExpense|floatformat:"2g" }}</p>
+<p>Total de gastos en el mes: ${{ totalExpense|floatformat:"2g" }} M.N.</p>
 <p>Rango de gastos: {{ fromDate }} - {{ toDate }} </p>
 {% if orders %}
     <hr>
@@ -58,22 +58,22 @@
         <tbody>
         <tr>
             <td>Eléctricos</td>
-            <td>${{ catQuantities.0 }} M.N.</td>
+            <td>${{ catQuantities.0|floatformat:"2g" }} M.N.</td>
             <td>{{ percentages.0 }}%</td>
         </tr>
         <tr>
             <td>Plomería</td>
-            <td>${{ catQuantities.1 }} M.N.</td>
+            <td>${{ catQuantities.1|floatformat:"2g" }} M.N.</td>
             <td>{{ percentages.1 }}%</td>
         </tr>
         <tr>
             <td>Oficina</td>
-            <td>${{ catQuantities.2 }} M.N.</td>
+            <td>${{ catQuantities.2|floatformat:"2g" }} M.N.</td>
             <td>{{ percentages.2 }}%</td>
         </tr>
         <tr>
             <td>Limpieza</td>
-            <td>${{ catQuantities.3 }} M.N.</td>
+            <td>${{ catQuantities.3|floatformat:"2g" }} M.N.</td>
             <td>{{ percentages.3 }}%</td>
         </tr>
         </tbody>

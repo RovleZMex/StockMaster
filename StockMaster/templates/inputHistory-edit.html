@@ -164,7 +164,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'deleteOrder' %}",
+                    url: "{% url 'deleteInputOrder' %}",
                     data: {
                         'orderid': id,
                         'csrfmiddlewaretoken': csrftoken,

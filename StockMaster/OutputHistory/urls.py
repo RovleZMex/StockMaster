@@ -11,5 +11,5 @@ urlpatterns = [
     # path to go to order details
     path('detalles-orden-entrada/<int:orderid>/', views.inputOrderDetails, name="inputDetails"),
     path('editar-orden-entrada/<int:orderid>/', views.inputOrderEdit, name="inputOrderEdit"),
-    path('eliminar-orden/', views.deleteOrder, name="deleteOrder"),
+    path('eliminar-orden-entrada/', views.deleteOrder, name="deleteInputOrder"),
 ]

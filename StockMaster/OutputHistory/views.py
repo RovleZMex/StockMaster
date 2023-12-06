@@ -75,7 +75,7 @@ def InputHistory(request):
         end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
         inputOrders = inputOrders.filter(date_created__range=[start_date_obj, end_date_obj])
 
-    if order_type != "all":
+    if order_type and order_type != "all":
         inputOrders = inputOrders.filter(isExternal=True if order_type == "external" else False)
 
     paginator = Paginator(inputOrders.order_by("-date_created"), 10)

@@ -23,14 +23,7 @@
                 <p class="lead">Precio: ${{ product.price }} M.N.</p>
                 <p class="lead">Categoría: {{ product.get_category_display }}</p>
                 <p class="lead">Cantidad actual: {{ product.quantity }}</p>
-                <label for="isExternalCheckbox" class="lead">Es externo</label>
-                {% if product.isExternal %}
-                    <input type="checkbox" id="isExternalCheckbox" checked disabled>
-                {% else %}
-                    <input type="checkbox" id="isExternalCheckbox" disabled>
-                {% endif %}
-                <p class="lead pt-3">Baja existencia a partir de: {{ product.threshold }}</p>
-
+                <p class="lead">Baja existencia a partir de: {{ product.threshold }}</p>
                 <a href="{% url 'editProduct' product.id %}" class="btn btn-primary">Editar detalles</a>
                 <a href="{% url 'productGraph' product.id %}" class="btn btn-secondary">Ver informes</a>
             </div>

@@ -141,7 +141,7 @@
                                 <th scope="col">ID</th>
                                 <th scope="col"># de Productos</th>
                                 <th scope="col">Precio Total</th>
-                                <th scope="col">Fecha</th>
+                                <th scope="col">Fecha/Hora</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -149,7 +149,7 @@
                                 <tr class="table-row clickableRow" data-href="{% url 'inputDetails' order.id %}">
                                     <td>{{ order.id }}</td>
                                     <td>{{ order.GetItems.count }}</td>
-                                    <td>${{ order.GetTotal }} M.N.</td>
+                                    <td>${{ order.GetTotal|floatformat:"2g" }} M.N.</td>
                                     <td>{{ order.date_created }}</td>
                                 </tr>
                             {% endfor %}

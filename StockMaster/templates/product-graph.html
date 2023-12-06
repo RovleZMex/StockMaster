@@ -3,7 +3,7 @@
 {% block content %}
 
     <head>
-        <title>Gráfico con Chart.js</title>
+        <title>Informe del producto</title>
         <!-- Include Chart.js library -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <!-- Include Ajax library -->
@@ -19,7 +19,7 @@
                     <h3>Producto</h3>
                     <p class="lead">{{ product.name }}</p>
                     <p class="lead">SKU: {{ product.SKU }}</p>
-                    <p class="lead">Precio: ${{ product.price }} M.N.</p>
+                    <p class="lead">Precio: ${{ product.price|floatformat:"2g" }} M.N.</p>
                     <p class="lead">Existencia: {{ product.quantity }}</p>
                 </div>
                 <div class="col-md text-center">
@@ -88,7 +88,7 @@
     </section>
 
     <script>
-        function updateGraphs(){
+        function updateGraphs() {
             GetPriceData();
             GetStockData();
         }
@@ -129,9 +129,25 @@
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: false // Start from 0 on Y axis
-                    }
+                        beginAtZero: false, // Start from 0 on Y axis
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Existencia'
+                        },
+                        ticks: {
+                            precision: 0,
+                        }
+                    },
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Día del mes'
+                        }
+                    },
                 },
+
             }
         });
 
@@ -157,7 +173,38 @@
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: false // Start from 0 on Y axis
+                        beginAtZero: false, // Start from 0 on Y axis
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Precio'
+                        },
+                    },
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Día del mes'
+                        }
+                    },
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                var label = context.dataset.label || '';
+
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += '$' + context.parsed.y.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }) + ' M.N.';
+
+                                return label;
+                            }
+                        }
                     }
                 },
             }

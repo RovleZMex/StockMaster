@@ -1,66 +1,63 @@
 {% extends 'base.html' %}
 {% block content %}
-<head>
-    <meta name="viewport" charset="UTF-8">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-          crossorigin="anonymous">
-    <style>
-        .custom-form {
-            border-radius: 10px;
-            padding: 20px;
-            border: gray solid 1px;
-        }
+    <head>
+        <meta name="viewport" charset="UTF-8">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+              crossorigin="anonymous">
+        <style>
+            .custom-form {
+                border-radius: 10px;
+                padding: 20px;
+                border: gray solid 1px;
+            }
 
-        .middle-container {
-            width: 50%;
-            margin: auto;
-        }
-    </style>
-    <title>Agregar trabajador</title>
-</head>
-<body>
-<section class="p-5">
-    <div class="container middle-container">
-        <div class="custom-form bg-light">
-            <h1>Agregar trabajador</h1>
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="id_name" class="form-label">Nombre:</label>
-                    <input type="text" class="form-control" id="id_name" name="name" value="{{ form.name.value }}">
-                </div>
-                <!-- Inside your form in add_worker.html -->
-                <div class="mb-3">
-                    <label for="id_employeeNumber" class="form-label">Numero de empleado:</label>
-                    <input type="text" class="form-control" id="id_employeeNumber" name="employeeNumber"
-                           value="{{ form.employeeNumber.value }}">
-                    {% if form.employeeNumber.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.employeeNumber.errors.as_text }}
+            .middle-container {
+                width: 50%;
+                margin: auto;
+            }
+        </style>
+        <title>Agregar trabajador</title>
+    </head>
+    <body>
+    <section class="p-5">
+        <div class="container middle-container">
+            <div class="custom-form bg-light">
+                <h1>Agregar trabajador</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Nombre:</label>
+                        <input type="text" class="form-control" id="id_name" name="name">
                     </div>
-                    {% endif %}
-                </div>
+                    <!-- Inside your form in add_worker.html -->
+                    <div class="mb-3">
+                        <label for="id_employeeNumber" class="form-label">Numero de empleado:</label>
+                        <input type="text" class="form-control" id="id_employeeNumber" name="employeeNumber">
+                        {% if form.employeeNumber.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.employeeNumber.errors.as_text }}
+                            </div>
+                        {% endif %}
+                    </div>
 
-                <div class="mb-3">
-                    <label for="id_workArea" class="form-label">Area de trabajador:</label>
-                    <input type="text" class="form-control" id="id_workArea" name="workArea"
-                           value="{{ form.workArea.value }}">
-                </div>
-                <div class="mb-3">
-                    <label for="id_employeePassword" class="form-label">Contraseña de empleado:</label>
-                    <input type="password" class="form-control" id="id_employeePassword" name="employeePassword"
-                           value="{{ form.employeePassword.value }}">
-                </div>
-                <button type="submit" class="btn btn-primary">Agregar trabajador</button>
-            </form>
+                    <div class="mb-3">
+                        <label for="id_workArea" class="form-label">Area de trabajador:</label>
+                        <input type="text" class="form-control" id="id_workArea" name="workArea">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_employeePassword" class="form-label">Contraseña de empleado:</label>
+                        <input type="password" class="form-control" id="id_employeePassword" name="employeePassword">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar trabajador</button>
+                </form>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Bootstrap Script -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
-</body>
+    <!-- Bootstrap Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
+    </body>
 {% endblock content %}

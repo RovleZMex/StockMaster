@@ -288,8 +288,6 @@ def GetExpensesMonth(request):
         orders = getOrdersInMonthAndYear(month, year)
         if order_type != "all":
             orders = orders.filter(isExternal=True if order_type == "external" else False)
-        print(month)
-        print(orders)
 
         # Obtener todas las fechas del mes
         allDates = [datetime(year, month, day).date() for day in range(1, calendar.monthrange(year, month)[1] + 1)]
@@ -403,6 +401,7 @@ def TextExpense(request):
         orders = GetOrderAsOfDate(year, month)
         products = Product.objects.filter(
             inputorderitem__inputOrder__id__in=[order.id for order in orders]).distinct()
+
 
     valorProductos = {}
     totalProductos = 0  # Variable para almacenar la cantidad total de productos

@@ -176,64 +176,72 @@
         };
 
         let stockVersus = new Chart(stockVersusCanvas, {
-            type: 'line',
-            data: data,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                tension: 0,
-                stacked: false,
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Left Axis Title'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: false,
-                        position: 'right',
-
-                        // grid line settings
-                        grid: {
-                            drawOnChartArea: false, // only want the grid lines for one axis to show up
-                        },
-                        title: {
-                            display: true,
-                            text: 'Right Axis Title'
-                        }
-                    },
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                var label = context.dataset.label || '';
-
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += '$' + context.parsed.y.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                }) + ' M.N.';
-
-                                return label;
-                            }
-                        }
-                    }
+    type: 'line',
+    data: data,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        tension: 0,
+        stacked: false,
+        scales: {
+            x: { // Agregado para el eje x
+                display: true,
+                title: {
+                    display: true,
+                    text: 'Día del mes'
                 }
             },
-        });
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Gasto en M.N.'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: false,
+                position: 'right',
+
+                // grid line settings
+                grid: {
+                    drawOnChartArea: false, // only want the grid lines for one axis to show up
+                },
+                title: {
+                    display: true,
+                    text: 'Right Axis Title'
+                }
+            },
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        var label = context.dataset.label || '';
+
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += '$' + context.parsed.y.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }) + ' M.N.';
+
+                        return label;
+                    }
+                }
+            }
+        }
+    },
+});
+
 
 
         // Obtén el contexto del canvas

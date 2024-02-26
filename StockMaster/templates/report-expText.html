@@ -201,6 +201,15 @@
             return cookieValue;
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            let today = new Date();
+            let currentMonth = today.getMonth() + 1; // Añadimos 1 porque los meses en JavaScript son base 0
+            let currentYear = today.getFullYear();
+
+            document.getElementById('monthSelect').value = currentMonth;
+            document.getElementById('yearSelect').value = currentYear;
+        })
+
         $(document).ready(function () {
             // Manejar clic en el enlace "Ver PDF"
             $("#verPDF").click(function (e) {

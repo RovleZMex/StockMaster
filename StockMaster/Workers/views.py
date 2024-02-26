@@ -138,6 +138,15 @@ def confirm_order(request):
 
     worker = get_object_or_404(Worker, employeeNumber=employee_number)
 
+
+    for item in order_items:
+        product = get_object_or_404(Product, id=item['productId'])
+        quantity = int(item['quantity'])
+
+        # Check if enough inventory (quantity) is available
+        if product.quantity < quantity or product.quantity == 0:
+            return HttpResponseBadRequest(f'No hay suficientes disponibles para {product.name}')
+
     with transaction.atomic():
         output_order = OutputOrder(worker=worker)
         output_order.save()
@@ -145,10 +154,6 @@ def confirm_order(request):
         for item in order_items:
             product = get_object_or_404(Product, id=item['productId'])
             quantity = int(item['quantity'])
-
-            # Check if enough inventory (quantity) is available
-            if product.quantity < quantity:
-                return HttpResponseBadRequest(f'No hay suficientes disponibles para {product.name}')
 
             # Update the inventory quantity
             product.quantity -= quantity

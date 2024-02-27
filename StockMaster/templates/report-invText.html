@@ -68,7 +68,7 @@
                 <div class="d-inline-block">
                     <select class="form-select" id="yearSelect" name="year" onchange="">
                         {% for year in years %}
-                            <option value="{{ year }}" {% if forloop.counter1 == year %}
+                            <option value="{{ year }}" {% if year == yearSelect %}
                                     selected {% endif %}>{{ year }}</option>
                         {% endfor %}
                     </select>

@@ -116,7 +116,7 @@ class ViewExpPDF(View):
 
         for order in orders:
             for item in order.inputorderitem_set.all():
-                tempProduct = TempProduct(item.product, item.product.SKU)
+                tempProduct = TempProduct(item.getProductAsOfDate(), item.product.SKU)
                 if tempProduct in tempProducts:
                     tempProducts[tempProducts.index(tempProduct)].quantity += item.quantity
                     tempProducts[tempProducts.index(tempProduct)].total += item.getSubtotal()
@@ -372,7 +372,7 @@ def TextInventory(request):
         'totalPrice': round(sum([product.getTotalValue() for product in products]), 2),
         'categories': categories,
         'month': int(month),
-        'year': int(year),
+        'yearSelect': int(year),
     }
     return render(request, 'report-invText.html', context)
 
@@ -438,7 +438,7 @@ def TextExpense(request):
         'years': years,
         'orders': orders,
         'month': int(month),
-        'year': int(year),
+        'yearSelect': int(year),
         'totalOrders': len(orders),
         'totalExpense': round(sum([order.GetTotal() for order in orders]), 2),
         'valorProductosOrdenado': valorProductosOrdenado,

@@ -39,43 +39,6 @@
     </style>
 </head>
 <body>
-<div class="container mt-4">
-    <h1>Carrito</h1>
-    <div>
-        {% if cart_items %}
-            <ul class="list-unstyled" id="cart-items">
-                {% for item in cart_items %}
-                    <li class="cart-item" id="cart-item-{{ item.product.id }}">
-                        {{ item.product.name }} -
-                        <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1">
-
-                        <button type="button" class="btn btn-remove ml-2"
-                                onclick="removeFromCart({{ item.product.id }})">Eliminar
-                        </button>
-                    </li>
-
-                {% endfor %}
-            </ul>
-            <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
-            <form id="order-form">
-                {% csrf_token %}
-                <div class="form-group">
-                    <input type="int" class="form-control" id="employeeNumber" name="employee_number"
-                           value="{{ employee_number }}"
-                            {% if employee_number %} readonly {% endif %} required>
-                </div>
-                <input type="hidden" id="orderItems" name="order_items">
-                <!-- Updated the button to only call the confirmOrder function -->
-                <button type="button" class="btn btn-confirm" onclick="confirmOrder()">Confirmar Orden</button>
-            </form>
-        {% else %}
-            <p>Your cart is empty.</p>
-            <button class="btn btn-secondary" onclick="location.href='{% url 'store' %}'">Regresar a la tienda</button>
-
-        {% endif %}
-    </div>
-
-</div>
 
 <!-- Bootstrap Modal for confirmation message -->
 <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
@@ -98,6 +61,123 @@
     </div>
 </div>
 
+
+<section class="h-100 gradient-custom">
+    <div class="container py-5">
+        <div class="row d-flex justify-content-center my-4">
+            <div class="col-md-8">
+                <a href="{% url 'store' %}" type="button" class="btn btn-secondary ">Volver a la tienda</a>
+                {% if cart_items %}
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0">Carrito</h5>
+                        </div>
+                        {% for item  in cart_items %}
+                            <div class="card-body">
+                                <!-- Single item -->
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
+                                        <!-- Image -->
+                                        {% if item.product.image %}
+                                            <div class="bg-image hover-overlay hover-zoom ripple rounded"
+                                                 data-mdb-ripple-color="light">
+                                                <img src="{{ item.product.image.url }}"
+                                                     class="w-100" alt="Imágen no disponible."/>
+                                                <a href="#!">
+                                                    <div class="mask"
+                                                         style="background-color: rgba(251, 251, 251, 0.2)"></div>
+                                                </a>
+                                            </div>
+                                            <!-- Image -->
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
+                                        <!-- Data -->
+                                        <p><strong>{{ item.product.name }}</strong></p>
+                                        <p>SKU: {{ item.product.SKU }}</p>
+                                        <!-- Data -->
+                                    </div>
+
+                                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                                        <!-- Quantity -->
+                                        <div class="d-flex mb-4" style="max-width: 300px">
+                                            <div class="form-outline">
+                                                <input id="form1" min="1" name="quantity_{{ item.product.id }}"
+                                                       value="{{ item.quantity }}"
+                                                       type="number" class="form-control"
+                                                       onchange="updateCartItem(this, {{ item.product.id }})"/>
+                                                <label class="form-label" for="form1">Cantidad</label>
+                                            </div>
+                                            <button type="button" class="btn btn-remove ml-2"
+                                                    onclick="removeFromCart({{ item.product.id }})">Eliminar
+                                            </button>
+                                        </div>
+                                        <!-- Quantity -->
+                                    </div>
+                                </div>
+                                <!-- Single item -->
+                                <hr class="my-4"/>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="py-3">No hay artículos en tu órden.</p>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <p><strong>Información trabajador</strong></p>
+                        <p class="mb-0">Nombre: {{ worker_name }}</p>
+                        <p class="mb-0">Número de trabajador: {{ employee_number }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Resumen</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush" id="cart-items">
+                            {% for item in cart_items %}
+                                <li
+                                        class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0"
+                                        id="cart-item-{{ item.product.id }}">
+                                    <p class="py-0 pr-5">{{ item.product.name }}</p>
+                                    <span><strong>x{{ item.quantity }}</strong></span>
+
+                                </li>
+                            {% endfor %}
+                            <li
+                                    class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                <div>
+                                    <strong>Cantidad total</strong>
+                                </div>
+                                <span><strong>{{ cart_count }}</strong></span>
+                            </li>
+                        </ul>
+                        <form id="order-form">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="employeeNumber">Número de trabajador</label>
+                                <input type="" class="form-control" id="employeeNumber" name="employee_number"
+                                       value="{{ employee_number }}"
+                                        {% if employee_number %} readonly {% endif %} required>
+                            </div>
+                            <input type="hidden" id="orderItems" name="order_items">
+                            <!-- Updated the button to only call the confirmOrder function -->
+                            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="confirmOrder()">
+                                Confirmar Orden
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <script>
     function removeFromCart(productId) {
         $.ajax({
@@ -109,23 +189,72 @@
             },
             success: function (response) {
                 $('#cart-item-' + productId).remove();
+                updateCartSummary();
             }
         });
     }
 
+    function updateCartItem(inputElement, productId) {
+        const newQuantity = inputElement.value;
+        const cartItemElement = $('#cart-item-' + productId);
+
+        // Actualizar la cantidad en el elemento del carrito
+        cartItemElement.find('span strong').text('x' + newQuantity);
+
+        // Actualizar la cantidad total en el resumen
+        updateCartTotal();
+    }
+
+    function removeFromCart(productId) {
+        $.ajax({
+            url: '{% url "remove_from_cart" %}',
+            method: 'POST',
+            data: {
+                'product_id': productId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (response) {
+                $('#cart-item-' + productId).remove();
+                // Actualizar la cantidad total en el resumen después de eliminar el producto
+                updateCartTotal();
+                location.reload();
+            }
+        });
+    }
+
+    function updateCartTotal() {
+        let totalQuantity = 0;
+        $('#cart-items li').each(function () {
+            const quantityText = $(this).find('span strong').text();
+            try {
+                const quantity = parseInt(quantityText.split('x')[1].trim(), 10);
+                totalQuantity += quantity;
+            } catch (error) {
+                console.error('Error parsing quantity: ' + error);
+            }
+        });
+        // Actualizar la cantidad total en el resumen
+        $('#cart-total-quantity').text(totalQuantity);
+    }
 
     function confirmOrder() {
         const employeeNumber = $('#employeeNumber').val();
         if (!employeeNumber) {
-            alert('Se requiere numero de empleado!');
+            alert('Se requiere número de empleado!');
             return;
         }
 
-        const cartItems = $('#cart-items li').map(function () {
+        const cartItems = [];
+        $('#cart-items li').each(function () {
             const productId = this.id.split('-')[2];
-            const quantity = $(this).find('input').val();
-            return {productId, quantity};
-        }).get();
+            const quantityText = $(this).find('span strong').text();
+            try {
+                const quantity = parseInt(quantityText.split('x')[1].trim(), 10);
+                cartItems.push({productId, quantity});
+            } catch (error) {
+                // Handle error if needed
+            }
+        });
 
         $.ajax({
             url: '{% url "confirm_order" %}',
@@ -143,15 +272,14 @@
                 $('#cart-items').empty();
                 // Optionally, update the cart count in the UI if you have it
                 // $('#cart-count').text('0');
-
-                
+                 updateCartTotal();
             },
             error: function (xhr, textStatus, errorThrown) {
                 alert('Error: ' + xhr.responseText);
             }
-
         });
     }
+
 </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 import json
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -57,6 +57,7 @@ def verify_employee(request):
 
     return render(request, 'verify_employee.html')
 
+
 def logout_worker(request):
     # This will clear the session
     request.session.flush()
@@ -79,7 +80,10 @@ def show_cart(request):
     cart = request.session.get('cart', {})
     products = Product.objects.filter(id__in=cart.keys())
     cart_items = [(product, cart[str(product.id)]) for product in products]
-    context = {'cart_items': cart_items, 'employee_number': request.session.get('employee_number')}
+    print(len(cart_items))
+    context = {
+        'cart_items': cart_items,
+        'employee_number': request.session.get('employee_number'), }
     return render(request, 'store/cart.html', context)
 
 
@@ -101,9 +105,14 @@ def view_cart(request):
             'quantity': quantity,
             'total_price': product.price * quantity,
         })
+
+    employee_number = request.session.get('employee_number')
+    worker = Worker.objects.get(employeeNumber=employee_number)
     context = {
         'cart_items': cart_items,
         'total': total,
+        'cart_count': len(cart_items),
+        'worker_name': worker.name,
     }
     context.update({'employee_number': request.session.get('employee_number')})
     return render(request, 'store/cart.html', context)
@@ -140,7 +149,11 @@ def confirm_order(request):
 
     with transaction.atomic():
         output_order = OutputOrder(worker=worker)
-        output_order.save()
+
+        # primero hay que checar que haya suficiente disponibilidad para cada producto antes de crear la orden o items.
+
+        # creamos un array de outputorderitems temporal
+        tempOOItems = []
 
         for item in order_items:
             product = get_object_or_404(Product, id=item['productId'])
@@ -154,11 +167,14 @@ def confirm_order(request):
             product.quantity -= quantity
             product.save()
 
-            OutputOrderItem.objects.create(
+            tempOOItems.append(OutputOrderItem(
                 product=product,
                 quantity=quantity,
                 outputOrder=output_order
-            )
+            ))
+        output_order.save()
+        for tempItem in tempOOItems:
+            tempItem.save()
 
         if 'cart' in request.session:
             del request.session['cart']
@@ -170,9 +186,10 @@ def confirm_order(request):
     return JsonResponse({'message': 'Orden confirmada!', 'logged_out': True})
 
 
-
 def product_detail(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     return render(request, 'store/product_detail.html', {'product': product})
 
 
+def order_history(request):
+    return HttpResponse('aaaa')

@@ -118,7 +118,7 @@
                         <div class="container mt-4">
                             <div class="table-responsive">
                                 {% if products %}
-                                    <table class="table mt-3 table-hover tableRoundedm">
+                                    <table class="table mt-3 table-hover tableRoundedm align-middle">
                                         <thead class="table-dark">
                                         <tr>
                                             <th>SKU</th>
@@ -129,7 +129,7 @@
                                         </thead>
                                         <tbody id="inventory-table">
                                         {% for product in products %}
-                                            <tr class="table-row clickableRow{% if product.quantity == 0 %} table-danger {% elif product.isLowStock %} table-warning {% endif %}"
+                                            <tr class="table-row clickableRow"
                                                 data-href="{% url 'productDetails' product.id %}">
                                                 <td>{{ product.SKU }}</td>
                                                 <td>{{ product.name }}</td>

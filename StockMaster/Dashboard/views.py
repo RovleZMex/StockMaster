@@ -178,8 +178,8 @@ def deleteWorker(request, employeeNumber):
         Redirects to the workers list page after deleting the worker.
     """
     if request.method == 'POST' and request.POST.get('method') == 'DELETE':
-        worker = get_object_or_404(Worker, employeeNumber=employeeNumber)
-        worker.delete()
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM Workers_worker WHERE employeeNumber = %s", [employeeNumber])
         return redirect('workers')
 
 
@@ -201,9 +201,10 @@ def addWorker(request):
         if form.is_valid():
             with connection.cursor() as cursor:
                 cursor.execute(
-                    f'''INSERT INTO Workers_worker (name, employeeNumber, workArea, employeePassword) VALUES 
-                    ('{request.POST.get('name')}',{int(request.POST.get('employeeNumber'))},
-                    '{request.POST.get('workArea')}','{request.POST.get('employeePassword')}')''')
+                    '''INSERT INTO Workers_worker (name, employeeNumber, workArea, employeePassword) VALUES 
+                    (%s, %s, %s, %s)''',
+                    [request.POST.get('name'), int(request.POST.get('employeeNumber')), request.POST.get('workArea'),
+                     request.POST.get('employeePassword')])
             return redirect('workers')  # Redirect to the workers list page after adding a worker
     else:
         form = WorkerForm()

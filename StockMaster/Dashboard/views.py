@@ -88,6 +88,7 @@ def Dashboard(request):
 
 @login_required(login_url='login')
 def Workers(request):
+
     """
     Displays a list of workers and provides a search functionality.
 
@@ -96,15 +97,13 @@ def Workers(request):
     """
     searchQuery = request.GET.get('search')
     if searchQuery:
-        search_query_normalized = RemoveAccents(searchQuery).lower()
-        worker_list = Worker.objects.all()
-        filtered_workers = []
-        for worker in worker_list:
-            if search_query_normalized in RemoveAccents(worker.name).lower():
-                filtered_workers.append(worker)
+        search_query_normalized = '%' + RemoveAccents(searchQuery).lower() + '%'
+
+        filtered_workers = Worker.objects.raw('''SELECT * FROM Workers_worker
+                                            WHERE name LIKE %s''', [search_query_normalized])
         paginator = Paginator(filtered_workers, 10)  # Muestra 10 trabajadores por página
     else:
-        worker_list = Worker.objects.all()
+        worker_list = Worker.objects.raw("SELECT * FROM Workers_worker")
         paginator = Paginator(worker_list, 10)  # Muestra 10 trabajadores por página
 
     page_number = request.GET.get("page")

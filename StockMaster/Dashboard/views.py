@@ -149,15 +149,9 @@ def EditWorker(request, employeeNumber):
 
     if request.method == "POST":
         # Process form data and update worker information
-        worker.name = request.POST.get("nombreTrabajador")
-        worker.workArea = request.POST.get("areaTrabajo")
-        worker.employeeNumber = request.POST.get("employeeNumber")
-        worker.employeePassword = request.POST.get("employeePassword")
-
-        # Save the updated worker information
-        worker.save()
-
-        # Redirect to worker details page or any other desired page
+        with connection.cursor() as cursor:
+            cursor.execute("UPDATE Workers_worker SET name = %s, workArea = %s, employeeNumber = %s, employeePassword = %s WHERE employeeNumber = %s",
+                           [request.POST.get("nombreTrabajador"), request.POST.get("areaTrabajo"), int(request.POST.get("employeeNumber")), request.POST.get("employeePassword"), employeeNumber])
         return redirect('workers')
 
     context = {'worker': worker, 'ind': employeeNumber}

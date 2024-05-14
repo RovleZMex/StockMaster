@@ -1,16 +1,18 @@
 import unicodedata
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from datetime import datetime
+
 from InputHistory.models import InputOrder
 from OutputHistory.models import OutputOrder
 from Product.models import Product
 from Workers.models import Worker
-from datetime import datetime
 from django import forms
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.db import connection
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 
 
 # Create your views here.
@@ -88,7 +90,6 @@ def Dashboard(request):
 
 @login_required(login_url='login')
 def Workers(request):
-
     """
     Displays a list of workers and provides a search functionality.
 
@@ -153,8 +154,6 @@ def EditWorker(request, employeeNumber):
         worker.employeeNumber = request.POST.get("employeeNumber")
         worker.employeePassword = request.POST.get("employeePassword")
 
-
-
         # Save the updated worker information
         worker.save()
 
@@ -195,11 +194,16 @@ class WorkerForm(forms.ModelForm):
             raise ValidationError("Este numero de empleado ya existe.")
         return employeeNumber
 
+
 def addWorker(request):
     if request.method == 'POST':
         form = WorkerForm(request.POST)
         if form.is_valid():
-            form.save()
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    f'''INSERT INTO Workers_worker (name, employeeNumber, workArea, employeePassword) VALUES 
+                    ('{request.POST.get('name')}',{int(request.POST.get('employeeNumber'))},
+                    '{request.POST.get('workArea')}','{request.POST.get('employeePassword')}')''')
             return redirect('workers')  # Redirect to the workers list page after adding a worker
     else:
         form = WorkerForm()

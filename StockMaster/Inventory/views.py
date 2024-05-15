@@ -114,11 +114,20 @@ def AddProducts(request):
         Rendered 'add-product' page.
 
     """
-    allProducts = Product.objects.all()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM Products_product")
+        allProducts = cursor.fetchall()
 
     if request.method == "POST":
-        print(request.POST.getlist("productname"))  # GETS THE LIST OF PRODUCTS
-        print(request.POST.getlist("quantity"))  # GETS THE LIST OF QUANTITIES
+        product_names = request.POST.getlist("productname")
+        quantities = request.POST.getlist("quantity")
+        for name, quantity in zip(product_names, quantities):
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO Products_product (name, quantity) VALUES (%s, %s)",
+                    [name, quantity]
+                )
+
     context = {'products': allProducts}
     return render(request, 'add-product.html', context)
 
@@ -134,27 +143,41 @@ def EditProduct(request, productid):
 
     Returns:
         Rendered product edit page.
-
     """
     product = get_object_or_404(Product, id=productid)
+
     if request.method == "POST":
-        product.name = request.POST.get("nombreProducto")
-        product.quantity = request.POST.get("cantidadProducto")
-        if len(request.FILES) != 0:
-            product.image = request.FILES['imagenProducto']
-        product.category = MapCategory(request.POST.get("categoriaProducto"))
-        product.isExternal = request.POST.get('compradoPorFuera') == 'on'
-        product.threshold = request.POST.get("bajoUmbralProducto")
-        product.price = request.POST.get("productPrice")
-        product.save()
-        url_producto = reverse('productDetails', args=[productid])
-        return redirect(url_producto)
+        try:
+            nombreProducto = request.POST.get("nombreProducto")
+            cantidadProducto = int(request.POST.get("cantidadProducto"))
+            categoriaProducto = MapCategory(request.POST.get("categoriaProducto"))
+            compradoPorFuera = request.POST.get('compradoPorFuera') == 'on'
+            bajoUmbralProducto = int(request.POST.get("bajoUmbralProducto"))
+            productPrice = float(request.POST.get("productPrice"))
 
-    context = {'product': product,
-               'ind': productid}
+            image = None
+            if len(request.FILES) != 0:
+                image = request.FILES['imagenProducto']
 
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE Products_product
+                    SET name = %s, quantity = %s, category = %s, isExternal = %s, threshold = %s, price = %s
+                    WHERE id = %s
+                """, [nombreProducto, cantidadProducto, categoriaProducto, compradoPorFuera, bajoUmbralProducto,
+                      productPrice, productid])
+
+                if image:
+                    product.image = image
+                    product.save()
+
+            url_producto = reverse('productDetails', args=[productid])
+            return redirect(url_producto)
+        except (ValueError, TypeError):
+            return HttpResponseBadRequest("Invalid input")
+
+    context = {'product': product, 'ind': productid}
     return render(request, 'product-edit.html', context)
-
 
 @login_required(login_url='login')
 def deleteProduct(request, product_id):
@@ -169,10 +192,9 @@ def deleteProduct(request, product_id):
         Redirects to the inventory url after deleting item
     """
     if request.method == 'POST' and request.POST.get('method') == 'DELETE':
-        product = get_object_or_404(Product, id=product_id)
-        product.delete()
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM Products_product WHERE id = %s", [product_id])
         return redirect('inventory')
-
 
 @login_required(login_url='login')
 def ProductGraph(request, productid):

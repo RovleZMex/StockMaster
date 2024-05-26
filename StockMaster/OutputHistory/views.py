@@ -109,7 +109,7 @@ def outputDetails(request, orderid):
     worker_name = output_order.worker.name
 
     with connection.cursor() as cursor:
-        # Join OutputOrderItem and Product to get the total price
+        # Join OutputOrderItem and Product to get the total price of the products
         cursor.execute("""
                     SELECT SUM(OutputHistory_outputorderitem.quantity * price)
                     FROM OutputHistory_outputorderitem
@@ -224,17 +224,30 @@ def ModifyOutputOrders(request, orderid):
 def deleteOrderOutput(request):
     if request.method == "POST":
         id = int(request.POST["orderid"])
-        order = OutputOrder.objects.get(id=id)
-        for item in order.outputorderitem_set.all():
-            item.product.quantity += item.quantity
-            item.product.save()
-        order.delete()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                            SELECT product_id, quantity 
+                            FROM OutputHistory_outputorderitem 
+                            WHERE outputOrder_id = %s
+                        """, [id])
+            items = cursor.fetchall()
+            for item in items:
+                # To "return" items to inventory
+                cursor.execute("""
+                                UPDATE Product_product 
+                                SET quantity = quantity + %s 
+                                WHERE id = %s
+                            """, [item[1], item[0]])
+            cursor.execute("DELETE FROM OutputHistory_outputorder WHERE id = %s", [id])
+
         return JsonResponse({
             'success': True,
         })
     return JsonResponse({
         'success': False,
     })
+
 
 
 @login_required(login_url='login')

@@ -462,16 +462,33 @@ def CreateOrderItem(product_data, order):
     """
     if product_data["productName"] == "":
         return
-    product = Product.objects.get(SKU=DeleteLeftFromSequence(product_data["productName"], " - ").strip())
+
+    # Obtener el producto
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT id, SKU FROM ProductProduct WHERE SKU = %s",
+        [DeleteLeftFromSequence(product_data["productName"], " - ").strip()]
+    )
+    product_row = cursor.fetchone()
+    if not product_row:
+        return  # El producto no existe
+
+    product_id, _ = product_row
+
+    # Calcular la cantidad
     if product_data['quantityType'] == "unidades":
         quantity = int(product_data['quantity'])
     else:
         quantity = int(product_data['quantity']) * int(product_data['unitsPerBox'])
-    InputOrderItem.objects.create(
-        product=product,
-        quantity=quantity,
-        inputOrder=order
+
+
+    cursor.execute(
+        "INSERT INTO InputHistory_inputorderitem (quantity, product_id, inputOrder_id, date_created) VALUES (%s, %s, %s, %s)",
+        [quantity, product_id, order.id, datetime.now()]
     )
+
+    # Commit para guardar los cambios
+    transaction.commit()
 
 
 def DeleteLeftFromSequence(text, sequence):

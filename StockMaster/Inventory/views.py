@@ -2,7 +2,6 @@ import calendar
 import datetime
 import json
 import unicodedata
-
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
@@ -11,7 +10,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-
+from django.db import connection, IntegrityError
 from InputHistory.models import InputOrder, InputOrderItem
 from Product.models import Product
 
@@ -28,25 +27,92 @@ def Inventory(request):
         Rendered HTML page with filtered products.
 
     """
-    allProducts = Product.objects.all().order_by('name')
-
-    searchQuery = ''
-
-    searchCondition = Q()
-
     searchQuery = request.GET.get('search', '')
 
     if searchQuery:
-        searchCondition = searchCondition & Q(name__icontains=searchQuery) | Q(SKU__icontains=searchQuery)
+        search_query_normalized = '%' + searchQuery.lower() + '%'
+        with connection.cursor() as cursor:
+            cursor.execute('''
+                SELECT * FROM Product_product
+                WHERE lower(name) LIKE %s OR lower(SKU) LIKE %s
+                ORDER BY name
+            ''', [search_query_normalized, search_query_normalized])
+            filtered_products = cursor.fetchall()
+    else:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM Product_product ORDER BY name')
+            filtered_products = cursor.fetchall()
 
-    filteredProducts = allProducts.filter(searchCondition)
+    # Convert the raw SQL result into a list of dictionaries
+    products = []
+    columns = [col[0] for col in cursor.description]
+    for row in filtered_products:
+        products.append(dict(zip(columns, row)))
 
-    paginator = Paginator(filteredProducts, 5)
-    page = request.GET.get('page', 1)
-    products = paginator.get_page(page)
+    paginator = Paginator(products, 5)  # Muestra 5 productos por página
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
 
-    return render(request, 'inventory.html', {'products': products, 'searchQuery': searchQuery})
+    context = {
+        'products': page_obj,
+        'searchQuery': searchQuery
+    }
 
+    return render(request, 'inventory.html', context)
+
+
+
+@login_required(login_url='login')
+def inventory_with_join(request):
+    """
+    Render the inventory page with products and their related order items.
+
+    Args:
+        request: HTTP request object.
+
+    Returns:
+        Rendered HTML page with joined data.
+    """
+    searchQuery = request.GET.get('search', '')
+    if searchQuery:
+        search_query_normalized = '%' + searchQuery.lower() + '%'
+        query = '''
+            SELECT p.id, p.name, p.SKU, i.id AS input_order_item_id, i.quantity
+            FROM Product_product p
+            LEFT JOIN InputHistory_inputorderitem i ON p.id = i.product_id
+            WHERE lower(p.name) LIKE %s OR lower(p.SKU) LIKE %s
+            ORDER BY p.name
+        '''
+        params = [search_query_normalized, search_query_normalized]
+    else:
+        query = '''
+            SELECT p.id, p.name, p.SKU, i.id AS input_order_item_id, i.quantity
+            FROM Product_product p
+            LEFT JOIN InputHistory_inputorderitem i ON p.id = i.product_id
+            ORDER BY p.name
+        '''
+        params = []
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+
+    # Convert the raw SQL result into a list of dictionaries
+    products = []
+    columns = [col[0] for col in cursor.description]
+    for row in results:
+        products.append(dict(zip(columns, row)))
+
+    paginator = Paginator(products, 5)  # Muestra 5 productos por página
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'products': page_obj,
+        'searchQuery': searchQuery
+    }
+
+    return render(request, 'inventory.html', context)
 
 @login_required(login_url='login')
 def FilterInventory(request):
@@ -114,19 +180,23 @@ def AddProducts(request):
         Rendered 'add-product' page.
 
     """
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM Products_product")
-        allProducts = cursor.fetchall()
-
     if request.method == "POST":
         product_names = request.POST.getlist("productname")
         quantities = request.POST.getlist("quantity")
-        for name, quantity in zip(product_names, quantities):
+
+        if product_names and quantities:
             with connection.cursor() as cursor:
-                cursor.execute(
-                    "INSERT INTO Products_product (name, quantity) VALUES (%s, %s)",
-                    [name, quantity]
-                )
+                for product_name, quantity in zip(product_names, quantities):
+                    cursor.execute(
+                        '''INSERT INTO Product_product (productname, quantity) VALUES (%s, %s)''',
+                        [product_name, int(quantity)]
+                    )
+            return redirect('add-product')  # Redirect to the add-product page after adding products
+
+    else:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Product_product")
+            allProducts = cursor.fetchall()
 
     context = {'products': allProducts}
     return render(request, 'add-product.html', context)
@@ -143,41 +213,45 @@ def EditProduct(request, productid):
 
     Returns:
         Rendered product edit page.
+
     """
-    product = get_object_or_404(Product, id=productid)
-
     if request.method == "POST":
-        try:
-            nombreProducto = request.POST.get("nombreProducto")
-            cantidadProducto = int(request.POST.get("cantidadProducto"))
-            categoriaProducto = MapCategory(request.POST.get("categoriaProducto"))
-            compradoPorFuera = request.POST.get('compradoPorFuera') == 'on'
-            bajoUmbralProducto = int(request.POST.get("bajoUmbralProducto"))
-            productPrice = float(request.POST.get("productPrice"))
+        nombreProducto = request.POST.get("nombreProducto")
+        cantidadProducto = request.POST.get("cantidadProducto")
+        imagenProducto = request.FILES.get('imagenProducto')
+        categoriaProducto = request.POST.get("categoriaProducto")
+        compradoPorFuera = request.POST.get('compradoPorFuera') == 'on'
+        bajoUmbralProducto = request.POST.get("bajoUmbralProducto")
+        productPrice = request.POST.get("productPrice")
 
-            image = None
-            if len(request.FILES) != 0:
-                image = request.FILES['imagenProducto']
+        with connection.cursor() as cursor:
+            cursor.execute(
+                '''UPDATE Product_product 
+                   SET name=%s, quantity=%s, category=%s, isExternal=%s, threshold=%s, price=%s 
+                   WHERE id=%s''',
+                [nombreProducto, cantidadProducto, MapCategory(categoriaProducto), compradoPorFuera, bajoUmbralProducto,
+                 productPrice, productid]
+            )
 
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    UPDATE Products_product
-                    SET name = %s, quantity = %s, category = %s, isExternal = %s, threshold = %s, price = %s
-                    WHERE id = %s
-                """, [nombreProducto, cantidadProducto, categoriaProducto, compradoPorFuera, bajoUmbralProducto,
-                      productPrice, productid])
+            if imagenProducto:
+                cursor.execute(
+                    '''UPDATE Product_product 
+                       SET image=%s 
+                       WHERE id=%s''',
+                    [imagenProducto, productid]
+                )
 
-                if image:
-                    product.image = image
-                    product.save()
+        url_producto = reverse('productDetails', args=[productid])
+        return redirect(url_producto)
 
-            url_producto = reverse('productDetails', args=[productid])
-            return redirect(url_producto)
-        except (ValueError, TypeError):
-            return HttpResponseBadRequest("Invalid input")
+    else:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Product_product WHERE id=%s", [productid])
+            product = cursor.fetchone()
 
     context = {'product': product, 'ind': productid}
     return render(request, 'product-edit.html', context)
+
 
 @login_required(login_url='login')
 def deleteProduct(request, product_id):
@@ -192,9 +266,27 @@ def deleteProduct(request, product_id):
         Redirects to the inventory url after deleting item
     """
     if request.method == 'POST' and request.POST.get('method') == 'DELETE':
-        with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM Products_product WHERE id = %s", [product_id])
-        return redirect('inventory')
+        try:
+            with connection.cursor() as cursor:
+                # Elimina las filas dependientes en otras tablas
+                cursor.execute('DELETE FROM InputHistory_inputorderitem WHERE product_id=%s', [product_id])
+                cursor.execute('DELETE FROM OutputHistory_outputorderitem WHERE product_id=%s', [product_id])
+
+                # Luego elimina el producto
+                cursor.execute('DELETE FROM Product_product WHERE id=%s', [product_id])
+            return redirect('inventory')
+        except IntegrityError as e:
+            # Maneja el error de integridad aquí si es necesario
+            print(f"IntegrityError: {e}")
+            return redirect('inventory')
+        except Exception as e:
+            # Manejo de otros errores operacionales
+            print(f"An error occurred: {e}")
+            return redirect('inventory')
+
+    # Optional: handle case where method is not POST or DELETE
+    return redirect('inventory')
+
 
 @login_required(login_url='login')
 def ProductGraph(request, productid):
@@ -620,3 +712,6 @@ def MapCategory(value):
                   '3': 'ELE',
                   '4': 'PLU'}
     return categories[value]
+
+
+

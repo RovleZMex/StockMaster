@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.db import connection, IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -576,16 +577,33 @@ def CreateOrderItem(product_data, order):
     """
     if product_data["productName"] == "":
         return
-    product = Product.objects.get(SKU=DeleteLeftFromSequence(product_data["productName"], " - ").strip())
+    
+    sku = product_data["productName"].split(" - ")[-1].strip()
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, price
+            FROM Product_product
+            WHERE SKU = %s
+        """, [sku])
+        product = cursor.fetchone()
+        if not product:
+            return
+    
     if product_data['quantityType'] == "unidades":
         quantity = int(product_data['quantity'])
     else:
         quantity = int(product_data['quantity']) * int(product_data['unitsPerBox'])
-    InputOrderItem.objects.create(
-        product=product,
-        quantity=quantity,
-        inputOrder=order
-    )
+    
+    total_price = quantity * product[1]
+    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO InputHistory_inputorderitem (product_id, quantity, inputOrder_id, date_created) VALUES (%s, %s, %s, %s)",
+            [product[0], quantity, order.id, datetime.datetime.now()]
+        )
+
+
 
 
 def DeleteLeftFromSequence(text, sequence):

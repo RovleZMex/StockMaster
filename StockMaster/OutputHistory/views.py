@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.db import connection
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
@@ -284,15 +285,30 @@ def inputOrderDetails(request, orderid):
     inputOrder = get_object_or_404(InputOrder, id=orderid)
 
     total = 0
-    totalQuantity = 0
-    for product in inputOrder.inputorderitem_set.all():
-        total += product.getSubtotal()
-        totalQuantity += product.quantity
+    total_quantity = 0
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT SUM(i.quantity * p.price) AS total, SUM(i.quantity) AS total_quantity
+            FROM InputHistory_inputorderitem i
+            JOIN Product_product p ON i.product_id = p.id
+            WHERE i.inputOrder_id = %s
+            """,
+            [orderid]
+        )
+        row = cursor.fetchone()
+
+        if row:
+            total, total_quantity = row
+
+    if total is not None:
+        total = round(total, 2)
 
     context = {
         'order': inputOrder,
-        'totalPrice': round(total, 2),
-        'totalQuantity': totalQuantity
+        'totalPrice': total,
+        'totalQuantity': total_quantity
     }
     return render(request, 'inputHistory-details.html', context)
 
@@ -308,6 +324,7 @@ def inputOrderEdit(request, orderid):
             date = request.POST["date"] + "-00:00:00"
             order.date_created = datetime.strptime(date, '%Y-%m-%d-%H:%M:%S')
             order.save()
+
         # Delete current items in the order
         for item in order.inputorderitem_set.all():
             item.product.quantity -= item.quantity
@@ -327,6 +344,7 @@ def inputOrderEdit(request, orderid):
                     quantity=quantity,
                     inputOrder=order
                 )
+
             except:
                 pass
         return redirect('inputHistory')
@@ -342,18 +360,43 @@ def inputOrderEdit(request, orderid):
     return render(request, 'inputHistory-edit.html', context)
 
 
+
+
 @login_required(login_url="login")
 def deleteOrder(request):
     if request.method == "POST":
-        id = int(request.POST["orderid"])
-        order = InputOrder.objects.get(id=id)
-        for item in order.inputorderitem_set.all():
-            item.product.quantity -= item.quantity
-            item.product.save()
-        order.delete()
+        order_id = int(request.POST["orderid"])
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT product_id, SUM(quantity) AS total_quantity
+                FROM InputHistory_inputorderitem
+                WHERE inputOrder_id = %s
+                GROUP BY product_id
+            """, [order_id])
+            quantities = cursor.fetchall()
+
+            for product_id, total_quantity in quantities:
+                cursor.execute("""
+                    UPDATE Product_product
+                    SET quantity = quantity - %s
+                    WHERE id = %s
+                """, [total_quantity, product_id])
+
+            cursor.execute(
+                "DELETE FROM InputHistory_inputorderitem WHERE inputOrder_id = %s",
+                [order_id]
+            )
+
+            cursor.execute(
+                "DELETE FROM InputHistory_inputorder WHERE id = %s",
+                [order_id]
+            )
+
         return JsonResponse({
             'success': True,
         })
+
     return JsonResponse({
         'success': False,
     })

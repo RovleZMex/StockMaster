@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.db import connection
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
@@ -236,7 +237,12 @@ def inputOrderDetails(request, orderid):
 
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT SUM(quantity * product_price) AS total, SUM(quantity) AS total_quantity FROM InputHistory_inputorderitem WHERE inputOrder_id = %s",
+            """
+            SELECT SUM(i.quantity * p.price) AS total, SUM(i.quantity) AS total_quantity
+            FROM InputHistory_inputorderitem i
+            JOIN Product_product p ON i.product_id = p.id
+            WHERE i.inputOrder_id = %s
+            """,
             [orderid]
         )
         row = cursor.fetchone()
@@ -244,68 +250,65 @@ def inputOrderDetails(request, orderid):
         if row:
             total, total_quantity = row
 
+    if total is not None:
+        total = round(total, 2)
+
     context = {
         'order': inputOrder,
-        'totalPrice': round(total, 2),
+        'totalPrice': total,
         'totalQuantity': total_quantity
     }
     return render(request, 'inputHistory-details.html', context)
 
 
-from django.db import connection
-
 @login_required(login_url='login')
 def inputOrderEdit(request, orderid):
     if request.method == 'POST':
-        order = get_object_or_404(InputOrder, id=orderid)
-        is_external = request.POST.get("external")
+        order = InputOrder.objects.get(id=orderid)
+        isExternal = request.POST.get("external")
 
-        order.isExternal = True if is_external == "on" else False
+        order.isExternal = True if isExternal == "on" else False
         if request.POST.get("date") != '':
             date = request.POST["date"] + "-00:00:00"
             order.date_created = datetime.strptime(date, '%Y-%m-%d-%H:%M:%S')
             order.save()
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "DELETE FROM InputHistory_inputorderitem WHERE inputOrder_id = %s",
-                [orderid]
-            )
+        # Delete current items in the order
+        for item in order.inputorderitem_set.all():
+            item.product.quantity -= item.quantity
+            item.product.save()
+            item.delete()
 
-        for i in range(1, len(request.POST) // 2):
+        for i in range(1, len(request.POST) // 2):  # 2 attributes per item
             try:
-                product_name = request.POST[f"product{i}"]
+                productName = request.POST[f"product{i}"]
                 quantity = request.POST[f"quantity{i}"]
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT id FROM ProductProduct WHERE name ILIKE %s",
-                        [f"%{product_name}%"]
-                    )
-                    product_row = cursor.fetchone()
-                    if product_row:
-                        product_id = product_row[0]
-                        cursor.execute(
-                            "INSERT INTO InputHistory_inputorderitem (quantity, product_id, inputOrder_id) VALUES (%s, %s, %s)",
-                            [quantity, product_id, orderid]
-                        )
+                product = Product.objects.get(name__icontains=productName)
+                product.quantity += int(quantity)
+                product.save()
+                # create the new items for the list
+                InputOrderItem.objects.create(
+                    product=product,
+                    quantity=quantity,
+                    inputOrder=order
+                )
+
             except:
                 pass
-
         return redirect('inputHistory')
 
     order = get_object_or_404(InputOrder, id=orderid)
-    all_products = Product.objects.all()
+    allProducts = Product.objects.all()
 
     context = {
         'order': order,
-        'allProducts': all_products,
+        'allProducts': allProducts,
     }
 
     return render(request, 'inputHistory-edit.html', context)
 
 
 
-from django.db import connection
 
 @login_required(login_url="login")
 def deleteOrder(request):
@@ -313,26 +316,26 @@ def deleteOrder(request):
         order_id = int(request.POST["orderid"])
 
         with connection.cursor() as cursor:
-            
             cursor.execute("""
-                UPDATE Products_product p
-                SET quantity = quantity - subquery.total_quantity
-                FROM (
-                    SELECT product_id, SUM(quantity) AS total_quantity
-                    FROM InputHistory_inputorderitem
-                    WHERE inputOrder_id = %s
-                    GROUP BY product_id
-                ) AS subquery
-                WHERE p.id = subquery.product_id;
+                SELECT product_id, SUM(quantity) AS total_quantity
+                FROM InputHistory_inputorderitem
+                WHERE inputOrder_id = %s
+                GROUP BY product_id
             """, [order_id])
+            quantities = cursor.fetchall()
 
-            
+            for product_id, total_quantity in quantities:
+                cursor.execute("""
+                    UPDATE Product_product
+                    SET quantity = quantity - %s
+                    WHERE id = %s
+                """, [total_quantity, product_id])
+
             cursor.execute(
                 "DELETE FROM InputHistory_inputorderitem WHERE inputOrder_id = %s",
                 [order_id]
             )
 
-           
             cursor.execute(
                 "DELETE FROM InputHistory_inputorder WHERE id = %s",
                 [order_id]
@@ -345,4 +348,3 @@ def deleteOrder(request):
     return JsonResponse({
         'success': False,
     })
-

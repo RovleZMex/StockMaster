@@ -188,11 +188,19 @@ def ModifyOutputOrders(request, orderid):
                         existing_product.quantity -= int(quantity)
                         existing_product.save()  # Update existing product quantity in the inventory
                     else:
-                        OutputOrderItem.objects.create(
-                            product=existing_product, quantity=quantity, outputOrder=order
-                        )
-                        existing_product.quantity -= int(quantity)
-                        existing_product.save()  # Update existing product quantity in the inventory
+                        # Adds a new product to the order and updates inventory
+                        with connection.cursor() as cursor:
+                            cursor.execute(
+                                """
+                                INSERT INTO OutputHistory_outputorderitem (product_id, quantity, outputOrder_id)
+                                VALUES (%s, %s, %s)
+                                """, [existing_product.id, quantity, orderid])
+                            cursor.execute(
+                                """
+                                UPDATE Product_product 
+                                SET quantity = quantity - %s 
+                                WHERE id = %s
+                                """, [int(quantity), existing_product.id])
                 else:
                     # Add new product to the order
                     new_product = Product.objects.create(name=name)

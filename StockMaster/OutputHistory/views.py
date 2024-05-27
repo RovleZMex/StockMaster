@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
+from django.db import connection
 
 from InputHistory.models import InputOrder, InputOrderItem
 from OutputHistory.models import OutputOrder
@@ -107,12 +108,25 @@ def outputDetails(request, orderid):
     output_order = get_object_or_404(OutputOrder, id=orderid)
     worker_name = output_order.worker.name
 
-    total_price = output_order.GetTotal()
+    with connection.cursor() as cursor:
+        """
+        Regresa la suma de todos los productos multiplicados por sus cantidades dentro de la orden
+        Inner Join de OutputHistory_outputorderitem y Product_product para poder
+        conseguir el valor del precio de cada producto.
+        """
+        cursor.execute("""
+                    SELECT SUM(OutputHistory_outputorderitem.quantity * Product_product.price)
+                    FROM OutputHistory_outputorderitem
+                    INNER JOIN Product_product
+                    ON OutputHistory_outputorderitem.product_id = Product_product.id
+                    WHERE OutputHistory_outputorderitem.outputOrder_id = %s
+                """, [orderid])
+        total_price = cursor.fetchone()[0]
+    # total_price = output_order.GetTotal()
     total_quantity = output_order.GetQuantity()
     date = output_order.date_created
 
     products = {}
-
     for product in output_order.outputorderitem_set.all():
         products[product] = product.quantity * product.product.price
 
@@ -178,11 +192,22 @@ def ModifyOutputOrders(request, orderid):
                         existing_product.quantity -= int(quantity)
                         existing_product.save()  # Update existing product quantity in the inventory
                     else:
-                        OutputOrderItem.objects.create(
-                            product=existing_product, quantity=quantity, outputOrder=order
-                        )
-                        existing_product.quantity -= int(quantity)
-                        existing_product.save()  # Update existing product quantity in the inventory
+                        """
+                        Si el producto no se encuentra en la orden entonces se agrega
+                        el valor a la orden y se resta la cantidad del inventario
+                        """
+                        with connection.cursor() as cursor:
+                            cursor.execute(
+                                """
+                                INSERT INTO OutputHistory_outputorderitem (product_id, quantity, outputOrder_id)
+                                VALUES (%s, %s, %s)
+                                """, [existing_product.id, quantity, orderid])
+                            cursor.execute(
+                                """
+                                UPDATE Product_product 
+                                SET quantity = quantity - %s 
+                                WHERE id = %s
+                                """, [int(quantity), existing_product.id])
                 else:
                     # Add new product to the order
                     new_product = Product.objects.create(name=name)
@@ -214,11 +239,38 @@ def ModifyOutputOrders(request, orderid):
 def deleteOrderOutput(request):
     if request.method == "POST":
         id = int(request.POST["orderid"])
-        order = OutputOrder.objects.get(id=id)
-        for item in order.outputorderitem_set.all():
-            item.product.quantity += item.quantity
-            item.product.save()
-        order.delete()
+        """
+        Primero se regresan los productos de la orden al inventario
+        Después se eliminan los objetos dentro de la orden para finalmente
+        eliminar la orden completa.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT product_id, quantity 
+                FROM OutputHistory_outputorderitem 
+                WHERE outputOrder_id = %s
+                """, [id])
+            items = cursor.fetchall()
+            for item in items:
+                cursor.execute(
+                    """
+                    UPDATE Product_product 
+                    SET quantity = quantity + %s 
+                    WHERE id = %s
+                    """, [item[1], item[0]])
+            # Eliminación de la orden
+            cursor.execute(
+                """
+                DELETE FROM OutputHistory_outputorderitem 
+                WHERE outputOrder_id = %s
+                """, [id])
+            cursor.execute(
+                """
+                DELETE FROM OutputHistory_outputorder 
+                WHERE id = %s
+                """, [id])
+
         return JsonResponse({
             'success': True,
         })

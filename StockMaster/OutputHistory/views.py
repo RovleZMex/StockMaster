@@ -109,9 +109,13 @@ def outputDetails(request, orderid):
     worker_name = output_order.worker.name
 
     with connection.cursor() as cursor:
-        # Join OutputOrderItem and Product to get the total price of the products
+        """
+        Regresa la suma de todos los productos multiplicados por sus cantidades dentro de la orden
+        Inner Join de OutputHistory_outputorderitem y Product_product para poder
+        conseguir el valor del precio de cada producto.
+        """
         cursor.execute("""
-                    SELECT SUM(OutputHistory_outputorderitem.quantity * price)
+                    SELECT SUM(OutputHistory_outputorderitem.quantity * Product_product.price)
                     FROM OutputHistory_outputorderitem
                     INNER JOIN Product_product
                     ON OutputHistory_outputorderitem.product_id = Product_product.id
@@ -188,7 +192,10 @@ def ModifyOutputOrders(request, orderid):
                         existing_product.quantity -= int(quantity)
                         existing_product.save()  # Update existing product quantity in the inventory
                     else:
-                        # Adds a new product to the order and updates inventory
+                        """
+                        Si el producto no se encuentra en la orden entonces se agrega
+                        el valor a la orden y se resta la cantidad del inventario
+                        """
                         with connection.cursor() as cursor:
                             cursor.execute(
                                 """
@@ -232,22 +239,37 @@ def ModifyOutputOrders(request, orderid):
 def deleteOrderOutput(request):
     if request.method == "POST":
         id = int(request.POST["orderid"])
-
+        """
+        Primero se regresan los productos de la orden al inventario
+        Después se eliminan los objetos dentro de la orden para finalmente
+        eliminar la orden completa.
+        """
         with connection.cursor() as cursor:
-            cursor.execute("""
-                            SELECT product_id, quantity 
-                            FROM OutputHistory_outputorderitem 
-                            WHERE outputOrder_id = %s
-                        """, [id])
+            cursor.execute(
+                """
+                SELECT product_id, quantity 
+                FROM OutputHistory_outputorderitem 
+                WHERE outputOrder_id = %s
+                """, [id])
             items = cursor.fetchall()
             for item in items:
-                # To "return" items to inventory
-                cursor.execute("""
-                                UPDATE Product_product 
-                                SET quantity = quantity + %s 
-                                WHERE id = %s
-                            """, [item[1], item[0]])
-            cursor.execute("DELETE FROM OutputHistory_outputorder WHERE id = %s", [id])
+                cursor.execute(
+                    """
+                    UPDATE Product_product 
+                    SET quantity = quantity + %s 
+                    WHERE id = %s
+                    """, [item[1], item[0]])
+            # Eliminación de la orden
+            cursor.execute(
+                """
+                DELETE FROM OutputHistory_outputorderitem 
+                WHERE outputOrder_id = %s
+                """, [id])
+            cursor.execute(
+                """
+                DELETE FROM OutputHistory_outputorder 
+                WHERE id = %s
+                """, [id])
 
         return JsonResponse({
             'success': True,
@@ -255,7 +277,6 @@ def deleteOrderOutput(request):
     return JsonResponse({
         'success': False,
     })
-
 
 
 @login_required(login_url='login')
